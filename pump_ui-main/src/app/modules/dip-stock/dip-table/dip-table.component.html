@@ -1,0 +1,60 @@
+<div class="card-premium dialog-modern-card" style="min-width: 600px;">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">table_chart</mat-icon>
+        Dip Chart Table
+      </h4>
+      <p class="card-subtitle">Select standardized volume values based on depth reading</p>
+    </div>
+    <button mat-icon-button (click)="sendSelected()" class="close-btn" color="primary" matTooltip="Add Selection">
+      <mat-icon>check_circle</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive-modern">
+      <table class="modern-report-table">
+        <thead>
+          <tr>
+            <th style="width: 25%;">Dip Depth (mm)</th>
+            <th style="width: 35%;">Volume (Ltrs)</th>
+            <th style="width: 25%;">Difference</th>
+            <th style="width: 15%;" class="text-center">
+              <mat-checkbox (change)="toggleSelectAll($event)"></mat-checkbox>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let items of productList | paginate: { itemsPerPage: 6, currentPage: currentPage }" class="align-middle">
+            <td class="font-weight-bold">{{ items.id }}</td>
+            <td class="text-primary">{{ items.volume | number:'1.2-2' }}</td>
+            <td class="text-muted small">{{ items.diff }}</td>
+            <td class="text-center">
+              <mat-checkbox [(ngModel)]="items.selected"></mat-checkbox>
+            </td>
+          </tr>
+          <tr *ngIf="productList.length === 0">
+            <td colspan="4" class="no-data-msg py-5">
+              <mat-icon class="fs-1 opacity-25">analytics</mat-icon>
+              <p class="mt-2 text-muted">Loading dip chart data...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern border-top">
+      <div class="pagination-info small text-muted">
+        Records {{ (currentPage - 1) * 6 + 1 }} to {{ (currentPage * 6) > productList.length ? productList.length : (currentPage * 6) }}
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern border-top p-3">
+    <button mat-flat-button color="primary" (click)="sendSelected()" class="w-100 py-2">
+      <mat-icon class="me-2">done_all</mat-icon> Confirm & Add Selected Values
+    </button>
+  </div>
+</div>

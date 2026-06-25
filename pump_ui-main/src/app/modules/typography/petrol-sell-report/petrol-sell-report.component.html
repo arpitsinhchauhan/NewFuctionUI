@@ -1,0 +1,98 @@
+<div class="report-entry-wrapper">
+  <mat-card class="card-premium">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Add Petrol Sales Details</h4>
+        <p class="text-muted small mb-0">Enter daily meter readings for Petrol nozzles</p>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button (click)="cancel()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body mt-4">
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Transaction Date</mat-label>
+            <input matInput [(ngModel)]="purchaDipStockseDetails.date" type="date" (change)="updateDate()">
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nozzle Count</mat-label>
+            <mat-select [(ngModel)]="selectedNumber">
+              <mat-option *ngFor="let number of numbers" [value]="number">
+                {{ number }} Nozzles
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-md-4 d-flex align-items-center">
+          <button mat-flat-button color="primary" class="premium-btn-primary w-100" (click)="order()">
+            <mat-icon>add_task</mat-icon>
+            <span>Update All Entries</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive-modern">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Pump/Nozzle</th>
+              <th>Closing Meter</th>
+              <th>Opening Meter</th>
+              <th>Testing (L)</th>
+              <th>Total (Unit)</th>
+              <th>Qty (Ltr)</th>
+              <th>Rate (₹)</th>
+              <th class="text-right">Total Sell (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of row; let i = index" [hidden]="i >= selectedNumber">
+              <td>
+                <span class="font-weight-bold text-primary">{{ item.pump }}</span>
+              </td>
+              <td>
+                <input type="number" [(ngModel)]="item.close_meter" (input)="calculateTotals(item)"
+                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.close_meter)}" />
+              </td>
+              <td>
+                <input type="number" [(ngModel)]="item.open_meter" (input)="calculateTotals(item)"
+                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.open_meter)}" />
+              </td>
+              <td>
+                <input type="number" [(ngModel)]="item.testing" (input)="calculateTotals(item)"
+                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.testing)}" />
+              </td>
+              <td>
+                <span class="text-muted">{{ item.total }}</span>
+              </td>
+              <td class="font-weight-medium text-info">
+                {{ item.petrol_ltr | number:'1.2-2' }}
+              </td>
+              <td>
+                <input type="number" [(ngModel)]="item.rate" (input)="calculateTotals(item)"
+                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.rate)}" />
+              </td>
+              <td class="text-right font-weight-bold text-success">
+                ₹{{ item.total_sell | number:'1.2-2' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-footer-modern mt-4">
+        <div class="grand-total-section">
+          <span class="total-label">Grand Total Sales:</span>
+          <span class="total-value text-success">₹{{ totalPrice() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</div>

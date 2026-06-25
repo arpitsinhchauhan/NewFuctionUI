@@ -1,0 +1,37 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">add_shopping_cart</mat-icon>
+        Add New Expense Category
+      </h4>
+      <p class="card-subtitle">Define recurring expense types for reporting</p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body p-4">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-12">
+        <div class="form-group-modern">
+          <label class="label-modern">Expense Category Name</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix class="me-2 opacity-50">label</mat-icon>
+            <input matInput [(ngModel)]="inputValue" placeholder="e.g. Electricity, Maintenance, Salaries">
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
+      <button mat-flat-button color="primary" (click)="logInput()" class="px-5 py-2">
+        <mat-icon class="me-2">add_circle</mat-icon> Create Category
+      </button>
+    </div>
+  </div>
+</div>

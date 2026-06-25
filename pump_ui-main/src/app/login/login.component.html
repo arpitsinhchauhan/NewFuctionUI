@@ -1,0 +1,74 @@
+<div class="login-root">
+  <div class="login-container">
+    <div class="login-visual-panel d-none d-lg-flex">
+      <div class="visual-content">
+        <div class="brand-badge">
+          <mat-icon>local_gas_station</mat-icon>
+          PUMP MANAGER PRO
+        </div>
+        <h1>Fueling the Future of Enterprise Efficiency</h1>
+        <p>A comprehensive management suite designed for modern petrol pump operations.</p>
+
+        <div class="feature-pills">
+          <span class="pill"><mat-icon>security</mat-icon> Secure</span>
+          <span class="pill"><mat-icon>speed</mat-icon> Fast</span>
+          <span class="pill"><mat-icon>auto_graph</mat-icon> Scalable</span>
+        </div>
+      </div>
+      <div class="visual-overlay"></div>
+    </div>
+
+    <div class="login-form-panel">
+      <div class="form-content">
+        <div class="form-header">
+          <h2>Welcome</h2>
+          <p>Please enter your credentials to access the management dashboard.</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="modern-login-form">
+          <div class="form-group-modern mb-4">
+            <label class="form-label-modern">Username</label>
+            <div class="input-with-icon">
+              <mat-icon>person_outline</mat-icon>
+              <input type="text" class="form-control-modern ps-5" placeholder="Enter your username"
+                formControlName="username">
+            </div>
+          </div>
+
+          <div class="form-group-modern mb-4">
+            <label class="form-label-modern">Password</label>
+            <div class="input-with-icon">
+              <mat-icon>lock_open</mat-icon>
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control-modern ps-5 pe-5"
+                placeholder="Enter your password" formControlName="password">
+              <button type="button" class="password-toggle" (click)="showPassword = !showPassword">
+                <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <mat-checkbox color="primary" class="small-check">Remember me</mat-checkbox>
+            <a href="javascript:void(0)" (click)="openForgotPassword()" class="forgot-password">Forgot Password?</a>
+          </div>
+
+          <button class="btn-premium btn-premium-primary btn-lg w-100 py-3 mb-4" type="submit">
+            Sign In to Dashboard
+          </button>
+
+          <div class="form-footer">
+            <p>Don't have an account? <br>
+               Contact Administrator: 
+               <a href="tel:7698171658" class="contact-link">7698171658</a> | 
+               <a href="mailto:arpitsinhchauhan634@gmail.com" class="contact-link">arpitsinhchauhan634@gmail.com</a>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <div class="copyright-text">
+        &copy; 2026 Pump Manager Pro. All rights reserved.
+      </div>
+    </div>
+  </div>
+</div>

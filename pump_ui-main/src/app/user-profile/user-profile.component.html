@@ -1,0 +1,264 @@
+<div class="reports-page-wrapper">
+  <!-- Reports Section -->
+  <div class="card-modern mb-4">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Business Analytics & Reports</h4>
+        <p class="text-muted small mb-0">Generate comprehensive Excel and PDF reports for accounting</p>
+      </div>
+    </div>
+    
+    <div class="card-body-modern p-4">
+
+      <!-- Pump Manager Context Banner -->
+      <div *ngIf="isManager" class="manager-scope-banner mb-4">
+        <mat-icon class="banner-icon">supervisor_account</mat-icon>
+        <div class="banner-text">
+          <strong>Pump Manager View</strong>
+          <span class="ms-2 text-muted small">
+            Reports aggregate data from
+            <strong class="text-primary">{{ managerEmployeeList.length || 'all assigned' }} employee(s)</strong>
+            under your supervision.
+          </span>
+          <span *ngIf="!employeeListLoaded" class="ms-2"><mat-spinner diameter="14" style="display:inline-block;"></mat-spinner> Loading...</span>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <!-- Customer Reports -->
+        <div class="report-section-card">
+          <div class="section-badge info"><mat-icon>people</mat-icon></div>
+          <div class="section-content">
+            <h5>Customer Outstanding Report
+              <span *ngIf="isManager" class="scope-tag">All Employees</span>
+            </h5>
+            <p *ngIf="isManager" class="text-muted small mb-2">Shows outstanding balances from customers of all your assigned employees.</p>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <label class="modern-label">Start Date</label>
+                <input type="date" [(ngModel)]="startDateJb" class="modern-input">
+              </div>
+              <div class="col-md-6">
+                <label class="modern-label">End Date</label>
+                <input type="date" [(ngModel)]="endDateJb" class="modern-input">
+              </div>
+            </div>
+            <div class="mt-3" *ngIf="startDateJb && endDateJb">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-label>Select Target Customer</mat-label>
+                <mat-select [(ngModel)]="selectedCustomer" (selectionChange)="onCustomerSelectionChange($event)">
+                  <mat-option *ngFor="let customer of customers" [value]="customer">{{ customer }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <!-- Excel & Financials -->
+        <div class="report-section-card">
+          <div class="section-badge success"><mat-icon>table_view</mat-icon></div>
+          <div class="section-content">
+            <h5>Financial Excel Export
+              <span *ngIf="isManager" class="scope-tag">All Employees</span>
+            </h5>
+            <p *ngIf="isManager" class="text-muted small mb-2">Exports consolidated financial data from all your assigned employees.</p>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <label class="modern-label">Start Date</label>
+                <input type="date" [(ngModel)]="startDate" class="modern-input">
+              </div>
+              <div class="col-md-6">
+                <label class="modern-label">End Date</label>
+                <input type="date" [(ngModel)]="endDate" class="modern-input">
+              </div>
+            </div>
+            <button mat-flat-button color="primary" class="premium-btn-primary mt-3 w-100" (click)="exportToExcel()">
+              <mat-icon>download</mat-icon> Generate Excel Sheet
+            </button>
+          </div>
+        </div>
+
+        <!-- Expenses & Profit Loss -->
+        <div class="report-section-card">
+          <div class="section-badge danger"><mat-icon>trending_down</mat-icon></div>
+          <div class="section-content">
+            <h5>Profit & Loss Analytics (PDF)
+              <span *ngIf="isManager" class="scope-tag">All Employees</span>
+            </h5>
+            <p *ngIf="isManager" class="text-muted small mb-2">Aggregated P&L report covering all employees under your management.</p>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <label class="modern-label">Start Date</label>
+                <input type="date" [(ngModel)]="startDatePdf" class="modern-input">
+              </div>
+              <div class="col-md-6">
+                <label class="modern-label">End Date</label>
+                <input type="date" [(ngModel)]="endDatePdf" class="modern-input">
+              </div>
+            </div>
+            <button mat-flat-button color="warn" class="mt-3 w-100" (click)="pdf()">
+              <mat-icon>picture_as_pdf</mat-icon> Generate PDF Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Indirect Incomes -->
+        <div class="report-section-card">
+          <div class="section-badge warning"><mat-icon>account_balance</mat-icon></div>
+          <div class="section-content">
+            <h5>Indirect Incomes & Credit
+              <span *ngIf="isManager" class="scope-tag">All Employees</span>
+            </h5>
+            <p *ngIf="isManager" class="text-muted small mb-2">Credit note summary aggregated across all employees you manage.</p>
+            <div class="row mt-3">
+              <div class="col-md-6">
+                <label class="modern-label">Start Date</label>
+                <input type="date" [(ngModel)]="startDateCredit" class="modern-input">
+              </div>
+              <div class="col-md-6">
+                <label class="modern-label">End Date</label>
+                <input type="date" [(ngModel)]="endDateCredit" class="modern-input">
+              </div>
+            </div>
+            <button mat-stroked-button color="primary" class="mt-3 w-100" (click)="creditDetails()">
+              <mat-icon>receipt_long</mat-icon> Income Summary PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Master Section -->
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Employee Master Registry</h4>
+        <p class="text-muted small mb-0">Manage staff profiles, bank accounts, and employment IDs</p>
+      </div>
+      <div class="header-actions">
+        <button mat-flat-button color="primary" class="premium-btn-primary" (click)="EmployeeDetails()">
+          <mat-icon>person_add</mat-icon>
+          <span>Register Staff</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Profile</th>
+            <th>Staff Name</th>
+            <th>Bank Account No.</th>
+            <th>Phone Contact</th>
+            <th>Employee ID</th>
+            <th class="text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of productList; let i = index" (click)="openDetails(item)" class="clickable-row">
+            <td>
+              <div class="employee-avatar-wrapper">
+                <img [src]="thumbnails[i]" class="employee-thumb" *ngIf="thumbnails[i]">
+                <div class="employee-placeholder" *ngIf="!thumbnails[i]">{{ item.name.charAt(0) | uppercase }}</div>
+              </div>
+            </td>
+            <td class="font-weight-bold">{{ item.name }}</td>
+            <td><code>{{ item.accountNumber }}</code></td>
+            <td>{{ item.phoneNumber }}</td>
+            <td><span class="id-badge">{{ item.employeeId }}</span></td>
+            <td class="text-center">
+              <span class="status-pill success">Active</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Daily Reports Registry -->
+  <div class="card-modern mt-4">
+    <div class="card-header-modern d-flex justify-content-between align-items-center flex-wrap gap-3">
+      <div class="header-main">
+        <h4 class="card-title-modern">Daily Reports Overview</h4>
+        <p class="text-muted small mb-0">Track shift-wise and employee-wise report submissions and aggregate sales</p>
+      </div>
+      <div class="header-actions d-flex gap-3">
+        <div class="summary-chip success">
+          <mat-icon>monetization_on</mat-icon>
+          <span>Total Sales: <strong>{{ totalReportsSales | currency:'INR':'symbol':'1.2-2' }}</strong></span>
+        </div>
+        <div class="summary-chip info">
+          <mat-icon>assignment</mat-icon>
+          <span>Submissions: <strong>{{ totalSubmissionsCount }}</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date & Time</th>
+            <th>Shift</th>
+            <th>Submitted By</th>
+            <th class="text-right">Sales Amount</th>
+            <th>Remaining Stocks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let report of dailyReports" class="hover-row">
+            <td><span class="id-badge">#{{ report.reportId }}</span></td>
+            <td>
+              <div class="d-flex flex-column">
+                <span class="font-weight-bold">{{ report.reportDate }}</span>
+                <span class="text-muted small">{{ report.reportTime }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill" [class.success]="report.shift === 'Morning' || report.shift === 'Day'" [class.warning]="report.shift === 'Evening' || report.shift === 'Night'">
+                {{ report.shift }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <mat-icon class="mr-2 text-muted" style="font-size: 18px; width: 18px; height: 18px;">person</mat-icon>
+                <span>{{ report.createdBy }}</span>
+              </div>
+            </td>
+            <td class="text-right font-weight-bold text-success">
+              {{ (report.salesAmount || 0) | currency:'INR':'symbol':'1.2-2' }}
+            </td>
+            <td>
+              <div *ngIf="parseStockDetails(report.stockDetails) as stocks; else noStocks" class="d-flex flex-wrap gap-2 stock-tags">
+                <span class="badge badge-outline-petrol" title="Petrol Remaining">
+                  ⛽ P: <strong>{{ stocks.petrolRemaining | number:'1.2-2' }}L</strong>
+                </span>
+                <span class="badge badge-outline-diesel" title="Diesel Remaining">
+                  🚛 D: <strong>{{ stocks.dieselRemaining | number:'1.2-2' }}L</strong>
+                </span>
+                <span *ngIf="stocks.xpPetrolRemaining > 0" class="badge badge-outline-xp" title="XP Petrol Remaining">
+                  ⚡ XP: <strong>{{ stocks.xpPetrolRemaining | number:'1.2-2' }}L</strong>
+                </span>
+                <span *ngIf="stocks.powerDieselRemaining > 0" class="badge badge-outline-power" title="Power Diesel Remaining">
+                  🔥 PD: <strong>{{ stocks.powerDieselRemaining | number:'1.2-2' }}L</strong>
+                </span>
+              </div>
+              <ng-template #noStocks>
+                <span class="text-muted small">N/A</span>
+              </ng-template>
+            </td>
+          </tr>
+          <tr *ngIf="dailyReports.length === 0">
+            <td colspan="6" class="text-center text-muted py-4">
+              <mat-icon style="font-size: 48px; width: 48px; height: 48px;">assignment_late</mat-icon>
+              <p class="mt-2 mb-0">No daily reports submitted yet.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

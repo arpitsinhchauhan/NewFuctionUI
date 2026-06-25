@@ -1,0 +1,17 @@
+<div class="dialog-modern-container" style="width: 420px; padding: 24px; text-align: center;">
+  <div class="text-center mb-4">
+    <div class="icon-circle mb-3" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; display: inline-flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: 50%;">
+      <mat-icon style="font-size: 36px; width: 36px; height: 36px;">lock</mat-icon>
+    </div>
+    <h3 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 8px;">Account Locked</h3>
+    <p class="text-danger font-weight-bold mb-3" style="font-weight: 600; color: #dc2626;">{{ message }}</p>
+    <p class="text-muted small" style="line-height: 1.5;">For compliance and security reasons, your account has been locked. Please contact the system administrator to unlock your account or reset your password.</p>
+  </div>
+
+  <div class="dialog-actions-modern" style="display: flex; justify-content: center; padding-top: 16px;">
+    <button class="btn-premium btn-premium-primary btn-md" style="min-width: 120px;" (click)="close()">
+      <mat-icon class="me-2" style="vertical-align: middle;">check</mat-icon>
+      OK
+    </button>
+  </div>
+</div>

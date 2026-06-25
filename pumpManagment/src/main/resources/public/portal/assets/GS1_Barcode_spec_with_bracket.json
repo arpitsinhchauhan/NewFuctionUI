@@ -1,0 +1,84 @@
+{
+    "(00)": {
+        "name": "SSCC",
+        "type": "F",
+        "length": "18"
+    },
+    "(01)": {
+        "name": "GTIN",
+        "type": "F",
+        "length": "14"
+    },
+    "(11)": {
+        "name": "PRODUCTION_DATE",
+        "type": "F",
+        "length": "6"
+    },
+    "(17)": {
+
+        "name": "EXPIRATION_DATE",
+        "type": "F",
+        "length": "6"
+    },
+    "(10)": {
+        "name": "LOT_NUMBER",
+        "type": "V",
+        "length": "-1"
+    },
+    "(21)": {
+        "name": "SERIAL_NUMBER",
+        "type": "V",
+        "length": "-1"
+    },
+    "(30)":{
+        "name":"COUNT_OF_ITEMS",
+        "type": "V",
+        "length": "-1"
+    },
+    "(240)":{
+        "name":"ADDITIONAL_PRODUCT_IDENTIFICATION",
+        "type": "V",
+        "length": "-1"
+    },
+    "(710)":{
+        "name":"NHRN_DE",
+        "type": "V",
+        "length":"-1"
+    },
+    "(711)":{
+        "name":"NHRN_FR",
+        "type": "V",
+        "length":"-1"
+    },
+    "(712)":{
+        "name":"NHRN_ES",
+        "type": "V",
+        "length":"-1"
+    },
+    "(713)":{
+        "name":"NHRN_BR",
+        "type": "V",
+        "length":"-1"
+    },
+    "(714)":{
+        "name":"NHRN_PT",
+        "type": "V",
+        "length":"-1"
+    },
+    "(92)":{
+        "name":"COMPANY_INTERNAL_INFORMATION_92",
+        "type": "V",
+        "length":"-1"
+    },
+    "(91)":{
+        "name":"COMPANY_INTERNAL_INFORMATION_91",
+        "type": "V",
+        "length":"-1"
+    },
+    "(90)":{
+        "name":"INFO_MUTUALLY_AGREED",
+        "type":"V",
+        "length":"-1"
+
+    }
+}

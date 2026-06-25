@@ -1,0 +1,39 @@
+<div class="dialog-modern-container dialog-md">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="me-2 text-primary vertical-align-middle">inventory_2</mat-icon>
+        Petrol Open Stock
+      </h4>
+      <span class="dialog-type-badge badge-add ms-3">Opening Stock</span>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted" title="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern p-4">
+    <form [formGroup]="stockForm">
+      <div class="form-grid-modern">
+        <div class="form-group-modern">
+          <label class="form-label-modern text-muted mb-1">Inventory Date</label>
+          <input type="date" class="form-control-modern" formControlName="date">
+        </div>
+
+        <div class="form-group-modern">
+          <label class="form-label-modern text-muted mb-1">Open Stock (Ltrs)</label>
+          <input type="number" class="form-control-modern font-weight-bold" formControlName="openstock" placeholder="0.00">
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="dialog-actions-modern mt-2">
+    <button class="btn-premium btn-premium-secondary px-4" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary px-5" (click)="onSubmit()">
+      <mat-icon class="me-2">check</mat-icon> Submit Stock
+    </button>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+export const Constants = {
+  USER_ROLE:"ROLE",
+  ROLE_ADMIN:"1",
+  ROLE_USER: "2",
+  REPORT_COMMON_SEARCH: "REPORT_COMMON_SEARCH",
+}

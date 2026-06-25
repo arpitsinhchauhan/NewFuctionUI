@@ -1,0 +1,53 @@
+<div class="export-dialog-wrapper">
+  <div class="card-header-modern mb-4">
+    <div class="header-text">
+      <h4 class="card-title">Customer Report</h4>
+      <p class="card-subtitle">Select customers for PDF/Excel export</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button class="btn-export-excel me-2" (click)="exportToExcel()">
+        <mat-icon>file_download</mat-icon>
+        <span>Excel</span>
+      </button>
+      <button mat-flat-button class="btn-export-pdf me-2" (click)="printTable()">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>PDF</span>
+      </button>
+      <button mat-icon-button (click)="cancel()" color="warn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="table-responsive-modern">
+    <table id="CustomerTable" class="modern-report-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;" class="text-center">
+            <mat-checkbox [checked]="allSelected" (change)="toggleSelectAll($event)"></mat-checkbox>
+          </th>
+          <th>Date</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let items of customerList" [class.row-selected]="items.selected">
+          <td class="text-center">
+            <mat-checkbox [(ngModel)]="items.selected" (change)="checkIfAllSelected()"></mat-checkbox>
+          </td>
+          <td>{{items.date | date: 'dd-MM-yyyy'}}</td>
+          <td class="font-weight-bold">{{items.name}}</td>
+          <td>{{items.email}}</td>
+          <td>{{items.phone}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="customerList.length === 0" class="no-data-msg">
+    <mat-icon>info</mat-icon>
+    <p>No customer records found.</p>
+  </div>
+</div>

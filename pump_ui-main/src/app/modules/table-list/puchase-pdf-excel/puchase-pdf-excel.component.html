@@ -1,0 +1,69 @@
+<div class="export-dialog-wrapper">
+  <div class="card-header-modern mb-4">
+    <div class="header-text">
+      <h4 class="card-title">Purchase Report</h4>
+      <p class="card-subtitle">Select records for PDF/Excel export</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" (click)="exportToExcel()" class="me-2">
+        <mat-icon>file_download</mat-icon>
+        <span>Excel</span>
+      </button>
+      <button mat-flat-button color="accent" (click)="printTable()" class="me-2">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>PDF</span>
+      </button>
+      <button mat-icon-button (click)="cancel()" color="warn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="table-responsive-modern">
+    <table id="PurchaseTable" class="modern-report-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;" class="text-center">
+            <mat-checkbox [checked]="allSelected" (change)="toggleSelectAll($event)"></mat-checkbox>
+          </th>
+          <th>Date</th>
+          <th>Type</th>
+          <th class="text-right">Quantity</th>
+          <th class="text-right">Total</th>
+          <th class="text-right">VAT</th>
+          <th class="text-right">Cess</th>
+          <th class="text-right">JTC %</th>
+          <th class="text-right">Total Purchase</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of productList" [class.row-selected]="product.selected">
+          <td class="text-center">
+            <mat-checkbox [(ngModel)]="product.selected" (change)="checkIfAllSelected()"></mat-checkbox>
+          </td>
+          <td>{{ product.date | date: 'dd-MM-yyyy' }}</td>
+          <td>{{ product.type }}</td>
+          <td class="text-right">{{ product.quantity }}</td>
+          <td class="text-right">{{ product.total }}</td>
+          <td class="text-right">{{ product.vat }}</td>
+          <td class="text-right">{{ product.cess }}</td>
+          <td class="text-right">{{ product.jtcpercentage }}</td>
+          <td class="text-right text-primary font-weight-bold">₹{{ product.total_purchase | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="footer-row">
+          <td colspan="8" class="text-right"><strong>Grand Total Purchase:</strong></td>
+          <td class="text-right text-primary font-weight-bold h5 mb-0">
+            ₹{{ getTotalPurchase() | number:'1.2-2' }}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div *ngIf="productList.length === 0" class="no-data-msg">
+    <mat-icon>info</mat-icon>
+    <p>No purchase records found.</p>
+  </div>
+</div>

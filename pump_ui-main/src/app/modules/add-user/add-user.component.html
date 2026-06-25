@@ -1,0 +1,257 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">{{ isEditingSelf ? 'manage_accounts' : 'person_add' }}</mat-icon>
+        {{ isEditingSelf ? 'My Pump Account' : (data ? 'Update Employee Account' : 'Register New User') }}
+      </h4>
+      <p class="card-subtitle">
+        {{ isEditingSelf ? 'Update your pump name and nozzle configuration' : 'Define user roles and pump assignments' }}
+      </p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ✅ Self-edit cascade info banner -->
+  <div *ngIf="isEditingSelf" class="cascade-info-banner">
+    <mat-icon>sync_alt</mat-icon>
+    <span>Changes to <strong>Pump Name</strong> and <strong>Nozzle counts</strong> will automatically update all your employees.</span>
+  </div>
+
+  <div class="card-body card-body-scrollable">
+
+    <form [formGroup]="userForm">
+      <div class="row g-3">
+        <!-- Profile Section -->
+        <div class="col-md-4">
+          <div class="form-group-modern">
+            <label class="label-modern">Petrol Pump Name</label>
+
+            <!-- AUTO MODE: read-only pill for PUMP_MANAGER -->
+            <div *ngIf="isPumpNameAutoSet" class="pump-name-auto-display">
+              <mat-icon class="pump-name-icon">local_gas_station</mat-icon>
+              <span class="pump-name-text">{{ userForm.get('firstName')?.value }}</span>
+              <span class="pump-name-lock-badge">
+                <mat-icon>lock</mat-icon> Auto
+              </span>
+            </div>
+
+            <!-- MANUAL MODE: editable input for SUPER_ADMIN -->
+            <mat-form-field *ngIf="!isPumpNameAutoSet" appearance="outline" class="w-100">
+              <mat-icon matPrefix class="me-2 opacity-50">local_gas_station</mat-icon>
+              <input matInput formControlName="firstName" type="text" placeholder="Enter pump name">
+            </mat-form-field>
+          </div>
+        </div>
+
+
+        <!-- Contact Name -->
+        <div class="col-md-4">
+          <div class="form-group-modern">
+            <label class="label-modern">Contact Name <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix class="me-2 opacity-50">badge</mat-icon>
+              <input matInput formControlName="lastName" type="text" placeholder="Full name">
+              <mat-error *ngIf="userForm.get('lastName')?.hasError('required')">
+                Contact Name is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="col-md-4">
+          <div class="form-group-modern">
+            <label class="label-modern">Username <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix class="me-2 opacity-50">alternate_email</mat-icon>
+              <input matInput formControlName="username" type="text" placeholder="unique_id">
+              <mat-error *ngIf="userForm.get('username')?.hasError('required')">
+                Username is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Password (Add mode only) -->
+        <div class="col-md-4" *ngIf="!data">
+          <div class="form-group-modern">
+            <label class="label-modern">Security Password <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix class="me-2 opacity-50">lock</mat-icon>
+              <input matInput formControlName="password" type="password" placeholder="••••••••">
+              <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+                Password is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="col-md-4">
+          <div class="form-group-modern">
+            <label class="label-modern">Phone Number <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix class="me-2 opacity-50">phone</mat-icon>
+              <input matInput formControlName="phoneNumber" type="text" placeholder="+91 XXXX XXX XXX">
+              <mat-error *ngIf="userForm.get('phoneNumber')?.hasError('required')">
+                Phone Number is required
+              </mat-error>
+              <mat-error *ngIf="userForm.get('phoneNumber')?.hasError('pattern')">
+                Must be 10–15 digits only
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Access Level -->
+        <div class="col-md-4">
+          <div class="form-group-modern">
+            <label class="label-modern">Access Level <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="role" placeholder="Select role">
+                <mat-option *ngFor="let roleOpt of availableRoles" [value]="roleOpt.value">
+                  <mat-icon class="me-2">person</mat-icon> {{ roleOpt.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="userForm.get('role')?.hasError('required')">
+                Access Level is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="col-md-12">
+          <div class="form-group-modern">
+            <label class="label-modern">Email Address <span class="text-danger">*</span></label>
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-icon matPrefix class="me-2 opacity-50">mail</mat-icon>
+              <input matInput formControlName="email" type="email" placeholder="user@petrolpump.com">
+              <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+                Email Address is required
+              </mat-error>
+              <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+                Please enter a valid email address
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+
+        <!-- Pump Configuration Section -->
+        <div class="col-md-12" *ngIf="showPumpFields">
+          <div class="nozzle-config-section">
+            <div class="nozzle-section-header">
+              <mat-icon>settings_input_component</mat-icon>
+              <span>Nozzle &amp; Pump Configuration</span>
+              <span *ngIf="isNozzleAutoSet" class="auto-badge">
+                <mat-icon>auto_awesome</mat-icon> Auto-configured from Pump Manager
+              </span>
+            </div>
+
+            <!-- AUTO MODE: Read-only nozzle display for PUMP_MANAGER creating employees -->
+            <div *ngIf="isNozzleAutoSet" class="nozzle-auto-grid">
+              <div class="nozzle-info-card">
+                <div class="nozzle-icon petrol-icon"><mat-icon>local_gas_station</mat-icon></div>
+                <div class="nozzle-info-text">
+                  <span class="nozzle-label">Petrol Nozzles</span>
+                  <span class="nozzle-value">{{ managerNozzleData?.petrol_nozzle || 0 }}</span>
+                </div>
+              </div>
+              <div class="nozzle-info-card">
+                <div class="nozzle-icon diesel-icon"><mat-icon>opacity</mat-icon></div>
+                <div class="nozzle-info-text">
+                  <span class="nozzle-label">Diesel Nozzles</span>
+                  <span class="nozzle-value">{{ managerNozzleData?.diesel_nozzle || 0 }}</span>
+                </div>
+              </div>
+              <div class="nozzle-info-card">
+                <div class="nozzle-icon xp-icon"><mat-icon>bolt</mat-icon></div>
+                <div class="nozzle-info-text">
+                  <span class="nozzle-label">XP Petrol Nozzles</span>
+                  <span class="nozzle-value">{{ managerNozzleData?.xp_petrol_nozzle || 0 }}</span>
+                </div>
+              </div>
+              <div class="nozzle-info-card">
+                <div class="nozzle-icon power-icon"><mat-icon>power</mat-icon></div>
+                <div class="nozzle-info-text">
+                  <span class="nozzle-label">Power Diesel Nozzles</span>
+                  <span class="nozzle-value">{{ managerNozzleData?.powe_diesel_nozzle || 0 }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- MANUAL MODE: Editable dropdowns for SUPER_ADMIN/admin -->
+            <div *ngIf="!isNozzleAutoSet" class="row g-3 mt-1">
+              <div class="col-md-6">
+                <div class="form-group-modern mb-0">
+                  <label class="label-modern">Petrol Pump Nozzle</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="petrol_nozzle">
+                      <mat-option *ngFor="let option of pumpOptions" [value]="option">{{ option }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-modern mb-0">
+                  <label class="label-modern">Diesel Pump Nozzle</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="diesel_nozzle">
+                      <mat-option *ngFor="let option of pumpOptions" [value]="option">{{ option }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-modern mb-0">
+                  <label class="label-modern">XP Petrol Nozzle</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="xp_petrol_nozzle">
+                      <mat-option *ngFor="let option of pumpOptions" [value]="option">{{ option }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-modern mb-0">
+                  <label class="label-modern">Power Diesel Nozzle</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select formControlName="powe_diesel_nozzle">
+                      <mat-option *ngFor="let option of pumpOptions" [value]="option">{{ option }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="dialog-actions-modern mt-4">
+        <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-auto no-print">
+          Cancel
+        </button>
+
+        <button mat-stroked-button color="primary" *ngIf="data" 
+                (click)="openChangePassword()" class="px-3 py-2 me-3">
+          <mat-icon class="me-2">key</mat-icon> Change Password
+        </button>
+
+        <button mat-flat-button color="primary" *ngIf="!data" 
+                (click)="addUser()" class="px-5 py-2">
+          <mat-icon class="me-2">person_add</mat-icon> Create User
+        </button>
+
+        <button mat-flat-button color="primary" *ngIf="data" 
+                (click)="editUser()" class="px-5 py-2">
+          <mat-icon class="me-2">save</mat-icon> Update User
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+.user-master-wrapper {
+  padding: 24px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-footer-modern {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fcfdfe;
+  border-top: 1px solid var(--border-color);
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+::ng-deep .modern-pagination .ngx-pagination {
+  margin-bottom: 0;
+}
+
+::ng-deep .modern-pagination .ngx-pagination .current {
+  background: var(--primary) !important;
+  border-radius: 4px;
+}

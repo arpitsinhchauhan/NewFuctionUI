@@ -1,0 +1,86 @@
+<div class="dialog-modern-container dialog-md">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="me-2 vertical-align-middle">local_gas_station</mat-icon>
+        {{ data?.type === 'edit' ? 'Edit' : 'Add' }} Dip Details
+      </h4>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-white">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern">
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Transaction Date</label>
+        <input type="date" class="form-control-modern" [(ngModel)]="extraDipvalueDetails.date">
+      </div>
+      <div class="form-group-modern pt-4">
+        <button class="btn-premium btn-premium-secondary btn-md w-100" (click)="openComponent()">
+          <mat-icon class="me-2">table_chart</mat-icon>
+          View Conversion Table
+        </button>
+      </div>
+    </div>
+
+    <!-- Petrol Section -->
+    <div class="section-divider mb-4">
+      <span class="bg-card px-3 text-muted small font-weight-bold">
+        <mat-icon class="vertical-align-middle me-1" style="font-size: 16px;">local_gas_station</mat-icon>
+        PETROL TANK READINGS
+      </span>
+    </div>
+
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Dip Reading (mm)</label>
+        <input type="number" class="form-control-modern" [(ngModel)]="extraPdip" (blur)="fetchPvalue()" placeholder="0">
+      </div>
+      <div class="form-group-modern">
+        <label class="form-label-modern">Calculated Volume (Ltrs)</label>
+        <div class="form-control-modern bg-light d-flex align-items-center justify-content-between">
+          <mat-icon class="text-primary" style="font-size: 18px;">opacity</mat-icon>
+          <span class="font-weight-bold text-primary">{{ extra_pvalue }} L</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diesel Section -->
+    <div class="section-divider mb-4 mt-4">
+      <span class="bg-card px-3 text-muted small font-weight-bold">
+        <mat-icon class="vertical-align-middle me-1" style="font-size: 16px;">ev_station</mat-icon>
+        DIESEL TANK READINGS
+      </span>
+    </div>
+
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Dip Reading (mm)</label>
+        <input type="number" class="form-control-modern" [(ngModel)]="extra_dieseldip" (blur)="fetchDvalue()" placeholder="0">
+      </div>
+      <div class="form-group-modern">
+        <label class="form-label-modern">Calculated Volume (Ltrs)</label>
+        <div class="form-control-modern bg-light d-flex align-items-center justify-content-between">
+          <mat-icon class="text-primary" style="font-size: 18px;">opacity</mat-icon>
+          <span class="font-weight-bold text-primary">{{ extra_dvalue }} L</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern">
+    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data?.type === 'add'" (click)="logData()">
+      <mat-icon class="me-2">add</mat-icon>
+      Save Record
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data?.type === 'edit'" (click)="Edit(extraDipvalueDetails)">
+      <mat-icon class="me-2">check</mat-icon>
+      Update Record
+    </button>
+  </div>
+</div>

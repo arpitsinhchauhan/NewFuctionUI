@@ -1,0 +1,104 @@
+<div class="purchase-wrapper">
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Oil Purchase Inventory</h4>
+        <p class="text-muted small mb-0">Detailed tracking of lubricant and oil procurement records</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-container-modern mr-3">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium" placeholder="Search something...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </div>
+        <button mat-stroked-button color="primary" (click)="openExcelPdf()">
+          <mat-icon>download</mat-icon>
+          <span>Export Excel</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <div class="horizontal-scroll-container">
+        <table class="modern-table text-nowrap">
+          <thead>
+            <tr>
+              <th (click)="sortBy('date')" class="sortable">
+                Date
+                <mat-icon class="sort-icon" *ngIf="sortColumn === 'date'">
+                  {{ sortDirection === 'asc' ? 'expand_less' : 'expand_more' }}
+                </mat-icon>
+              </th>
+              <th *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">Employee</th>
+              <th>Type</th>
+              <th>Vendor Details</th>
+              <th>SKU / HSN</th>
+              <th>Quantity / Unit</th>
+              <th>Pricing (Rate)</th>
+              <th>Tax & GST</th>
+              <th class="text-right">Net Amount</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of oilProductList | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+              <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
+              <td *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">
+                <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
+              </td>
+              <td>
+                <span class="status-pill info">{{ item.type }}</span>
+              </td>
+              <td>
+                <div class="vendor-info">
+                  <span class="font-weight-bold d-block">{{ item.vendorName }}</span>
+                  <span class="text-muted small">Ref: {{ item.skuNumber }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="sku-info">
+                  <span class="d-block">{{ item.skuName }}</span>
+                  <span class="badge badge-light small">{{ item.hsn }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="qty-info">
+                  <span class="font-weight-medium">{{ item.quantity }} {{ item.unit }}</span>
+                  <span class="text-muted small d-block">({{ item.qtyLtrOrKg }} Ltr/Kg)</span>
+                </div>
+              </td>
+              <td>
+                <div class="pricing-info">
+                  <span class="d-block">Rate: ₹{{ item.rate }}</span>
+                  <span class="text-muted small">MRP: ₹{{ item.mrp }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="tax-info">
+                  <span class="d-block text-success">GST: {{ item.gstPercentage }}% (₹{{ item.gstAmount }})</span>
+                  <span class="text-muted small">Taxable: ₹{{ item.taxableValue }}</span>
+                </div>
+              </td>
+              <td class="text-right font-weight-bold text-primary">₹{{ item.netAmount | number:'1.2-2' }}</td>
+              <td class="text-center">
+                <div class="action-buttons justify-content-center">
+                  <button class="action-btn-circle action-btn-delete" (click)="deleteRow(item.id)" title="Delete Record">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="pagination-info">
+        Viewing page {{ currentPage }} of inventory
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+</div>

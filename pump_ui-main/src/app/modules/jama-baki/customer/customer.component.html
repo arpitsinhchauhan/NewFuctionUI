@@ -1,0 +1,61 @@
+<div class="dialog-modern-container dialog-sm customer-dialog">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary">person_add</mat-icon>
+        Customer Details
+        <span class="dialog-type-badge" [class.badge-add]="!data" [class.badge-edit]="data">
+          {{ data ? 'Update Mode' : 'New Registration' }}
+        </span>
+      </h4>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern">
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Registration Date</label>
+        <input type="date" [(ngModel)]="customerDetails.date" class="form-control-modern">
+      </div>
+    </div>
+
+    <div class="form-group-modern">
+      <label class="form-label-modern">Full Name / Business Name</label>
+      <div class="d-flex align-items-center position-relative">
+        <mat-icon class="position-absolute ms-2 text-muted" style="font-size: 18px;">badge</mat-icon>
+        <input type="text" [(ngModel)]="customerDetails.name" class="form-control-modern ps-5" placeholder="Enter customer name">
+      </div>
+    </div>
+
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Phone Number</label>
+        <div class="d-flex align-items-center position-relative">
+          <mat-icon class="position-absolute ms-2 text-muted" style="font-size: 18px;">phone</mat-icon>
+          <input type="text" [(ngModel)]="customerDetails.phone" class="form-control-modern ps-5" placeholder="+91 00000 00000">
+        </div>
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Email Address</label>
+        <div class="d-flex align-items-center position-relative">
+          <mat-icon class="position-absolute ms-2 text-muted" style="font-size: 18px;">email</mat-icon>
+          <input type="email" [(ngModel)]="customerDetails.email" class="form-control-modern ps-5" placeholder="customer@example.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern">
+    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" (click)="data ? Edit(customerDetails) : logData()">
+      <mat-icon class="me-2">{{ data ? 'save' : 'add' }}</mat-icon>
+      {{ data ? 'Save Changes' : 'Register Customer' }}
+    </button>
+  </div>
+</div>

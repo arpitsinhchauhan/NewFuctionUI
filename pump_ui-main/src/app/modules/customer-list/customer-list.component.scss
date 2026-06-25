@@ -1,0 +1,68 @@
+.customer-wrapper {
+  padding: 24px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sort-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.card-footer-modern {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+::ng-deep .modern-pagination .ngx-pagination {
+  margin-bottom: 0;
+}
+
+::ng-deep .modern-pagination .ngx-pagination .current {
+  background: var(--primary) !important;
+  border-radius: 4px;
+}
+
+.ml-2 {
+  margin-left: 8px !important;
+}

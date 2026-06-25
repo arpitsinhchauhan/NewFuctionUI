@@ -1,0 +1,82 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">Oil Purchase</h4>
+      <p class="card-subtitle">Capture vendor invoices in a compact purchase register</p>
+    </div>
+    <button mat-icon-button type="button" (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body card-body-scrollable">
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Purchase Date</label>
+        <mat-form-field appearance="outline" class="w-100">
+          <input matInput [(ngModel)]="purchaDipStockseDetails.date" type="date" (change)="updateDate()">
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table text-nowrap">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Vendor Name</th>
+            <th>SKU Name</th>
+            <th>SKU #</th>
+            <th>HSN</th>
+            <th>MRP</th>
+            <th>Qty (Ltr/Kg)</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Rate</th>
+            <th>Net Total</th>
+            <th>Discount</th>
+            <th>Taxable Value</th>
+            <th>GST %</th>
+            <th>GST Amount</th>
+            <th>Cess %</th>
+            <th>Cess Amount</th>
+            <th>Net Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index">
+            <td><input type="text" [(ngModel)]="item.type" readonly class="table-input"></td>
+            <td><input type="text" [(ngModel)]="item.vendorName" class="table-input"></td>
+            <td><input type="text" [(ngModel)]="item.skuName" class="table-input"></td>
+            <td><input type="text" [(ngModel)]="item.skuNumber" class="table-input"></td>
+            <td><input type="text" [(ngModel)]="item.hsn" class="table-input"></td>
+            <td><input type="number" [(ngModel)]="item.mrp" class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.mrp)}"></td>
+            <td><input type="number" [(ngModel)]="item.qtyLtrOrKg" class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.qtyLtrOrKg)}"></td>
+            <td><input type="number" [(ngModel)]="item.quantity" class="table-input no-spinner" (keyup)="calculateRow(item)" [ngClass]="{'invalid-input': !isNumber(item.quantity)}"></td>
+            <td><input type="text" [(ngModel)]="item.unit" class="table-input"></td>
+            <td><input type="number" [(ngModel)]="item.rate" class="table-input no-spinner" (keyup)="calculateRow(item)" [ngClass]="{'invalid-input': !isNumber(item.rate)}"></td>
+            <td><input type="number" [(ngModel)]="item.netTotal" class="table-input no-spinner" readonly></td>
+            <td><input type="number" [(ngModel)]="item.discount" class="table-input no-spinner" (keyup)="calculateRow(item)" [ngClass]="{'invalid-input': !isNumber(item.discount)}"></td>
+            <td><input type="number" [(ngModel)]="item.taxableValue" class="table-input no-spinner" readonly></td>
+            <td><input type="number" [(ngModel)]="item.gstPercentage" class="table-input no-spinner" (keyup)="calculateRow(item)" [ngClass]="{'invalid-input': !isNumber(item.gstPercentage)}"></td>
+            <td><input type="number" [(ngModel)]="item.gstAmount" class="table-input no-spinner" readonly></td>
+            <td><input type="number" [(ngModel)]="item.cessPercentage" class="table-input no-spinner" (keyup)="calculateRow(item)" [ngClass]="{'invalid-input': !isNumber(item.cessPercentage)}"></td>
+            <td><input type="number" [(ngModel)]="item.cessAmount" class="table-input no-spinner" readonly></td>
+            <td><input type="number" [(ngModel)]="item.netAmount" class="table-input no-spinner" readonly></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="17" class="text-right font-weight-bold">Grand Total</td>
+            <td><input type="text" [value]="totalPrice()" readonly class="table-input font-weight-bold"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern">
+    <button mat-stroked-button type="button" (click)="cancel()" class="me-auto">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="order()">Save Purchase</button>
+  </div>
+</div>

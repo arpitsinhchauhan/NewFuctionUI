@@ -1,0 +1,101 @@
+<div class="dialog-modern-container dialog-lg">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary me-2">payments</mat-icon>
+        Daily Expense (Kharch) Entry
+      </h4>
+      <span class="dialog-type-badge badge-add ms-3">Indirect Expenses</span>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted" title="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern p-4">
+    <!-- Date and Actions Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+      <div class="d-flex align-items-center gap-3">
+        <div class="form-group-modern mb-0" style="width: 200px;">
+          <label class="form-label-modern text-muted mb-1">Expense Date</label>
+          <input type="date" [(ngModel)]="purchaDipStockseDetails.date" class="form-control-modern">
+        </div>
+        <button class="btn-premium btn-premium-secondary btn-sm mt-4" (click)="expense()" title="New Category">
+          <mat-icon class="me-1">add_circle</mat-icon> New Category
+        </button>
+      </div>
+      <button class="btn-premium btn-premium-primary btn-sm mt-4" (click)="addTable()">
+        <mat-icon class="me-1">add_circle</mat-icon> Add Expense Row
+      </button>
+    </div>
+
+    <div class="table-responsive-modern mt-3">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th style="width: 10%;">ID</th>
+            <th style="width: 45%;">Indirect Expense Category</th>
+            <th style="width: 20%;" class="text-end">Amount (₹)</th>
+            <th style="width: 25%;">Expense Note / Remarks</th>
+            <th style="width: 60px;" class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" class="align-middle">
+            <td>
+              <input type="text" [(ngModel)]="item.idkharch" class="form-control-modern text-center text-muted bg-light" readonly />
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 density-compact no-margin">
+                <mat-select [(ngModel)]="item.expenses" [compareWith]="compareStrings" (openedChange)="onSelectOpened()" placeholder="Select Category">
+                  <mat-option disabled class="p-2">
+                    <div class="search-box-premium w-100 m-0">
+                      <input type="text" placeholder="Filter..." [(ngModel)]="searchText"
+                             (ngModelChange)="onSearchChange()" class="w-100 border-0 bg-transparent" style="outline: none; padding: 4px;"
+                             (click)="$event.stopPropagation()" />
+                      <mat-icon class="text-muted" style="font-size: 18px;">search</mat-icon>
+                    </div>
+                  </mat-option>
+                  <mat-option *ngFor="let expense of filteredExpenses" [value]="expense">{{ expense }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="item.price" placeholder="0.00" class="form-control-modern text-right font-weight-bold text-danger" style="text-align: right;" />
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="item.notes" placeholder="Spending details..." class="form-control-modern" />
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="warn" (click)="deleteRow(i)" title="Delete Row">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="row.length === 0">
+            <td colspan="5" class="no-data-msg py-5 text-center">
+              <mat-icon class="fs-1 opacity-25">receipt</mat-icon>
+              <p class="mt-2 text-muted">No expenses listed. Click "Add Expense Row" to record a payment.</p>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="row.length > 0">
+          <tr class="bg-light">
+            <td colspan="2" class="text-right font-weight-bold">Grand Total Expenses:</td>
+            <td class="font-weight-bold text-danger h6 mb-0 py-3 text-right" style="text-align: right;">₹ {{ totalPrice() | number:'1.2-2' }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern mt-2">
+    <button class="btn-premium btn-premium-secondary px-4" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary px-5" (click)="order()">
+      <mat-icon class="me-2">save</mat-icon> Save Expense Report
+    </button>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="user-master-wrapper">
+  <div class="card-modern" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Developer Settings</h4>
+        <p class="text-muted small mb-0">Configure system-wide settings, notification dispatchers, and automation intervals</p>
+      </div>
+    </div>
+
+    <div style="padding: 24px;">
+      <form (submit)="saveSettings()">
+        <h5 style="margin-top: 0; color: var(--primary); font-weight: 600;">SMTP Email Configuration</h5>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <mat-form-field appearance="outline">
+            <mat-label>SMTP Host</mat-label>
+            <input matInput [(ngModel)]="smtpHost" name="smtpHost" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>SMTP Port</mat-label>
+            <input matInput [(ngModel)]="smtpPort" name="smtpPort" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" style="grid-column: span 2;">
+            <mat-label>Sender Email Address</mat-label>
+            <input matInput [(ngModel)]="senderEmail" name="senderEmail" type="email" required>
+          </mat-form-field>
+        </div>
+
+        <mat-divider style="margin-bottom: 24px;"></mat-divider>
+
+        <h5 style="color: var(--primary); font-weight: 600;">System Policies</h5>
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+          <mat-checkbox [(ngModel)]="enableRegistration" name="enableRegistration" color="primary">
+            Enable Public Multi-Tenant Registration Portal
+          </mat-checkbox>
+
+          <mat-form-field appearance="outline" style="max-width: 300px; margin-top: 8px;">
+            <mat-label>Automated Database Backup Interval</mat-label>
+            <mat-select [(ngModel)]="backupSchedule" name="backupSchedule">
+              <mat-option value="Hourly">Hourly</mat-option>
+              <mat-option value="Daily">Daily</mat-option>
+              <mat-option value="Weekly">Weekly</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+          <button mat-flat-button color="primary" type="submit" class="premium-btn-primary">
+            <mat-icon>save</mat-icon>
+            <span>Save System Settings</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

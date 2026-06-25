@@ -1,0 +1,120 @@
+<div class="dialog-modern-container dialog-xl">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary me-2">opacity</mat-icon>
+        Oil Sales
+      </h4>
+      <span class="dialog-type-badge badge-add ms-3">Lubricants</span>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted" title="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern p-4">
+    <!-- Date and Actions Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+      <div class="d-flex align-items-center gap-3">
+        <div class="form-group-modern mb-0" style="width: 200px;">
+          <label class="form-label-modern text-muted mb-1">Sale Date</label>
+          <input type="date" [(ngModel)]="purchaDipStockseDetails.date" class="form-control-modern">
+        </div>
+        <button class="btn-premium btn-premium-secondary btn-sm mt-4" (click)="oilType()" title="Oil Type">
+          <mat-icon class="me-1">settings</mat-icon> Oil Type
+        </button>
+      </div>
+      <button class="btn-premium btn-premium-primary btn-sm mt-4" (click)="addTable()">
+        <mat-icon class="me-1">add_circle</mat-icon> Add Row
+      </button>
+    </div>
+
+    <div class="table-responsive-modern mt-3">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Customer Name</th>
+            <th>Oil Type</th>
+            <th class="text-end" style="width: 180px;">Price (₹)</th>
+            <th>Note</th>
+            <th style="width: 80px;" class="text-center">Bill</th>
+            <th style="width: 80px;" class="text-center">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" class="align-middle">
+            <td>
+              <mat-form-field appearance="outline" class="w-100 density-compact no-margin">
+                <mat-select [(ngModel)]="item.customer" [compareWith]="compareCustomers" (openedChange)="onReceiverOpened()"
+                  (selectionChange)="onCustomerChange($event.value, item)" placeholder="Select Customer">
+                  <mat-option disabled class="p-2">
+                    <div class="search-box-premium w-100 m-0">
+                      <input type="text" placeholder="Search customer" [(ngModel)]="receiverSearch"
+                        (ngModelChange)="filterReceivers()" class="w-100 border-0 bg-transparent" style="outline: none; padding: 4px;" />
+                      <mat-icon class="text-muted" style="font-size: 18px;">search</mat-icon>
+                    </div>
+                  </mat-option>
+                  <mat-option *ngFor="let customer of filteredNames" [value]="customer">
+                    {{ customer.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 density-compact no-margin">
+                <mat-select [(ngModel)]="item.value" [compareWith]="compareStrings" (openedChange)="onSelectOpened()" placeholder="Select Oil Type">
+                  <mat-option disabled class="p-2">
+                    <div class="search-box-premium w-100 m-0">
+                      <input type="text" placeholder="Search oil type" [(ngModel)]="searchText"
+                        (ngModelChange)="onSearchChange()" class="w-100 border-0 bg-transparent" style="outline: none; padding: 4px;" />
+                      <mat-icon class="text-muted" style="font-size: 18px;">search</mat-icon>
+                    </div>
+                  </mat-option>
+                  <mat-option *ngFor="let value of filteredExpenses" [value]="value">
+                    {{ value }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="item.price" class="form-control-modern text-right font-weight-bold text-success" style="text-align: right;" placeholder="0.00">
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="item.oilSellNote" placeholder="Add note" class="form-control-modern">
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="primary" type="button" (click)="oilBill(item, i)" title="Generate Receipt">
+                <mat-icon>picture_as_pdf</mat-icon>
+              </button>
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="warn" type="button" (click)="deleteRow(i)" title="Delete Row">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="row.length === 0">
+            <td colspan="6" class="no-data-msg py-5 text-center">
+              <mat-icon class="fs-1 opacity-25">opacity</mat-icon>
+              <p class="mt-2 text-muted mb-0">No oil sales listed. Choose a date and click "Add Row".</p>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="bg-light">
+            <td colspan="2" class="text-right font-weight-bold">Grand Total:</td>
+            <td class="font-weight-bold text-success h6 mb-0 py-3 text-right" style="text-align: right;">₹ {{ totalPrice() | number:'1.2-2' }}</td>
+            <td colspan="3"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern mt-2">
+    <button class="btn-premium btn-premium-secondary px-4" (click)="cancel()">Cancel</button>
+    <button class="btn-premium btn-premium-primary px-5" (click)="order()">
+      <mat-icon class="me-2">save</mat-icon> Save Oil Sales
+    </button>
+  </div>
+</div>

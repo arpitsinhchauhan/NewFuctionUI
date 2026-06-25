@@ -1,0 +1,77 @@
+<div class="dip-wrapper">
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Fuel Dip & Inventory Levels</h4>
+        <p class="text-muted small mb-0">Monitor daily physical stock readings for Petrol and Diesel tanks</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-box-modern">
+          <mat-icon>search</mat-icon>
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by date...">
+          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('date')" class="sortable">
+              Reading Date
+              <mat-icon class="sort-icon" *ngIf="sortColumn === 'date'">
+                {{ sortDirection === 'asc' ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </th>
+            <th *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">Employee</th>
+            <th>Petrol Reading</th>
+            <th>Petrol Volume (L)</th>
+            <th>Diesel Reading</th>
+            <th>Diesel Volume (L)</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of productList | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+            <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
+            <td *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">
+              <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
+            </td>
+            <td>
+              <div class="dip-info">
+                <span class="badge badge-primary-light">Dip: {{ item.petroldip }} mm</span>
+              </div>
+            </td>
+            <td class="font-weight-bold text-primary">{{ item.pvalue | number:'1.2-2' }} L</td>
+            <td>
+              <div class="dip-info">
+                <span class="badge badge-warning-light">Dip: {{ item.dieseldip }} mm</span>
+              </div>
+            </td>
+            <td class="font-weight-bold text-warning">{{ item.dvalue | number:'1.2-2' }} L</td>
+            <td class="text-center">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="openEditDialog(item)" title="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteRow(item.id)" title="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="pagination-info">
+        Viewing page {{ currentPage }} of dip records
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+</div>

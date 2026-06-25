@@ -1,0 +1,45 @@
+<div class="main-content">
+    <div class="container-fluid">
+        <div class="card card-plain">
+            <div class="card-header card-header-danger">
+                <div>
+
+                    <input matInput type="file" (change)="onFileSelected($event)" multiple>
+                    <button mat-raised-button  (click)="onSubmit($event)">Upload Photos</button>
+
+                </div>
+            </div>
+            <div>
+                <!-- <div class="image-container" *ngFor="let imageUrl of imageUrls">
+                    <img [src]="'data:image/png;base64,' + imageUrl['imageData']" alt="Image" />
+                </div> -->
+                <div class="image-container" *ngFor="let imageUrl of imageUrls">
+                    <img [src]="'data:image/png;base64,' + imageUrl['imageData']" alt="Image"
+                        style="max-width:100%;cursor:pointer" (click)="onClick($event)" class="modal-hover-opacity"
+                        data-toggle="modal" data-target="#myModal" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal" role="dialog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content card-premium dialog-modern-card">
+            <div class="card-header-modern">
+                <div class="header-text">
+                    <h4 class="card-title">
+                        <mat-icon class="me-2 text-primary">image</mat-icon>
+                        Image Preview
+                    </h4>
+                    <p class="card-subtitle">Viewing uploaded receipt or document</p>
+                </div>
+                <button mat-icon-button class="close-btn" data-dismiss="modal" color="warn">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+            <div class="card-body p-3 text-center bg-light">
+                <img [src]="imgSrc" class="img-fluid rounded-3 shadow-md preview-modal-img" />
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,189 @@
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" dir="ltr" prefix="og: https://ogp.me/ns#"
+      xmlns:th="http://www.thymeleaf.org"
+      style="width:100%;font-family:lato, 'helvetica neue', helvetica, arial, sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;padding:0;Margin:0">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta name="x-apple-disable-message-reformatting"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta content="telephone=no" name="format-detection"/>
+    <title>Profit Loss</title>
+    <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: right;
+            }
+            th {
+                background-color: yellow;
+            }
+            .left-align {
+                text-align: left;
+            }
+            .highlight {
+                background-color: #FFFF00; /* Yellow */
+            }
+            .header {
+                background-color: #26262621;
+                text-align: left;
+                font-weight:bold;
+
+            }
+
+        </style>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th colspan="4" style="text-align:center; background-color:#e6e6e6; font-size:16px;">
+            PROFIT &amp; LOSS STATEMENT
+            <br/>
+            <span style="font-size:13px; font-weight:normal;">
+                From <span th:text="${startDate}">01-04-2025</span>
+                To <span th:text="${endDate}">31-03-2026</span>
+            </span>
+        </th>
+    </tr>
+    <tr>
+        <th class="left-align">Particulars</th>
+        <th>IT Return</th>
+        <th class="left-align">Particulars</th>
+        <th>IT Return</th>
+    </tr>
+    <tr>
+        <th colspan="4" ></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td class="header" colspan="2">Opening Stock</td>
+        <td class="header" colspan="2">SALES ACCOUNT</td>
+    </tr>
+    <tr>
+        <td class="left-align">Diesel Stock</td>
+        <td th:text="${dieselstock}">0.0</td>
+        <td class="left-align">PETROL SALES A/C.</td>
+        <td th:text="${petrolSale}">0.0</td>
+    </tr>
+    <tr>
+        <td class="left-align">LUBRECANT</td>
+        <td th:text="${openOilSell}">0.0</td>
+        <td class="left-align">DIESEL SALES A/C.</td>
+        <td th:text="${dieselSale}">0.0</td>
+
+    </tr>
+    <tr>
+        <td class="left-align">PETROL STOCK</td>
+        <td th:text="${petrolStock}">0.0</td>
+        <td class="left-align">LUBRICANT SALES A/C</td>
+        <td th:text="${oilSell}">0.0</td>
+    </tr>
+    <tr>
+        <td class="left-align">XP_PETROL STOCK</td>
+        <td th:text="${xpPetrolStock}">0.0</td>
+        <td class="left-align">XP_PETROL SALES A/C.</td>
+        <td th:text="${xpPetrolSale}">0.0</td>
+    </tr>
+    <tr>
+        <td class="left-align">POWER_DIESEL STOCK</td>
+        <td th:text="${powerDieselstock}">0.0</td>
+        <td class="left-align">POWER_DIESEL SALES A/C.</td>
+        <td th:text="${powerDieselSale}">0.0</td>
+    </tr>
+    <tr>
+        <td class="header" colspan="2">Purchase Accounts</td>
+        <td class="header" colspan="2">Closing stock</td>
+    </tr>
+    <tr>
+        <td class="left-align">DIESEL PURCHASE A/C.</td>
+        <td th:text="${dieselPurchase}"></td>
+        <td class="left-align">DIESEL STOCK</td>
+        <td th:text="${closedieselMeter}"></td>
+    </tr>
+    <tr>
+        <td class="left-align">LUB PURCHASE A/C.</td>
+        <td th:text="${oilPurchase}"></td>
+        <td class="left-align">LUBRECANT</td>
+        <td th:text="${closeOilSell}">0.0</td>
+    </tr>
+    <tr>
+        <td class="left-align">PETROL PURCHASES A/C.</td>
+        <td th:text="${petrolPurchase}"></td>
+        <td class="left-align">PETROL STOCK</td>
+        <td th:text="${closePetrolMeter}"></td>
+    </tr>
+    <tr>
+        <td class="left-align">XP_PETROL PURCHASES A/C.</td>
+        <td th:text="${xpPetrolPurchase}"></td>
+        <td class="left-align">XP_PETROL STOCK</td>
+        <td th:text="${closeXpPetrolAmount}"></td>
+    </tr>
+    <tr>
+        <td class="left-align">POWER_DIESEL PURCHASES A/C.</td>
+        <td th:text="${powerDieselPurchase}"></td>
+        <td class="left-align">POWER_DIESEL STOCK</td>
+        <td th:text="${closePowerDieselAmount}"></td>
+    </tr>
+    <tr>
+        <td class="left-align">Direct Expenses</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="left-align">C GST EXP</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="left-align">S GST TAX EXP</td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="left-align highlight">GROSS PROFIT C/O</td>
+        <td class="left-align highlight" th:text="${totalStockAndPurchase}"></td>
+        <td class="left-align highlight">TOTAL</td>
+        <td class="left-align highlight" th:text="${totalCloseAndSale}"></td>
+    </tr>
+    <tr>
+        <td colspan="4"></td>
+    </tr>
+    <tr>
+        <td class="header" colspan="2">Indirect Expenses</td>
+        <td class="left-align highlight">GROSS PROFIT C/O</td>
+        <td th:text="${grossProfit}" class="left-align highlight"></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td class="left-align">Credit Balance</td>
+        <td th:text="${creditBalance}"></td>
+    </tr>
+    <tr th:each="row : ${kharchList}">
+        <td th:text="${row[0]}">Expense</td>
+        <td th:text="${row[1]}">Price</td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="left-align highlight"></td>
+        <td class="left-align highlight"></td>
+        <td class="left-align highlight">TotalRs</td>
+        <td class="left-align highlight" th:text="${totalRs}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

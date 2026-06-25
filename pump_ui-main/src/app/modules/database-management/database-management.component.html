@@ -1,0 +1,62 @@
+<div class="user-master-wrapper">
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Database Management</h4>
+        <p class="text-muted small mb-0">Monitor connection health, databases, backups, and sizes</p>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Database Name</th>
+            <th>Connection Status</th>
+            <th>Size</th>
+            <th>Tables</th>
+            <th>Last Backup</th>
+            <th class="text-center">Database Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of databases | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+            <td>
+              <div class="user-cell">
+                <mat-icon style="color: var(--primary);">storage</mat-icon>
+                <span class="font-weight-medium">{{ item.name }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill" [class.success]="item.status === 'Connected'" [class.info]="item.status !== 'Connected'">
+                {{ item.status }}
+              </span>
+            </td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.tables }}</td>
+            <td>{{ item.lastBackup }}</td>
+            <td class="text-center">
+              <div class="action-buttons" style="justify-content: center;">
+                <button mat-flat-button color="primary" class="premium-btn-primary" style="padding: 0 12px; height: 32px; font-size: 12px; margin-right: 8px;" (click)="backupDb(item.name)">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-right: 4px;">backup</mat-icon>
+                  Backup
+                </button>
+                <button mat-stroked-button color="accent" style="padding: 0 12px; height: 32px; font-size: 12px;" (click)="optimizeDb(item.name)">
+                  <mat-icon style="font-size: 16px; width: 16px; height: 16px; margin-right: 4px;">offline_bolt</mat-icon>
+                  Optimize
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="pagination-info">
+        Displaying {{ databases.length }} databases
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+</div>

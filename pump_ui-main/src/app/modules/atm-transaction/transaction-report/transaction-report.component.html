@@ -1,0 +1,86 @@
+<div class="dialog-modern-container dialog-lg">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary me-2">account_balance_wallet</mat-icon>
+        Transaction Entry
+      </h4>
+      <span class="dialog-type-badge badge-add ms-3">ATM & Bank Entries</span>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted" title="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern p-4">
+    <!-- Date and Actions Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+      <div class="d-flex align-items-center gap-3">
+        <div class="form-group-modern mb-0" style="width: 200px;">
+          <label class="form-label-modern text-muted mb-1">Transaction Date</label>
+          <input type="date" [(ngModel)]="purchaDipStockseDetails.date" class="form-control-modern">
+        </div>
+      </div>
+      <button class="btn-premium btn-premium-primary btn-sm mt-4" (click)="addTable()">
+        <mat-icon class="me-1">add_circle</mat-icon> Add Row
+      </button>
+    </div>
+
+    <div class="table-responsive-modern mt-3">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th style="width: 12%;">Row ID</th>
+            <th style="width: 38%;">Name</th>
+            <th style="width: 24%;" class="text-end">Amount (₹)</th>
+            <th style="width: 26%;">Transaction (Bank / Mode)</th>
+            <th style="width: 60px;" class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" class="align-middle">
+            <td>
+              <input type="text" [(ngModel)]="item.id" class="form-control-modern text-center text-muted bg-light" readonly />
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="item.name" placeholder="Enter name" class="form-control-modern" />
+            </td>
+            <td>
+              <input type="number" pattern="[0-9]*" inputmode="numeric" [(ngModel)]="item.amount" placeholder="0.00" class="form-control-modern text-right font-weight-bold text-success" style="text-align: right;" />
+            </td>
+            <td>
+              <input type="text" [(ngModel)]="item.transaction" placeholder="Enter bank / mode" class="form-control-modern" />
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="warn" (click)="deleteRow(i)" title="Delete Row">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="row.length === 0">
+            <td colspan="5" class="no-data-msg py-5 text-center">
+              <mat-icon class="fs-1 opacity-25">receipt_long</mat-icon>
+              <p class="mt-2 text-muted mb-0">No transaction rows yet. Choose a date and click "Add Row".</p>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="row.length > 0">
+          <tr class="bg-light">
+            <td colspan="2" class="text-right font-weight-bold">Grand Total:</td>
+            <td class="font-weight-bold text-success h6 mb-0 py-3 text-right" style="text-align: right;">₹ {{ totalPrice() | number:'1.2-2' }}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern mt-2">
+    <button class="btn-premium btn-premium-secondary px-4" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary px-5" (click)="order()">
+      <mat-icon class="me-2">save</mat-icon> Save Transaction
+    </button>
+  </div>
+</div>

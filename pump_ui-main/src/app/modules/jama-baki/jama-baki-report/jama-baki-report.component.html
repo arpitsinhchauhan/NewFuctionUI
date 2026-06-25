@@ -1,0 +1,129 @@
+<div class="dialog-modern-container dialog-xl">
+    <div class="dialog-header-modern">
+        <div class="header-main">
+            <h4>
+                <mat-icon class="text-primary me-2">account_balance_wallet</mat-icon>
+                Jama & Baki Entry
+            </h4>
+            <span class="dialog-type-badge badge-add ms-3">Credit & Debit Ledger</span>
+        </div>
+        <button mat-icon-button (click)="cancel()" class="text-muted" title="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="dialog-content-modern p-4">
+        <!-- Date and Actions Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-group-modern mb-0" style="width: 200px;">
+                    <label class="form-label-modern text-muted mb-1">Transaction Date</label>
+                    <input type="date" [(ngModel)]="purchaDipStockseDetails.date" class="form-control-modern">
+                </div>
+                <button class="btn-premium btn-premium-secondary btn-sm mt-4" (click)="AddCustomer()" title="Add Customer">
+                    <mat-icon class="me-1">person_add</mat-icon> New Customer
+                </button>
+            </div>
+            <button class="btn-premium btn-premium-primary btn-sm mt-4" (click)="addTable()">
+                <mat-icon class="me-1">add_circle</mat-icon> Add Row
+            </button>
+        </div>
+
+        <div class="table-responsive-modern mt-3">
+            <table class="modern-table" style="min-width: 1100px;">
+                <thead>
+                    <tr>
+                        <th style="width: 250px;">Customer Name</th>
+                        <th *ngIf="jamaBaki.type !== 'baki'">Jama (Credit ₹)</th>
+                        <th *ngIf="jamaBaki.type !== 'baki'">Credit Note</th>
+                        <th *ngIf="jamaBaki.type !== 'jama'">Item/Type</th>
+                        <th *ngIf="jamaBaki.type !== 'jama'" style="width: 100px;">LTR</th>
+                        <th *ngIf="jamaBaki.type !== 'jama'" style="width: 100px;">Rate</th>
+                        <th *ngIf="jamaBaki.type !== 'jama'">Baki (Debit ₹)</th>
+                        <th *ngIf="jamaBaki.type !== 'jama'">Debit Note</th>
+                        <th *ngIf="jamaBaki.type !== 'jama'" style="width: 80px;" class="text-center">Receipt</th>
+                        <th style="width: 60px;" class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of row; let i = index">
+                        <td class="align-middle">
+                            <mat-form-field appearance="outline" class="w-100 density-compact no-margin">
+                                <mat-label>Select Customer</mat-label>
+                                <mat-select [(ngModel)]="item.customer" [compareWith]="compareCustomers" (openedChange)="onReceiverOpened()" displayWith="displayCustomerName">
+                                    <mat-option disabled class="p-2">
+                                        <div class="search-box-premium w-100 m-0">
+                                            <input type="text" placeholder="Search customer..." [(ngModel)]="receiverSearch" (ngModelChange)="filterReceivers()" class="w-100 border-0 bg-transparent" style="outline: none; padding: 4px;" />
+                                            <mat-icon class="text-muted" style="font-size: 18px;">search</mat-icon>
+                                        </div>
+                                    </mat-option>
+                                    <mat-option *ngFor="let customer of filteredNames" [value]="customer">
+                                        {{ customer.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'baki'">
+                            <input type="number" [(ngModel)]="item.jama" class="form-control-modern text-success font-weight-bold" placeholder="0.00" />
+                        </td>
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'baki'">
+                            <input type="text" [(ngModel)]="item.jamaNote" class="form-control-modern" placeholder="Note..." />
+                        </td>
+
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'jama'">
+                            <mat-form-field appearance="outline" class="w-100 density-compact no-margin">
+                                <mat-select [(ngModel)]="item.type" [compareWith]="compareStrings" disableRipple placeholder="Select Type">
+                                    <mat-option *ngFor="let type of petrolTypeList" [value]="type">
+                                        {{ type }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'jama'">
+                            <input type="number" [(ngModel)]="item.ltr" (input)="calculateBaki(item)" class="form-control-modern" placeholder="0" />
+                        </td>
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'jama'">
+                            <input type="number" [(ngModel)]="item.rate" (input)="calculateBaki(item)" class="form-control-modern" placeholder="0.00" />
+                        </td>
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'jama'">
+                            <input type="text" [(ngModel)]="item.baki" [value]="item.baki" readonly class="form-control-modern text-danger font-weight-bold bg-light" placeholder="0.00" />
+                        </td>
+                        <td class="align-middle" *ngIf="jamaBaki.type !== 'jama'">
+                            <input type="text" [(ngModel)]="item.bakiNote" class="form-control-modern" placeholder="Note..." />
+                        </td>
+                        <td class="align-middle text-center" *ngIf="jamaBaki.type !== 'jama'">
+                            <button mat-icon-button color="primary" (click)="billBaki(item, i)" title="Generate Receipt">
+                                <mat-icon>picture_as_pdf</mat-icon>
+                            </button>
+                        </td>
+                        <td class="align-middle text-center">
+                            <button mat-icon-button color="warn" (click)="deleteRow(i)" title="Delete Row">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="bg-light">
+                        <td class="text-right font-weight-bold">Totals:</td>
+                        <td *ngIf="jamaBaki.type !== 'baki'" class="font-weight-bold text-success h6 mb-0 py-3">₹ {{ totalJama() | number:'1.2-2' }}</td>
+                        <td *ngIf="jamaBaki.type !== 'baki'"></td>
+                        <td *ngIf="jamaBaki.type !== 'jama'" colspan="3"></td>
+                        <td *ngIf="jamaBaki.type !== 'jama'" class="font-weight-bold text-danger h6 mb-0 py-3">₹ {{ totalBaki() | number:'1.2-2' }}</td>
+                        <td *ngIf="jamaBaki.type !== 'jama'" colspan="2"></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="dialog-actions-modern mt-2">
+        <button class="btn-premium btn-premium-secondary px-4" (click)="cancel()">
+            Cancel
+        </button>
+        <button class="btn-premium btn-premium-primary px-5" (click)="order()">
+            <mat-icon class="me-2">save</mat-icon> Save Entries
+        </button>
+    </div>
+</div>

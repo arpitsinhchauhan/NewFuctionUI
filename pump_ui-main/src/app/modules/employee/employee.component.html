@@ -1,0 +1,87 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">person_add</mat-icon>
+        Add New Employee
+      </h4>
+      <p class="card-subtitle">Register a new staff member to the system</p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body card-body-scrollable p-4">
+    <form #employeeForm="ngForm" class="modern-form">
+      <!-- Photo Upload Section -->
+      <div class="photo-upload-container mb-4">
+        <div class="photo-preview" [class.has-image]="photo">
+          <mat-icon *ngIf="!photo">account_circle</mat-icon>
+          <img *ngIf="photo" [src]="'data:image/jpeg;base64,' + photo" class="preview-img">
+        </div>
+        <div class="upload-controls">
+          <label class="btn-upload">
+            <mat-icon>photo_camera</mat-icon>
+            {{ photo ? 'Change Photo' : 'Upload Photo' }}
+            <input type="file" (change)="onFileChange($event)" accept="image/*" class="d-none">
+          </label>
+          <p class="upload-hint">JPG or PNG, Max 2MB (Optional)</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12 mb-3">
+          <div class="form-group-modern">
+            <label class="form-label-modern">Full Name</label>
+            <div class="input-group-modern">
+              <mat-icon>person</mat-icon>
+              <input type="text" [(ngModel)]="name" name="name" placeholder="Enter full name" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <div class="form-group-modern">
+            <label class="form-label-modern">Phone Number</label>
+            <div class="input-group-modern">
+              <mat-icon>phone</mat-icon>
+              <input type="text" [(ngModel)]="phoneNumber" name="phoneNumber" placeholder="98765 43210" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <div class="form-group-modern">
+            <label class="form-label-modern">Employee ID</label>
+            <div class="input-group-modern">
+              <mat-icon>badge</mat-icon>
+              <input type="text" [(ngModel)]="employeeId" name="employeeId" placeholder="EMP-1234" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12 mb-3">
+          <div class="form-group-modern">
+            <label class="form-label-modern">Account Number (Bank)</label>
+            <div class="input-group-modern">
+              <mat-icon>account_balance</mat-icon>
+              <input type="text" [(ngModel)]="accountNumber" name="accountNumber" placeholder="Enter bank account number" required>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="dialog-actions-modern border-top">
+    <button mat-button (click)="cancel()" class="px-4">Cancel</button>
+    <button mat-flat-button color="primary" 
+            (click)="saveEmployee(employeeForm.value)" 
+            [disabled]="!employeeForm.valid"
+            class="px-5 btn-premium">
+      <mat-icon class="me-2">save</mat-icon>
+      Save Employee
+    </button>
+  </div>
+</div>

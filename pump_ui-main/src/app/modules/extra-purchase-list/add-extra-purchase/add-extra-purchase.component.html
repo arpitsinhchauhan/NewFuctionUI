@@ -1,0 +1,105 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">shopping_cart</mat-icon>
+        Extra Purchase Entry
+      </h4>
+      <p class="card-subtitle">Register miscellaneous purchases and tax details</p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body p-4">
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-md-6">
+        <div class="form-group-modern mb-0">
+          <label class="label-modern">Purchase Date</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraDetails.date" type="date" (change)="updateDate()">
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern border rounded-3">
+      <table class="modern-report-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Total (₹)</th>
+            <th>Vat (₹)</th>
+            <th>Cess (₹)</th>
+            <th>JTC %</th>
+            <th class="text-right">Net Purchase (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" class="align-middle">
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput [(ngModel)]="item.extraType" readonly class="font-weight-bold">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.extra_quantity" class="no-spinner"
+                       [ngClass]="{'invalid-input': !isNumber(item.extra_quantity)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.extra_total" class="no-spinner"
+                       [ngClass]="{'invalid-input': !isNumber(item.extra_total)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.extra_vat" class="no-spinner"
+                       [ngClass]="{'invalid-input': !isNumber(item.extra_vat)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.extra_cess" class="no-spinner"
+                       [ngClass]="{'invalid-input': !isNumber(item.extra_cess)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.extra_jtcpercentage" class="no-spinner"
+                       [ngClass]="{'invalid-input': !isNumber(item.extra_jtcpercentage)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.extra_total_purchase" class="no-spinner text-right"
+                       [ngClass]="{'invalid-input': !isNumber(item.extra_total_purchase)}">
+              </mat-form-field>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="bg-light font-weight-bold">
+            <td colspan="2" class="text-right py-3">Grand Total:</td>
+            <td colspan="5" class="text-primary py-3 fs-5 text-right px-4">
+              ₹ {{ totalPrice() | number:'1.2-2' }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
+      <button mat-flat-button color="primary" (click)="order()" class="px-5 py-2">
+        <mat-icon class="me-2">save</mat-icon> Save Purchase
+      </button>
+    </div>
+  </div>
+</div>

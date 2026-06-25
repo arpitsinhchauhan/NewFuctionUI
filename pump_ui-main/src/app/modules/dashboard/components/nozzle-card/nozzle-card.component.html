@@ -1,0 +1,59 @@
+<mat-card class="card-premium nozzle-card-modern h-100">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">Nozzle Sales Performance</h4>
+      <p class="card-subtitle">Detailed tracking of individual nozzle throughput</p>
+    </div>
+    <div class="header-actions">
+      <mat-button-toggle-group [(ngModel)]="filterType"
+        (change)="filterTypeChange.emit(filterType); filterChange.emit()" 
+        class="modern-toggle-group">
+        <mat-button-toggle value="today">Day</mat-button-toggle>
+        <mat-button-toggle value="month">Month</mat-button-toggle>
+        <mat-button-toggle value="year">Year</mat-button-toggle>
+        <mat-button-toggle value="fy">FY</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <mat-form-field *ngIf="filterType === 'fy'" appearance="outline" class="small-select ml-2">
+        <mat-select [(ngModel)]="selectedYear"
+          (selectionChange)="selectedYearChange.emit(selectedYear); filterChange.emit()">
+          <mat-option *ngFor="let year of yearList" [value]="year">{{year}}-{{year+1}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="table-responsive mt-3">
+    <table class="modern-table">
+      <thead>
+        <tr>
+          <th>Nozzle ID</th>
+          <th>Fuel Type</th>
+          <th class="text-right">Volume (L)</th>
+          <th class="text-right">Total Revenue (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let nozzle of nozzleSales">
+          <td class="font-weight-bold">{{ nozzle.nozzleName }}</td>
+          <td>
+            <div class="fuel-type-indicator">
+              <span class="dot" [style.background-color]="getFuelColor(nozzle.fuelType)"></span>
+              <span>{{ nozzle.fuelType }}</span>
+            </div>
+          </td>
+          <td class="text-right text-muted">{{ nozzle.liters | number:'1.2-2' }}</td>
+          <td class="text-right font-weight-bold text-primary">
+            ₹{{ nozzle.amount | number:'1.2-2' }}
+          </td>
+        </tr>
+        <tr *ngIf="nozzleSales.length === 0">
+          <td colspan="4" class="text-center py-5 text-muted">
+            <mat-icon style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px;">receipt_long</mat-icon>
+            <p>No sales records found for this period</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</mat-card>

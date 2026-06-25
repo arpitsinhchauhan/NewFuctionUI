@@ -1,0 +1,35 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- <button (click)="sendSelected()">send</button> -->
+<button mat-raised-button (click)="sendSelected()" class="btn btn-danger" style="margin-left: 87%;">Add</button>
+<div class="product-list">
+    
+    <table>
+        <tr>
+            <th>Dip</th>
+            <th scope="col">Volume</th>
+            <th scope="col">Diff</th>
+            <th><input type="checkbox" (change)="toggleSelectAll($event)"></th>
+        </tr>
+        <!-- | searchfilter: searchTerm -->
+        <tr *ngFor="let items of extradipList |  paginate: { itemsPerPage: 6, currentPage: currentPage}">
+            <!-- <td *ngFor="let items of extradipList">{{items.Id}}</td>
+            <td *ngFor="let items of extradipList">{{items.Email}}</td>
+            <td *ngFor="let items of extradipList">{{items.Phone}}</td> -->
+            <td>{{items.id}}</td>
+            <td>{{items.extra_volume}}</td>
+            <td>{{items.extra_diff}}</td>
+            <td><input type="checkbox" [(ngModel)]="items.selected"></td>
+
+            <!-- <td>
+                <a (click)="send(items.id)">
+                    <mat-icon>send</mat-icon>
+                </a>
+            </td> -->
+        </tr>
+        
+    </table>
+    <div  style="margin-left: 47%;"> 
+        <pagination-controls
+            (pageChange)="currentPage = $event"></pagination-controls>
+    </div>
+</div>

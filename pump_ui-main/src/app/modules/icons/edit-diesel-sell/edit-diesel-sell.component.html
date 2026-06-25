@@ -1,0 +1,90 @@
+<div class="dialog-modern-container" style="width: 700px;">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary">ev_station</mat-icon>
+        Diesel Daily Sales
+        <span class="dialog-type-badge" [class.badge-add]="!data" [class.badge-edit]="data">
+          {{ data ? 'Update Mode' : 'New Entry' }}
+        </span>
+      </h4>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern">
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Reading Date</label>
+        <input type="date" class="form-control-modern" [(ngModel)]="dieselDetails.date">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Assigned Pump</label>
+        <select class="form-control-modern" [(ngModel)]="dieselDetails.pump">
+          <option value="" disabled selected>Select Pump</option>
+          <option *ngFor="let pump of pumpList" [value]="pump">{{ pump }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid-modern" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Closing Meter</label>
+        <input type="number" class="form-control-modern" [(ngModel)]="dieselDetails.close_meter" (input)="calculateValues()" placeholder="0.00">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Opening Meter</label>
+        <input type="number" class="form-control-modern" [(ngModel)]="dieselDetails.open_meter" (input)="calculateValues()" placeholder="0.00">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Raw Difference</label>
+        <div class="form-control-modern bg-light text-right font-weight-bold">
+          {{ (dieselDetails.total) | number:'1.2-2' }}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Testing / Usage (L)</label>
+        <input type="number" class="form-control-modern" [(ngModel)]="dieselDetails.testing" (input)="calculateValues()" placeholder="0.00">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Unit Rate (₹)</label>
+        <input type="number" class="form-control-modern" [(ngModel)]="dieselDetails.rate" (input)="calculateValues()" placeholder="00.00">
+      </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="valuation-box-modern">
+      <div class="valuation-info">
+        <span class="valuation-label">Net Sales Volume:</span>
+        <div class="h4 mb-0 font-weight-bold text-primary">{{ (dieselDetails.diesel_ltr) | number:'1.2-2' }} L</div>
+      </div>
+      <div class="valuation-total text-right">
+        <span class="valuation-label">Total Revenue:</span>
+        <div class="valuation-amount">₹{{ dieselDetails.total_sell | number:'1.2-2' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern">
+    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" *ngIf="!data" (click)="logData()">
+      <mat-icon>add_task</mat-icon> 
+      Save Sales Record
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data" (click)="Edit(dieselDetails)">
+      <mat-icon>save</mat-icon>
+      Update Sales Record
+    </button>
+  </div>
+</div>

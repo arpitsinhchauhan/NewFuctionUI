@@ -1,0 +1,28 @@
+<div class="admin-container">
+  <!-- Sidebar -->
+  <aside class="admin-sidenav" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileOpen">
+    <app-sidebar [isCollapsed]="isCollapsed"></app-sidebar>
+  </aside>
+
+  <!-- Mobile Backdrop -->
+  <div class="sidebar-backdrop" *ngIf="isMobileOpen" (click)="closeMobileSidebar()"></div>
+
+  <!-- Main Content Area -->
+  <div class="admin-content">
+    <!-- Navbar -->
+    <header class="admin-navbar-container">
+      <app-navbar (toggleSidenav)="toggleSidebar()"></app-navbar>
+    </header>
+    
+    <!-- Router Outlet Wrapper -->
+    <main class="main-content-wrapper">
+      <div class="content-container">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+    <!-- Optional Footer -->
+    <app-footer *ngIf="isMaps('maps')"></app-footer>
+  </div>
+</div>
+

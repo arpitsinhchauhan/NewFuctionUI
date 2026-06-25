@@ -1,0 +1,62 @@
+.nozzle-card-modern {
+  padding: 24px !important;
+}
+
+.fuel-type-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-table th {
+  padding: 12px 16px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-main);
+}
+
+.modern-table td {
+  padding: 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.modern-table tr:hover td {
+  background-color: rgba(0, 98, 255, 0.02);
+}
+
+.modern-table tr:last-child td {
+  border-bottom: none;
+}
+
+.text-right {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .header-actions {
+    margin-top: 16px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+}

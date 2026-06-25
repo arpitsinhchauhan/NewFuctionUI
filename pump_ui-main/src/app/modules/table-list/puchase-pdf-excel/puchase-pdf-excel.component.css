@@ -1,0 +1,45 @@
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.button-group button {
+  width: 140px;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+  }
+  
+  th, td {
+    padding: 12px 15px;
+  }
+  
+  thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+  }
+  
+  tbody tr {
+    border-bottom: 1px solid #dddddd;
+  }
+  
+  /* Style for table rows on hover */
+  tbody tr:hover {
+    background-color: #f3f3f3;
+  }
+  
+  /* Style for the last row */
+  tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+  }
+  

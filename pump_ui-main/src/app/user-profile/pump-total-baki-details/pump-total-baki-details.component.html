@@ -1,0 +1,53 @@
+<div class="row">
+    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+        <div class="card">
+            <div class="card-body">
+                <div *ngIf="reportList.length > 0">
+                    <div class="button-group">
+                        <button mat-raised-button (click)="exportExcel()">
+                            <mat-icon>file_download</mat-icon>
+                            Export to Excel
+                        </button>
+                        <button mat-raised-button (click)="pdf()">
+                            <mat-icon>picture_as_pdf</mat-icon>
+                            PDF
+                        </button>
+                        <button mat-raised-button (click)="cancel()">
+                            <mat-icon>cancel</mat-icon>
+                            Cancel
+                        </button>
+                    </div>
+
+                    <table id="bakiListTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Baki</th>
+                                <th>Jama</th>
+                                <th>Total_Baki</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let r of reportList">
+                                <td>{{ r.name }}</td>
+                                <td>{{ r.total_baki }}</td>
+                                <td>{{ r.total_jama }}</td>
+                                <td>{{ r.baki_total }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="text-align: right;"><strong>Total Baki:</strong></td>
+                                <td style="background-color: #d0b6b6;"><strong>{{ getTotalBaki() | number:'1.2-2'
+                                        }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div *ngIf="reportList.length === 0">
+                    No data available.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

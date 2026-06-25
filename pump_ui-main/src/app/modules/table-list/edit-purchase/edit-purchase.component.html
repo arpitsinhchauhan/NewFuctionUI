@@ -1,0 +1,87 @@
+<div class="dialog-modern-container" style="width: 800px;">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary">inventory_2</mat-icon>
+        Purchase Details
+        <span class="dialog-type-badge" [class.badge-add]="!data" [class.badge-edit]="data">
+          {{ data ? 'Update Mode' : 'New Entry' }}
+        </span>
+      </h4>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern">
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Purchase Date</label>
+        <input type="date" class="form-control-modern" [(ngModel)]="purchaseDetails.date">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Fuel Type</label>
+        <select class="form-control-modern" [(ngModel)]="purchaseDetails.type">
+          <option value="Petrol">Petrol</option>
+          <option value="Diesel">Diesel</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Quantity (L)</label>
+        <input type="number" class="form-control-modern text-right" [(ngModel)]="purchaseDetails.quantity" placeholder="0.00">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">Base Amount (₹)</label>
+        <input type="number" class="form-control-modern text-right" [(ngModel)]="purchaseDetails.total" (input)="calculateTotalPurchase()" placeholder="0.00">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">VAT Amount (₹)</label>
+        <input type="number" class="form-control-modern text-right" [(ngModel)]="purchaseDetails.vat" (input)="calculateTotalPurchase()" placeholder="0.00">
+      </div>
+    </div>
+
+    <div class="form-grid-modern">
+      <div class="form-group-modern">
+        <label class="form-label-modern">Cess Amount (₹)</label>
+        <input type="number" class="form-control-modern text-right" [(ngModel)]="purchaseDetails.cess" (input)="calculateTotalPurchase()" placeholder="0.00">
+      </div>
+
+      <div class="form-group-modern">
+        <label class="form-label-modern">JTC Percentage (%)</label>
+        <input type="number" class="form-control-modern text-right" [(ngModel)]="purchaseDetails.jtcpercentage" (input)="calculateTotalPurchase()" placeholder="0.00">
+      </div>
+    </div>
+
+    <!-- Summary Box -->
+    <div class="valuation-box-modern">
+      <div class="valuation-info">
+        <span class="valuation-label">Net Purchase Valuation</span>
+        <div class="text-muted small">Total sum of all components</div>
+      </div>
+      <div class="valuation-amount">
+        ₹ {{ (purchaseDetails.total_purchase || 0) | number:'1.2-2' }}
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern">
+    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
+      Cancel
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" *ngIf="!data" (click)="logData()">
+      <mat-icon class="me-2">add_shopping_cart</mat-icon> 
+      Register Purchase
+    </button>
+    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data" (click)="Edit(purchaseDetails)">
+      <mat-icon class="me-2">save</mat-icon> 
+      Update Purchase
+    </button>
+  </div>
+</div>

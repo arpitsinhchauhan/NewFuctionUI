@@ -1,0 +1,62 @@
+<mat-toolbar class="admin-navbar glass">
+  <div class="navbar-left">
+    <button mat-icon-button (click)="onToggleSidenav()" class="menu-btn">
+      <mat-icon>menu_open</mat-icon>
+    </button>
+    <h1 class="page-title">{{ getTitle() }}</h1>
+  </div>
+  
+  <span class="toolbar-spacer"></span>
+
+  <div class="navbar-right">
+    <div class="time-badge d-none d-md-flex">
+      <mat-icon>schedule</mat-icon>
+      <span>{{ currentTime }}</span>
+    </div>
+
+    <div class="action-divider d-none d-md-block"></div>
+
+    <button mat-icon-button (click)="toggleTheme()" [title]="themeService.getCurrentTheme() === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'" class="theme-toggle">
+      <mat-icon>{{ themeService.getCurrentTheme() === 'light' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+    </button>
+
+    <button mat-icon-button title="Notifications" class="nav-icon-btn">
+      <mat-icon matBadge="3" matBadgeColor="warn" matBadgeSize="small">notifications</mat-icon>
+    </button>
+
+    <button mat-icon-button (click)="AddCustomer()" title="Quick Add Customer" class="nav-icon-btn">
+      <mat-icon>person_add</mat-icon>
+    </button>
+
+    <button mat-icon-button [routerLink]="['/dashboard']" title="Go to Dashboard" class="nav-icon-btn">
+      <mat-icon>dashboard_customize</mat-icon>
+    </button>
+
+    <div class="user-profile-wrapper" [matMenuTriggerFor]="profileMenu">
+      <div class="user-avatar">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="user-meta d-none d-lg-flex">
+        <span class="username">{{ username }}</span>
+        <span class="user-role">Administrator</span>
+      </div>
+      <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+    </div>
+    
+    <mat-menu #profileMenu="matMenu" xPosition="before" panelClass="modern-profile-menu-panel">
+      <div class="profile-menu-header">
+        <p class="name">{{ username }}</p>
+        <p class="role">Admin Access</p>
+      </div>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="chnagePassword()">
+        <mat-icon>key</mat-icon>
+        <span>Change Password</span>
+      </button>
+      <button mat-menu-item (click)="logout()" class="logout-item">
+        <mat-icon>logout</mat-icon>
+        <span>Sign Out</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>

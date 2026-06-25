@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.transaction-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 56px;
+}
+
+.modern-report-table td {
+  min-width: 120px;
+}
+
+.modern-report-table td:last-child {
+  min-width: 72px;
+}
+
+.no-data-msg mat-icon {
+  display: block;
+}

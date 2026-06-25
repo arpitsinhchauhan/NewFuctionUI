@@ -1,0 +1,63 @@
+.dialog-modern-card {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body-scrollable {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 24px !important;
+}
+
+.valuation-box {
+  background: rgba(var(--primary-rgb), 0.05);
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-top: 24px;
+}
+
+.valuation-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.valuation-amount {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.mat-icon-prefix {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.fuel-type-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fuel-type-trigger mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Fix for overlapping buttons in some screen sizes */
+.dialog-actions-modern {
+  padding: 16px 24px !important;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

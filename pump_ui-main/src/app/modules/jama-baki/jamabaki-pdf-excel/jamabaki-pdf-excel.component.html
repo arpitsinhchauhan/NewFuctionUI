@@ -1,0 +1,73 @@
+<div class="dialog-modern-container dialog-lg">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="text-primary me-2">print</mat-icon>
+        Jama Baki Report Export
+      </h4>
+      <span class="dialog-type-badge badge-view ms-3">Export/Print</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-premium btn-premium-secondary btn-sm me-2" (click)="exportToExcel()">
+        <mat-icon class="me-1">file_download</mat-icon> Excel
+      </button>
+      <button class="btn-premium btn-premium-primary btn-sm me-3" (click)="printTable()">
+        <mat-icon class="me-1">picture_as_pdf</mat-icon> PDF
+      </button>
+      <button mat-icon-button (click)="cancel()" class="text-muted" title="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="dialog-content-modern p-0">
+    <div class="table-responsive-modern" style="max-height: 60vh;">
+      <table id="JamabakiTable" class="modern-table mb-0">
+        <thead class="position-sticky top-0 z-1 bg-white">
+          <tr>
+            <th style="width: 50px;" class="text-center px-3">
+              <mat-checkbox [checked]="allSelected" (change)="toggleSelectAll($event)"></mat-checkbox>
+            </th>
+            <th style="width: 120px;">Date</th>
+            <th>Customer Name</th>
+            <th class="text-right">Jama (Credit)</th>
+            <th>Credit Note</th>
+            <th class="text-right">Baki (Debit)</th>
+            <th>Debit Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let items of JamabakiList" [class.bg-light]="items.selected">
+            <td class="text-center px-3">
+              <mat-checkbox [(ngModel)]="items.selected" (change)="checkIfAllSelected()"></mat-checkbox>
+            </td>
+            <td class="align-middle text-muted">{{items.date | date: 'dd-MM-yyyy'}}</td>
+            <td class="align-middle font-weight-medium">{{items.name}}</td>
+            <td class="align-middle text-right text-success font-weight-bold">₹ {{items.jama | number:'1.2-2'}}</td>
+            <td class="align-middle text-muted small">{{items.jamaNote}}</td>
+            <td class="align-middle text-right text-danger font-weight-bold">₹ {{items.baki | number:'1.2-2'}}</td>
+            <td class="align-middle text-muted small">{{items.bakiNote}}</td>
+          </tr>
+        </tbody>
+        <tfoot class="position-sticky bottom-0 z-1 bg-white shadow-sm border-top">
+          <tr class="bg-light">
+            <td colspan="3" class="text-right font-weight-bold py-3">Grand Totals:</td>
+            <td class="text-right text-success font-weight-bold h6 mb-0 py-3">
+              ₹ {{ getTotalJama() | number:'1.2-2' }}
+            </td>
+            <td></td>
+            <td class="text-right text-danger font-weight-bold h6 mb-0 py-3">
+              ₹ {{ getTotalBaki() | number:'1.2-2' }}
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div *ngIf="JamabakiList.length === 0" class="d-flex flex-column align-items-center justify-content-center p-5 text-muted">
+        <mat-icon style="font-size: 48px; width: 48px; height: 48px; opacity: 0.5; margin-bottom: 16px;">info_outline</mat-icon>
+        <p class="mb-0 font-weight-medium">No credit/debit records found for export.</p>
+      </div>
+    </div>
+  </div>
+</div>

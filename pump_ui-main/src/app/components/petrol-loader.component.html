@@ -1,0 +1,24 @@
+<!-- Premium Petrol Nozzle Loader -->
+<div class="petrol-loader-overlay" *ngIf="isLoading">
+  <div class="loader-content">
+    <div class="nozzle-wrapper">
+      <svg viewBox="0 0 100 100" class="nozzle-svg">
+        <!-- Hose -->
+        <path d="M10,80 Q30,80 30,50" fill="none" stroke="currentColor" stroke-width="6" />
+        <!-- Handle -->
+        <rect x="25" y="40" width="10" height="20" rx="2" fill="currentColor" />
+        <!-- Body -->
+        <path d="M30,45 L70,35 Q80,32 80,45 L80,50 L30,55 Z" fill="currentColor" />
+        <!-- Spout -->
+        <path d="M80,45 L95,45" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+        <!-- Trigger -->
+        <path d="M35,55 Q45,65 55,55" fill="none" stroke="currentColor" stroke-width="2" />
+      </svg>
+      <div class="fuel-drip"></div>
+    </div>
+    <div class="loader-text">
+      <span class="main-text">Processing Fuel Data</span>
+      <span class="dots">...</span>
+    </div>
+  </div>
+</div>

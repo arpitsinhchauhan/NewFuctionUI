@@ -1,0 +1,38 @@
+/* expense.component.css */
+
+/* Style for the table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 18px;
+    text-align: left;
+  }
+  
+  /* Style for table headers */
+  th, td {
+    padding: 12px 15px;
+  }
+  
+  /* Style for table headers */
+  thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+  }
+  
+  /* Style for table rows */
+  tbody tr {
+    border-bottom: 1px solid #dddddd;
+  }
+  
+  /* Style for table rows on hover */
+  tbody tr:hover {
+    background-color: #f3f3f3;
+  }
+  
+  /* Style for the last row */
+  tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+  }
+  

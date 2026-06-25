@@ -1,0 +1,119 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">ev_station</mat-icon>
+        Edit Power Diesel Sales
+      </h4>
+      <p class="card-subtitle">Update meter readings and calculate sales volume</p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body p-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Reading Date</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="powerdieselDetails.date" type="date">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Assigned Pump</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select [(ngModel)]="powerdieselDetails.pump">
+              <mat-option *ngFor="let pump of powerpumpList" [value]="pump">
+                <mat-icon class="me-2 text-primary opacity-50">gas_meter</mat-icon> {{ pump }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Closing Meter (End)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="powerdieselDetails.close_meter" type="text" (ngModelChange)="calculateValues()" placeholder="000000.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Opening Meter (Start)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="powerdieselDetails.open_meter" type="text" (ngModelChange)="calculateValues()" placeholder="000000.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Meter Difference (Raw)</label>
+          <div class="p-3 bg-light rounded-2 border d-flex align-items-center justify-content-between h-48">
+            <span class="text-muted small">Total:</span>
+            <span class="font-weight-bold">{{ (powerdieselDetails.total) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Testing / Internal Usage (Ltrs)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="powerdieselDetails.testing" type="text" (ngModelChange)="calculateValues()" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Net Power Diesel Volume (Sales)</label>
+          <div class="p-3 bg-light rounded-2 border d-flex align-items-center justify-content-between h-48">
+            <span class="text-muted small">Ltrs:</span>
+            <span class="font-weight-bold text-primary">{{ (powerdieselDetails.powerdiesel_ltr) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Unit Rate (₹/Ltr)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix class="me-2 opacity-50">currency_rupee</mat-icon>
+            <input matInput [(ngModel)]="powerdieselDetails.rate" type="text" (ngModelChange)="calculateValues()" placeholder="00.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6 mt-3">
+        <div class="p-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <mat-icon class="text-primary me-2">monetization_on</mat-icon>
+            <span class="text-muted font-weight-medium">Total Sales Revenue:</span>
+          </div>
+          <span class="text-primary fs-3 font-weight-bold">
+            ₹ {{ powerdieselDetails.total_sell | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
+
+      <button mat-flat-button color="primary" *ngIf="data" (click)="Edit(powerdieselDetails)" class="px-5 py-2">
+        <mat-icon class="me-2">save</mat-icon> Update Sales Record
+      </button>
+    </div>
+  </div>
+</div>

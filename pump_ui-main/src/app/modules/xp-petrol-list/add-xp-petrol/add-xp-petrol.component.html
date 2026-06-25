@@ -1,0 +1,119 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">gas_meter</mat-icon>
+        XP Petrol Sales Entry
+      </h4>
+      <p class="card-subtitle">Log daily meter readings and calculate revenue</p>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body p-4">
+    <div class="row g-3 align-items-end mb-4">
+      <div class="col-md-4">
+        <div class="form-group-modern mb-0">
+          <label class="label-modern">Sales Date</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="xpPetrolDetails.date" type="date" (change)="updateDate()">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="form-group-modern mb-0">
+          <label class="label-modern">Active Nozzles</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select [(ngModel)]="selectedNumber" placeholder="Number of pumps">
+              <mat-option *ngFor="let number of numbers" [value]="number">{{ number }} Nozzles</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern border rounded-3">
+      <table class="modern-report-table">
+        <thead>
+          <tr>
+            <th>Pump</th>
+            <th>Closing</th>
+            <th>Opening</th>
+            <th>Diff</th>
+            <th>Testing</th>
+            <th>Net Ltrs</th>
+            <th>Rate</th>
+            <th class="text-right">Total Sell (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" [hidden]="i >= selectedNumber" class="align-middle">
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput [(ngModel)]="item.pump" readonly class="font-weight-bold">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.close_meter" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.close_meter)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.open_meter" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.open_meter)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.total" readonly>
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.testing" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.testing)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.xppetrol_ltr" readonly class="text-primary font-weight-bold">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.rate" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.rate)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.total_sell" readonly class="text-right">
+              </mat-form-field>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="bg-light font-weight-bold">
+            <td colspan="4" class="text-right py-3">Total Sales Summary:</td>
+            <td colspan="4" class="text-primary py-3 fs-5 text-right px-4">
+              ₹ {{ totalPrice() | number:'1.2-2' }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
+      <button mat-flat-button color="primary" (click)="order()" class="px-5 py-2">
+        <mat-icon class="me-2">save</mat-icon> Submit XP Petrol Sales
+      </button>
+    </div>
+  </div>
+</div>

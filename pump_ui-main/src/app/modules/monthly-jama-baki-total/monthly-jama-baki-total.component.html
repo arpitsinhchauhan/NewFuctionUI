@@ -1,0 +1,97 @@
+<div class="dialog-modern-container dialog-lg">
+  <div class="dialog-header-modern">
+    <div class="header-main">
+      <h4>
+        <mat-icon class="me-2 text-primary vertical-align-middle">assessment</mat-icon>
+        Monthly Account Statement
+      </h4>
+      <span class="dialog-type-badge badge-add ms-3">Statement</span>
+    </div>
+    <div class="header-actions d-flex align-items-center">
+      <button class="btn-premium btn-premium-primary py-1 px-3 me-2" (click)="exportToExcel()">
+        <mat-icon class="me-1">file_download</mat-icon> EXCEL
+      </button>
+      <button class="btn-premium btn-premium-danger py-1 px-3 me-3" (click)="printTable()">
+        <mat-icon class="me-1">picture_as_pdf</mat-icon> PDF
+      </button>
+      <button mat-icon-button (click)="close()" class="text-muted" title="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="dialog-content-modern p-4">
+    <!-- Customer Info Header -->
+    <div class="statement-header-info mb-4 d-flex justify-content-between align-items-center">
+      <div class="info-card d-flex align-items-center">
+        <div class="avatar-circle me-3">
+          <mat-icon class="text-muted">person</mat-icon>
+        </div>
+        <div class="details">
+          <span class="label text-muted small d-block">Statement for:</span>
+          <h5 class="customer-name mb-0 font-weight-bold">{{ data.name }}</h5>
+        </div>
+      </div>
+      
+      <div class="summary-pills d-flex">
+        <div class="pill success me-2 px-3 py-2 rounded">
+          <span class="pill-label d-block text-muted small">Total Jama</span>
+          <span class="pill-value font-weight-bold text-success">₹{{ senderAmountTotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="pill danger px-3 py-2 rounded">
+          <span class="pill-label d-block text-muted small">Total Baki</span>
+          <span class="pill-value font-weight-bold text-danger">₹{{ receiverAmountTotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern border rounded-3">
+      <table class="modern-table" id="JamaBakilistTable">
+        <thead>
+          <tr>
+            <th>Entry Date</th>
+            <th>Customer Ref</th>
+            <th class="text-right">Jama (Credit)</th>
+            <th class="text-right">Baki (Debit)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of productList">
+            <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
+            <td class="text-muted">{{ item.name }}</td>
+            <td class="text-right text-success font-weight-bold">
+              {{ item.jama ? '₹' + (item.jama | number:'1.2-2') : '-' }}
+            </td>
+            <td class="text-right text-danger font-weight-bold">
+              {{ item.baki ? '₹' + (item.baki | number:'1.2-2') : '-' }}
+            </td>
+          </tr>
+          <tr *ngIf="!productList || productList.length === 0">
+            <td colspan="4" class="text-center py-4 text-muted">No transactions found for this period</td>
+          </tr>
+        </tbody>
+        <tfoot class="bg-light">
+          <tr>
+            <td colspan="2" class="text-right font-weight-bold py-3">Monthly Totals</td>
+            <td class="text-right text-success font-weight-bold py-3">₹{{ senderAmountTotal | number:'1.2-2' }}</td>
+            <td class="text-right text-danger font-weight-bold py-3">₹{{ receiverAmountTotal | number:'1.2-2' }}</td>
+          </tr>
+          <tr class="balance-footer">
+            <td colspan="2" class="text-right font-weight-bold py-3">Net Balance (Outstanding)</td>
+            <td colspan="2" class="text-center py-3">
+               <span class="balance-badge font-weight-bold px-3 py-1 rounded" [class.negative]="totalDifference < 0">
+                 ₹{{ totalDifference | number:'1.2-2' }}
+               </span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern mt-2">
+    <button class="btn-premium btn-premium-secondary px-4" (click)="close()">
+      Close Statement
+    </button>
+  </div>
+</div>

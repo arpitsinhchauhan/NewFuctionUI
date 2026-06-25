@@ -1,0 +1,102 @@
+<div class="dialog-modern-container dialog-md">
+  <div class="dialog-header-modern no-print">
+    <div class="header-main">
+      <mat-icon class="text-primary me-2">receipt</mat-icon>
+      <h4>Fuel Invoice Receipt</h4>
+    </div>
+    <button mat-icon-button (click)="cancel()" class="text-muted" title="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content-modern p-4" style="background: #f1f5f9; overflow-y: auto;">
+    <div class="invoice-container p-5 shadow-sm rounded-lg" id="invoice" style="background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
+      <!-- Invoice Header -->
+      <div class="invoice-header-modern mb-5">
+        <div class="header-top d-flex justify-content-between align-items-center pb-3 border-bottom">
+          <div class="brand d-flex align-items-center gap-2">
+            <mat-icon class="brand-icon text-warning" style="font-size: 32px; width: 32px; height: 32px;">local_gas_station</mat-icon>
+            <h2 class="pump-name m-0" style="font-size: 24px; font-weight: 800; color: #0f172a;">{{ billData.PumpName }}</h2>
+          </div>
+          <div class="invoice-badge px-3 py-1 rounded bg-light text-dark font-weight-bold" style="font-size: 12px; letter-spacing: 0.5px;">CREDIT BILL</div>
+        </div>
+        <div class="header-bottom d-flex justify-content-between mt-4">
+          <div class="client-info">
+            <span class="label text-muted text-uppercase" style="font-size: 11px; font-weight: 600;">Bill To:</span>
+            <h4 class="client-name m-0 mt-1" style="font-weight: 700; color: #1e293b;">{{ billData.customer.name }}</h4>
+            <p class="client-detail text-secondary m-0 mt-1 d-flex align-items-center gap-1" style="font-size: 13px;"><mat-icon style="font-size: 16px; width: 16px; height: 16px;">email</mat-icon> {{ billData.customer.email }}</p>
+            <p class="client-detail text-secondary m-0 mt-1 d-flex align-items-center gap-1" style="font-size: 13px;"><mat-icon style="font-size: 16px; width: 16px; height: 16px;">phone</mat-icon> {{ billData.customer.phone }}</p>
+          </div>
+          <div class="meta-info text-end">
+            <div class="meta-item">
+              <span class="label text-muted text-uppercase" style="font-size: 11px; font-weight: 600;">Invoice Date:</span>
+              <div class="value font-weight-bold text-dark mt-1" style="font-size: 15px;">{{ billData.date | date:'dd MMM, yyyy' }}</div>
+            </div>
+            <div class="meta-item mt-2 no-print">
+              <button mat-mini-fab color="primary" class="whatsapp-btn" (click)="sendBakiBillWhatsapp()" title="Send to WhatsApp" style="background-color: #25d366; color: white;">
+                <mat-icon>chat</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoice Table -->
+      <div class="table-responsive-modern">
+        <table class="invoice-table-modern w-100" style="border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #e2e8f0; background: #f8fafc;">
+              <th class="text-center py-2 px-3 text-muted text-uppercase" style="font-size: 11px; font-weight: 700; width: 50px;">#</th>
+              <th class="py-2 px-3 text-muted text-uppercase" style="font-size: 11px; font-weight: 700; text-align: left;">Fuel Description</th>
+              <th class="py-2 px-3 text-muted text-uppercase text-end" style="font-size: 11px; font-weight: 700; text-align: right;">Qty (L)</th>
+              <th class="py-2 px-3 text-muted text-uppercase text-end" style="font-size: 11px; font-weight: 700; text-align: right;">Rate (₹)</th>
+              <th class="py-2 px-3 text-muted text-uppercase text-end" style="font-size: 11px; font-weight: 700; text-align: right;">Total (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of billData.items; let i = index" style="border-bottom: 1px solid #f1f5f9;">
+              <td class="text-center py-3 px-3" style="color: #64748b;">{{ i + 1 }}</td>
+              <td class="py-3 px-3 font-weight-bold" style="color: #1e293b; font-weight: 600;">{{ item.type }}</td>
+              <td class="py-3 px-3 text-end" style="text-align: right; color: #334155;">{{ item.ltr | number:'1.2-2' }}</td>
+              <td class="py-3 px-3 text-end" style="text-align: right; color: #334155;">₹{{ item.rate | number:'1.2-2' }}</td>
+              <td class="py-3 px-3 text-end font-weight-bold" style="text-align: right; color: #0f172a; font-weight: 700;">₹{{ item.total | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="summary-row">
+              <td colspan="4" class="text-end py-3 px-3 text-muted font-weight-bold" style="text-align: right; font-weight: 600; font-size: 14px;">Invoice Grand Total</td>
+              <td class="text-end py-3 px-3 text-primary font-weight-bold" style="text-align: right; font-weight: 800; font-size: 20px; color: var(--primary);">₹{{ getGrandTotal() | number:'1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Invoice Footer -->
+      <div class="invoice-footer-modern d-flex justify-content-between align-items-end mt-5 pt-4 border-top">
+        <div class="terms" style="max-width: 60%;">
+          <h5 class="m-0 mb-2 font-weight-bold text-dark" style="font-size: 13px; font-weight: 700;">Terms & Conditions</h5>
+          <p class="m-0 text-muted" style="font-size: 11px; line-height: 1.5;">1. This is a computer-generated credit bill.</p>
+          <p class="m-0 text-muted" style="font-size: 11px; line-height: 1.5;">2. Payment should be settled as per the agreed credit period.</p>
+        </div>
+        <div class="signature-box text-center">
+          <div class="sig-line" style="width: 160px; border-bottom: 1px solid #94a3b8; margin: 0 auto 8px auto;"></div>
+          <p class="m-0 text-secondary" style="font-size: 12px; font-weight: 600;">Authorized Signature</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions-modern no-print d-flex justify-content-between align-items-center p-3 border-top bg-light">
+    <button class="btn-premium btn-premium-secondary px-4 py-2" (click)="cancel()">
+      Close
+    </button>
+    <div class="d-flex gap-2">
+      <button class="btn-premium btn-premium-secondary d-flex align-items-center gap-1 px-3 py-2" (click)="downloadPDF()">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">picture_as_pdf</mat-icon> Download PDF
+      </button>
+      <button class="btn-premium btn-premium-primary d-flex align-items-center gap-1 px-4 py-2" (click)="printInvoice()">
+        <mat-icon style="font-size: 18px; width: 18px; height: 18px;">print</mat-icon> Print Bill
+      </button>
+    </div>
+  </div>
+</div>

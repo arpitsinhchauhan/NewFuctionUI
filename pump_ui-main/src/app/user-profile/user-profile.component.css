@@ -1,0 +1,249 @@
+.reports-page-wrapper {
+  padding: 10px 0;
+}
+
+.card-header-modern {
+  padding: 24px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 20px;
+  padding: 24px;
+}
+
+.report-section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.report-section-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.section-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.section-badge.info { background: rgba(37, 99, 235, 0.08); color: #2563eb; }
+.section-badge.success { background: rgba(16, 185, 129, 0.08); color: #10b981; }
+.section-badge.danger { background: rgba(239, 68, 68, 0.08); color: #ef4444; }
+.section-badge.warning { background: rgba(245, 158, 11, 0.08); color: #f59e0b; }
+
+.section-content {
+  flex-grow: 1;
+}
+
+.section-content h5 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.modern-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
+.modern-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-main);
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-size: 13px;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.modern-input:focus {
+  border-color: var(--primary);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+/* Employee Table Enhancements */
+.employee-avatar-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-main);
+  border: 2px solid var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.employee-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.employee-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.id-badge {
+  background: var(--bg-main);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+code {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.clickable-row:hover {
+  background: rgba(var(--primary-rgb), 0.02) !important;
+}
+
+@media (max-width: 1200px) {
+  .report-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .report-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summary-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+.summary-chip.success {
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+}
+.summary-chip.info {
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+}
+.summary-chip mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+.hover-row:hover {
+  background: rgba(var(--primary-rgb), 0.015) !important;
+}
+.stock-tags {
+  display: flex;
+  gap: 8px;
+}
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+.badge-outline-petrol {
+  border: 1px solid rgba(27, 103, 111, 0.3);
+  background: rgba(27, 103, 111, 0.05);
+  color: #1b676f;
+}
+.badge-outline-diesel {
+  border: 1px solid rgba(79, 82, 236, 0.3);
+  background: rgba(79, 82, 236, 0.05);
+  color: #4f52ec;
+}
+.badge-outline-xp {
+  border: 1px solid rgba(239, 124, 143, 0.3);
+  background: rgba(239, 124, 143, 0.05);
+  color: #ef7c8f;
+}
+.badge-outline-power {
+  border: 1px solid rgba(0, 163, 108, 0.3);
+  background: rgba(0, 163, 108, 0.05);
+  color: #00a36c;
+}
+
+/* ===== Pump Manager Scope Banner ===== */
+.manager-scope-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
+  border: 1.5px solid rgba(37, 99, 235, 0.2);
+  border-radius: 10px;
+  padding: 12px 18px;
+  color: var(--text-main);
+}
+
+.manager-scope-banner .banner-icon {
+  color: #2563eb;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.manager-scope-banner .banner-text {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ===== All-Employees Scope Tag ===== */
+.scope-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}

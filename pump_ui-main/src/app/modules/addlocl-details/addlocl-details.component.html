@@ -1,0 +1,99 @@
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">account_balance_wallet</mat-icon>
+        LOCL Credit Details
+      </h4>
+      <p class="card-subtitle">Manage local credit balances and remarks</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="accent" (click)="creditType()" class="me-2">
+        <mat-icon class="me-1">add_circle</mat-icon> Credit Type
+      </button>
+      <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body p-4">
+    <div class="row g-3 align-items-end mb-4">
+      <div class="col-md-6">
+        <div class="form-group-modern mb-0">
+          <label class="label-modern">Transaction Date</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="purchaDipStockseDetails.date" type="Date">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        <button mat-flat-button color="primary" (click)="addTable()" class="px-4 py-2">
+          <mat-icon class="me-2">add</mat-icon> Add New Row
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern border rounded-3">
+      <table class="modern-report-table">
+        <thead>
+          <tr>
+            <th style="width: 35%;">Credit Type</th>
+            <th style="width: 25%;">Balance (₹)</th>
+            <th style="width: 30%;">Remark</th>
+            <th style="width: 10%;" class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" class="align-middle">
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <mat-select placeholder="Select Type" [(ngModel)]="item.credit" name="creditType{{ i }}">
+                  <mat-option *ngFor="let type of creditTypeList" [value]="type">{{ type }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.balance" placeholder="0.00" class="text-right">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="text" [(ngModel)]="item.remark" placeholder="Note...">
+              </mat-form-field>
+            </td>
+            <td class="text-center">
+              <button mat-icon-button color="warn" (click)="deleteRow(i)" matTooltip="Remove Row">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="row.length === 0">
+            <td colspan="4" class="no-data-msg">
+              <mat-icon>post_add</mat-icon>
+              <p>No rows added. Click "Add New Row" to start.</p>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="row.length > 0">
+          <tr class="bg-light font-weight-bold">
+            <td colspan="2" class="text-right py-3">Grand Total:</td>
+            <td colspan="2" class="text-primary py-3 fs-5">
+               ₹ {{ totalPrice() | number:'1.2-2' }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
+      <button mat-flat-button color="primary" (click)="order()" class="px-5 py-2">
+        <mat-icon class="me-2">save</mat-icon> Save Credit Details
+      </button>
+    </div>
+  </div>
+</div>

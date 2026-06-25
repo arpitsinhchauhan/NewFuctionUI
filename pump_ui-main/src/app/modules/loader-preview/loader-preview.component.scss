@@ -1,0 +1,105 @@
+.loader-preview-box {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 30px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+}
+
+.loader-preview-box:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.loader-preview-box h6 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Option 1: Fuel Line */
+.fuel-line {
+  height: 6px;
+  width: 120px;
+  background: 
+    linear-gradient(var(--primary) 0 0),
+    linear-gradient(var(--primary) 0 0),
+    #e2e8f0;
+  background-size: 60% 100%;
+  background-repeat: no-repeat;
+  animation: flow 1.5s infinite linear;
+}
+
+@keyframes flow {
+  0%   {background-position: -150% 0, -150% 0}
+  66%  {background-position: 250% 0, -150% 0}
+  100% {background-position: 250% 0, 250% 0}
+}
+
+/* Option 2: Tank Meters */
+.tank-meters {
+  width: 50px;
+  height: 30px;
+  --c: no-repeat linear-gradient(var(--primary) 0 0);
+  background: var(--c), var(--c), var(--c);
+  background-size: 10px 50%;
+  animation: tank-check 1s infinite alternate;
+}
+
+@keyframes tank-check {
+  0%   {background-position: 0 0, 50% 100%, 100% 0}
+  20%  {background-position: 0 100%, 50% 100%, 100% 0}
+  40%  {background-position: 0 100%, 50% 0, 100% 0}
+  60%  {background-position: 0 100%, 50% 0, 100% 100%}
+  80%  {background-position: 0 0, 50% 0, 100% 100%}
+  100% {background-position: 0 0, 50% 100%, 100% 100%}
+}
+
+/* Option 3: Volume Pulse */
+.volume-pulse {
+  width: 50px;
+  aspect-ratio: .75;
+  --c: no-repeat linear-gradient(var(--primary) 0 0);
+  background: var(--c) 0% 50%, var(--c) 50% 50%, var(--c) 100% 50%;
+  background-size: 20% 50%;
+  animation: pulse 1s infinite linear;
+}
+
+@keyframes pulse {
+  20% {background-size: 20% 100%, 20% 50%, 20% 50%}
+  40% {background-size: 20% 50%, 20% 100%, 20% 50%}
+  60% {background-size: 20% 50%, 20% 50%, 20% 100%}
+  80% {background-size: 20% 50%, 20% 50%, 20% 50%}
+}
+
+/* Option 4: Liquid Fill */
+.liquid-fill {
+  width: 80px;
+  height: 15px;
+  background: rgba(var(--primary-rgb), 0.1);
+  border-radius: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-fill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  width: 0%;
+  animation: fill-tank 2s infinite ease-in-out;
+}
+
+@keyframes fill-tank {
+  0% { width: 0%; left: 0; }
+  50% { width: 100%; left: 0; }
+  100% { width: 0%; left: 100%; }
+}

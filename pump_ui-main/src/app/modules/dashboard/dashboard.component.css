@@ -1,0 +1,225 @@
+.dashboard-wrapper {
+  padding: 10px 0;
+  overflow: visible; /* Prevent clipping during transitions */
+  background: var(--bg-main);
+}
+
+/* Summary Cards Enhancement */
+.summary-card {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.card-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* .summary-card.success .card-icon-wrapper { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.summary-card.warning .card-icon-wrapper { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.summary-card.primary .card-icon-wrapper { background: rgba(37, 99, 235, 0.1); color: #2563eb; } */
+
+.card-info {
+  flex: 1;
+}
+
+.card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.card-value {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.card-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.card-trend.up { color: #10b981; }
+.card-trend mat-icon { font-size: 14px; width: 14px; height: 14px; }
+
+/* Section Header */
+.section-header {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 16px;
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Chart Cards */
+.chart-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px; /* Stabilize height */
+}
+
+.chart-container {
+  flex: 1;
+  min-height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+/* Antigravity: Prevent card jumping on load */
+.card-premium {
+  contain: content;
+}
+
+@media (max-width: 991px) {
+  .chart-card {
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-value {
+    font-size: 20px;
+  }
+}
+
+/* Premium Visual Custom Legend (3D Infographic style) */
+.premium-legend-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 5px;
+}
+
+.premium-legend-item {
+  background: var(--bg-card-hover, rgba(0, 0, 0, 0.02));
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.05));
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::ng-deep .dark-theme .premium-legend-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.premium-legend-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: var(--bg-card-active, rgba(0, 0, 0, 0.04));
+}
+
+::ng-deep .dark-theme .premium-legend-item:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.legend-pill-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.legend-pill {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.legend-percentage {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-main, #1e293b);
+}
+
+::ng-deep .dark-theme .legend-percentage {
+  color: #ffffff;
+}
+
+.legend-value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.legend-desc {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  line-height: 1.3;
+}
+
+.legend-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main, #1e293b);
+  white-space: nowrap;
+}
+
+::ng-deep .dark-theme .legend-val {
+  color: #ffffff;
+}
+
+.hover-row:hover {
+  background: rgba(var(--primary-rgb), 0.015) !important;
+}
+.stock-tags {
+  display: flex;
+  gap: 8px;
+}
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+}
+.badge-outline-petrol {
+  border: 1px solid rgba(27, 103, 111, 0.3);
+  background: rgba(27, 103, 111, 0.05);
+  color: #1b676f;
+}
+.badge-outline-diesel {
+  border: 1px solid rgba(79, 82, 236, 0.3);
+  background: rgba(79, 82, 236, 0.05);
+  color: #4f52ec;
+}
+.badge-outline-xp {
+  border: 1px solid rgba(239, 124, 143, 0.3);
+  background: rgba(239, 124, 143, 0.05);
+  color: #ef7c8f;
+}
+.badge-outline-power {
+  border: 1px solid rgba(0, 163, 108, 0.3);
+  background: rgba(0, 163, 108, 0.05);
+  color: #00a36c;
+}

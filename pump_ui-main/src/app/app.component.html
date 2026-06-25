@@ -1,0 +1,14 @@
+
+<!-- <router-outlet></router-outlet> -->
+<router-outlet>
+    <!-- <div *ngIf="showLoader" class="sk" [@loaderInOut]>
+        <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+    </div> -->
+    <ngx-spinner size="medium" [type]="typeSelected" [bdColor]="color" [@loaderInOut]></ngx-spinner> 
+    <!-- <ngx-spinner bdColor="rgba(51, 51, 51, 0.8)" size="medium" color="#fff" type="ball-scale-multiple"></ngx-spinner> -->
+
+</router-outlet>

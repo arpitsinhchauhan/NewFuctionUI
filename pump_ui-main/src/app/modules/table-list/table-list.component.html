@@ -1,0 +1,81 @@
+<div class="purchase-wrapper">
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Purchase History</h4>
+        <p class="text-muted small mb-0">Track fuel and oil purchase records</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-box-modern mr-3">
+          <mat-icon>search</mat-icon>
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by type or date...">
+          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <button mat-stroked-button color="primary" (click)="openExcelPdf()">
+          <mat-icon>download</mat-icon>
+          <span>Export Excel</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('date')" class="sortable">
+              Date
+              <mat-icon class="sort-icon" *ngIf="sortColumn === 'date'">
+                {{ sortDirection === 'asc' ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </th>
+            <th *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">Employee</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Base Total</th>
+            <th>VAT</th>
+            <th>Cess</th>
+            <th>JTC %</th>
+            <th>Final Total</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of productList | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+            <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
+            <td *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">
+              <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
+            </td>
+            <td>
+              <span class="status-pill info">{{ item.type }}</span>
+            </td>
+            <td>{{ item.quantity | number }} L</td>
+            <td>₹{{ item.total | number:'1.2-2' }}</td>
+            <td>₹{{ item.vat | number:'1.2-2' }}</td>
+            <td>₹{{ item.cess | number:'1.2-2' }}</td>
+            <td>{{ item.jtcpercentage }}%</td>
+            <td class="font-weight-bold text-primary">₹{{ item.total_purchase | number:'1.2-2' }}</td>
+            <td class="text-center">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="openEditDialog(item)" title="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteRow(item.id)" title="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="pagination-info">
+        Showing records for page {{ currentPage }}
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+</div>

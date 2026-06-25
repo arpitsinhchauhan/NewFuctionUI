@@ -1,0 +1,281 @@
+<div class="dashboard-wrapper">
+  <!-- Manager Dashboard Overview Section -->
+  <!-- <div *ngIf="userRole === 'PUMP_MANAGER' || userRole === 'user'" class="manager-overview-section mb-5">
+    <div class="section-header mb-3">
+      <h3 class="section-title">Manager Reporting Dashboard</h3>
+      <span class="section-subtitle">Real-time daily shift reports from employees</span>
+    </div>
+
+    <-- Manager KPI Cards -->
+    <!-- <div class="row mb-4">
+      <div class="col-lg-3 col-md-6 mb-4">
+        <mat-card class="card-premium summary-card success">
+          <div class="card-icon-wrapper">
+            <mat-icon>monetization_on</mat-icon>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Total Daily Sales</span>
+            <h2 class="card-value">₹{{ totalDailyReportsSales | number:'1.2-2' }}</h2>
+            <div class="card-trend up">
+              <span>Report total</span>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <mat-card class="card-premium summary-card primary">
+          <div class="card-icon-wrapper">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Employee Reports</span>
+            <h2 class="card-value">{{ employeeReportsCount }}</h2>
+            <div class="card-trend text-primary">
+              <span>Total submissions</span>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <mat-card class="card-premium summary-card info">
+          <div class="card-icon-wrapper">
+            <mat-icon>hourglass_empty</mat-icon>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Shift Reports Today</span>
+            <h2 class="card-value">{{ shiftReportsCount }} / 3</h2>
+            <div class="card-trend text-info">
+              <span>Active shifts</span>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+
+      <div class="col-lg-3 col-md-6 mb-4">
+        <mat-card class="card-premium summary-card danger">
+          <div class="card-icon-wrapper">
+            <mat-icon>warning</mat-icon>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Pending Reports</span>
+            <h2 class="card-value">{{ pendingReportsCount }}</h2>
+            <div class="card-trend text-danger">
+              <span>Awaiting submission</span>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </div> 
+
+    <-- Manager Daily Shift Reports Table 
+    <div class="row">
+      <div class="col-12">
+        <mat-card class="card-premium">
+          <div class="card-header-modern">
+            <div class="header-text">
+              <h4 class="card-title">Employee Shift Submissions</h4>
+              <p class="card-subtitle">Real-time breakdown of shift sales and inventory</p>
+            </div>
+          </div>
+          <div class="table-responsive-modern mt-4">
+            <table class="modern-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Date & Time</th>
+                  <th>Shift</th>
+                  <th>Sales Registered</th>
+                  <th>Stocks Remaining</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let report of dailyReports" class="hover-row">
+                  <td>
+                    <div class="user-cell">
+                      <div class="user-avatar bg-info text-white">{{ report.createdBy.charAt(0) | uppercase }}</div>
+                      <span class="font-weight-medium">{{ report.createdBy }}</span>
+                    </div>
+                  </td>
+                  <td>{{ report.createdDatetime | date:'medium' }}</td>
+                  <td>
+                    <span class="badge badge-outline-petrol">
+                      {{ report.shift }}
+                    </span>
+                  </td>
+                  <td class="font-weight-bold text-success">₹{{ report.salesAmount | number:'1.2-2' }}</td>
+                  <td>
+                    <div class="stock-tags">
+                      <span *ngFor="let item of parseStockDetails(report.stockDetails)" 
+                            class="badge"
+                            [class.badge-outline-petrol]="item.fuel === 'petrol'"
+                            [class.badge-outline-diesel]="item.fuel === 'diesel'"
+                            [class.badge-outline-xp]="item.fuel === 'xpPetrol'"
+                            [class.badge-outline-power]="item.fuel === 'powerDiesel'">
+                        {{ item.fuel }}: {{ item.value }}L
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="dailyReports.length === 0">
+                  <td colspan="5" class="text-center text-muted py-4">No daily reports submitted yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+    <div class="col-lg-4 col-md-6 mb-4">
+      <mat-card class="card-premium summary-card success">
+        <div class="card-icon-wrapper">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Daily Revenue</span>
+          <h2 class="card-value">₹{{ dailyTotal | number:'1.2-2' }}</h2>
+          <div class="card-trend up">
+            <mat-icon>trending_up</mat-icon>
+            <span>+12.5%</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="col-lg-4 col-md-6 mb-4">
+      <mat-card class="card-premium summary-card warning">
+        <div class="card-icon-wrapper">
+          <mat-icon>calendar_month</mat-icon>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Monthly Total</span>
+          <h2 class="card-value">₹{{ CurrentmonthTotal | number:'1.2-2' }}</h2>
+          <div class="card-trend up">
+            <mat-icon>trending_up</mat-icon>
+            <span>+8.2%</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="col-lg-4 col-md-6 mb-4">
+      <mat-card class="card-premium summary-card primary">
+        <div class="card-icon-wrapper">
+          <mat-icon>analytics</mat-icon>
+        </div>
+        <div class="card-info">
+          <span class="card-label">Annual Revenue</span>
+          <h2 class="card-value">₹{{ CurrentyearTotal | number:'1.2-2' }}</h2>
+          <div class="card-trend up">
+            <mat-icon>trending_up</mat-icon>
+            <span>+15.3%</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Fuel Stock Section -->
+  <!-- <div class="section-header mb-3">
+    <h3 class="section-title">Fuel Stock Monitoring</h3>
+    <span class="section-subtitle">Real-time inventory levels for all tanks</span>
+  </div> -->
+  
+  <!-- <div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showPetrolPumpsCount > 0">
+      <app-fuel-tank [currentStock]="petrolCurrentStock" [capacity]="petrolCapacity" label="Petrol" fuelType="petrol"></app-fuel-tank>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showDieselPumpsCount > 0">
+      <app-fuel-tank [currentStock]="dieselCurrentStock" [capacity]="dieselCapacity" label="Diesel" fuelType="diesel"></app-fuel-tank>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showXpPetrolCount > 0">
+      <app-fuel-tank [currentStock]="xpPetrolCurrentStock" [capacity]="xpPetrolCapacity" label="XP Petrol" fuelType="xp"></app-fuel-tank>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showPowerDieselCount > 0">
+      <app-fuel-tank [currentStock]="powerDieselCurrentStock" [capacity]="powerDieselCapacity" label="Power Diesel" fuelType="power"></app-fuel-tank>
+    </div>
+  </div> -->
+
+  <!-- Charts & Nozzle Sales Section Side-by-Side -->
+  <div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+      <mat-card class="card-premium chart-card h-100">
+        <div class="card-header-modern">
+          <div class="header-text">
+            <h4 class="card-title">Fuel & Baki Distribution</h4>
+            <p class="card-subtitle">Sales & outstanding breakdown</p>
+          </div>
+        </div>
+        <div class="chart-container mt-4" style="position: relative; height: 320px;">
+          <canvas baseChart 
+                  [data]="pieChartData" 
+                  [type]="pieChartType" 
+                  [options]="pieChartOptions">
+          </canvas>
+        </div>
+        
+        <!-- Premium Custom Legend (Infographic Style) -->
+        <div class="premium-legend-container mt-3">
+          <div *ngFor="let detail of pieChartDetails" class="premium-legend-item">
+            <div class="legend-pill-wrapper">
+              <span class="legend-pill" [style.background-color]="detail.color">
+                {{ detail.name }}
+              </span>
+              <span class="legend-percentage">{{ detail.pct | number:'1.1-1' }}%</span>
+            </div>
+            <div class="legend-value-row">
+              <span class="legend-desc">{{ detail.desc }}</span>
+              <span class="legend-val">₹{{ detail.value | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <app-nozzle-card class="h-100 d-block"
+        [nozzleSales]="nozzleSalesData" 
+        [(filterType)]="nozzleFilterType"
+        [(selectedYear)]="nozzleSelectedYear" 
+        [yearList]="yearList" 
+        (filterChange)="onNozzleFilterChange()">
+      </app-nozzle-card>
+    </div>
+  </div>
+
+  <!-- Sales Summary Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <mat-card class="card-premium chart-card">
+        <div class="card-header-modern">
+          <div class="header-text">
+            <h4 class="card-title">Sales Performance Summary</h4>
+            <p class="card-subtitle">Detailed breakdown of sales trends</p>
+          </div>
+          <div class="header-actions">
+            <mat-button-toggle-group [(ngModel)]="filterType" (change)="onFilterChange()" class="modern-toggle-group">
+              <mat-button-toggle value="today">Day</mat-button-toggle>
+              <mat-button-toggle value="month">Month</mat-button-toggle>
+              <mat-button-toggle value="year">Year</mat-button-toggle>
+              <mat-button-toggle value="fy">FY</mat-button-toggle>
+            </mat-button-toggle-group>
+
+            <mat-form-field *ngIf="filterType === 'fy'" appearance="outline" class="small-select ml-2">
+              <mat-select [(ngModel)]="selectedYear" (selectionChange)="onFilterChange()">
+                <mat-option *ngFor="let y of yearList" [value]="y">{{ y }} - {{ y + 1 }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="chart-container mt-4">
+          <canvas baseChart [data]="chartData" [type]="chartType" [options]="chartOptions"></canvas>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,95 @@
+<div>
+  <label for="startDate">Start Date:</label>
+  <input id="startDate" type="date" [(ngModel)]="startDate">
+
+  <label for="endDate">End Date:</label>
+  <input id="endDate" type="date" [(ngModel)]="endDate">
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Particulars</th>
+      <th>IT Return</th>
+      <th>IT RETURN</th>
+      <th>Particulars</th>
+      <th>IT RETURN</th>
+      <th>IT RETURN</th>
+    </tr>
+    <tr>
+      <th colspan="6"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of data">
+      <td>Opening Stock</td>
+      <td></td>
+      <td>{{ item.city }}</td>
+      <td>SALES ACCOUNT</td>
+      <td></td>
+      <td>{{ item.city }}</td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>Diesel Stock</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td>PETROL SALES A/C.</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>LUBRECANT</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td>DIESEL SALES A/C.</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>PETROL STOCK</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td>LUBRICANT SALES A/C</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>Purchase Accounts</td>
+      <td></td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>DIESEL PURCHASE A/C.</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>LUB PURCHASE A/C.</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr *ngFor="let item of data">
+      <td>PETROL PURCHAGES A/C.</td>
+      <td>{{ item.city }}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td colspan="3"></td>
+      <td>Closing stock</td>
+      <td></td>
+      <td>Closing stock</td>
+    </tr>
+  </tbody>
+</table>

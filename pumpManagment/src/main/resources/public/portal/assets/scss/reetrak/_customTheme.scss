@@ -1,0 +1,152 @@
+
+@mixin applyColor($color) {
+    color: $color;
+}
+
+.reetrak-default    { @include applyColor($gray-color); }
+.reetrak-primary    { @include applyColor($brand-primary); }
+.reetrak-secondary  { @include applyColor($gray-dark); }
+.reetrak-info       { @include applyColor($brand-info); }
+.reetrak-success    { @include applyColor($brand-success); }
+.reetrak-warning    { @include applyColor($brand-warning); }
+.reetrak-danger     { @include applyColor($brand-danger); }
+.reetrak-rose       { @include applyColor($brand-rose); }
+
+
+@mixin applyBgColor($color) {
+   
+   
+        background-color: $color;
+     
+  
+    
+}
+
+.reetrak-bg-default    { @include applyBgColor($gray-color); }
+.reetrak-bg-primary    { @include applyBgColor($brand-primary); }
+.reetrak-bg-secondary  { @include applyBgColor($gray-dark); }
+.reetrak-bg-info       { @include applyBgColor($brand-info); }
+.reetrak-bg-success  a  { @include applyBgColor($brand-success); }
+.reetrak-bg-warning    { @include applyBgColor($brand-warning); }
+.reetrak-bg-danger     { @include applyBgColor($brand-danger); }
+.reetrak-bg-rose       { @include applyBgColor($brand-rose); }
+
+.reetrak-select{
+    &:hover {
+        background: $brand-primary !important;
+    }
+    &.reetrak-select-info{
+        &:hover {
+            background: $brand-info !important;
+        }
+    }
+    &.reetrak-select-warning{
+        &:hover {
+            background: $brand-warning !important;
+        }
+    }
+    &.reetrak-select-danger{
+        &:hover {
+            background: $brand-danger !important;
+        }
+    }
+    &.reetrak-select-rose{
+        &:hover {
+            background: $brand-rose !important;
+        }
+    }
+    &.reetrak-select-success{
+        &:hover {
+            background: $brand-success !important;
+        }
+    }
+}
+
+.reetrak-pagination{
+
+    .paginate_button.active a{
+        color: $gray-color;
+
+        &,
+        &:focus,
+        &:hover{
+            background-color: $brand-primary;
+            border-color: $brand-primary;
+            color: $white-color;
+            @include shadow-4dp-color($brand-primary);
+        }
+
+    }
+
+    // Colors
+    &.pagination-info{
+        > .page-item.active > a,
+        > .page-item.active > span,
+        .paginate_button.active a{
+            &,
+            &:focus,
+            &:hover{
+                background-color: $brand-info;
+                border-color: $brand-info;
+                @include shadow-4dp-color($brand-info);
+            }
+        }
+    }
+
+    &.pagination-success{
+        > .page-item.active > a,
+        > .page-item.active > span,
+        .paginate_button.active a{
+            &,
+            &:focus,
+            &:hover{
+                background-color: $brand-success;
+                border-color: $brand-success;
+                @include shadow-4dp-color($brand-success);
+            }
+        }
+    }
+
+    &.pagination-warning{
+        > .page-item.active > a,
+        > .page-item.active > span,
+        .paginate_button.active a{
+            &,
+            &:focus,
+            &:hover{
+                background-color: $brand-warning;
+                border-color: $brand-warning;
+                @include shadow-4dp-color($brand-warning);
+            }
+        }
+    }
+
+    &.pagination-danger{
+        > .page-item.active > a,
+        > .page-item.active > span,
+        .paginate_button.active a{
+            &,
+            &:focus,
+            &:hover{
+                background-color: $brand-danger;
+                border-color: $brand-danger;
+                @include shadow-4dp-color($brand-danger);
+            }
+        }
+    }
+
+    &.pagination-rose{
+        > .page-item.active > a,
+        > .page-item.active > span,
+        .paginate_button.active a{
+            &,
+            &:focus,
+            &:hover{
+                background-color: $brand-rose;
+                border-color: $brand-rose;
+                @include shadow-4dp-color($brand-rose);
+            }
+        }
+    }
+}
+

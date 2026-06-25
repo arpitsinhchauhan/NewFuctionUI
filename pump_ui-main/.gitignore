@@ -1,0 +1,6 @@
+/.angular/cache
+node_modules
+/.idea
+/dist
+/hs_err_pid3704.log
+/.angular/

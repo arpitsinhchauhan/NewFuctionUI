@@ -1,0 +1,38 @@
+<div class="card-premium dialog-modern-card dialog-sm" 
+     [class.dialog-danger]="data.type === 'danger'" 
+     [class.dialog-warning]="data.type === 'warning'"
+     [class.dialog-success]="data.type === 'success'"
+     [class.dialog-info]="data.type === 'info'">
+  
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2" [color]="data.type === 'danger' ? 'warn' : 'primary'">
+          {{ data.type === 'danger' ? 'report_problem' : (data.type === 'warning' ? 'warning' : (data.type === 'success' ? 'check_circle' : 'help_outline')) }}
+        </mat-icon>
+        {{ data.title }}
+      </h4>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close(false)" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="card-body p-4 py-5 text-center">
+    <div class="mb-3" *ngIf="data.type === 'danger'">
+       <mat-icon style="font-size: 64px; width: 64px; height: 64px;" color="warn">delete_forever</mat-icon>
+    </div>
+    <p class="text-main fs-5 mb-0 font-weight-medium">{{ data.message }}</p>
+    <p class="text-muted small mt-2" *ngIf="data.type === 'danger'">This action cannot be undone.</p>
+  </div>
+
+  <div class="dialog-actions-modern mt-0 p-4 border-top">
+    <button mat-stroked-button (click)="dialogRef.close(false)" class="px-4 py-2 me-auto">
+      {{ data.cancelText || 'Cancel' }}
+    </button>
+    <button mat-flat-button [color]="data.type === 'danger' ? 'warn' : 'primary'" (click)="dialogRef.close(true)" class="px-4 py-2 shadow-sm">
+      <mat-icon class="me-2">{{ data.type === 'danger' ? 'delete' : 'check' }}</mat-icon>
+      {{ data.confirmText || 'Confirm Action' }}
+    </button>
+  </div>
+</div>

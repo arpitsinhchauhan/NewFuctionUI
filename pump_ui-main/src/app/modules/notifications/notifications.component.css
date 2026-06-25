@@ -1,0 +1,41 @@
+img {
+    width: 300px;
+    height: auto;
+  }
+  
+  .main-content {
+    margin-top: 70px;
+  }
+  
+  .card-plain {
+    background-color: rgb(255, 255, 255);
+  }
+  
+  /* .card-header {
+    /* padding: 20px; */
+    /* Adjust the padding to control the gap above the images */
+    /* border: 2px solid #000; *
+  } */
+  
+  .image-container {
+    display: inline-block;
+    /* Display images side by side */
+    margin: 10px;
+    /* Adjust the margin to control the gap between images */
+    padding: 10px;
+    /* Adjust the padding to control the space inside each image container */
+    width: 30%;
+    /* Adjust the width as per your design */
+    box-sizing: border-box;
+    /* Include padding and border in the width */
+    text-align: center;
+    /* Center the image within the container */
+  }
+  
+  .preview-modal-img {
+    width: 100% !important;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+  }
+  

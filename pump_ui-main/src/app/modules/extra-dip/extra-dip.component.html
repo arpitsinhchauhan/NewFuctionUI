@@ -1,0 +1,77 @@
+<div class="dip-wrapper">
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Premium Fuel Dip Inventory</h4>
+        <p class="text-muted small mb-0">Monitor physical stock for XP Petrol and Power Diesel tanks</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-box-modern">
+          <mat-icon>search</mat-icon>
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by date...">
+          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('date')" class="sortable">
+              Reading Date
+              <mat-icon class="sort-icon" *ngIf="sortColumn === 'date'">
+                {{ sortDirection === 'asc' ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </th>
+            <th *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">Employee</th>
+            <th>XP Petrol Dip</th>
+            <th>XP Petrol Vol (L)</th>
+            <th>Power Diesel Dip</th>
+            <th>Power Diesel Vol (L)</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of extraList | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+            <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
+            <td *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">
+              <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
+            </td>
+            <td>
+              <div class="dip-info">
+                <span class="badge badge-info-light">XP: {{ item.extra_petroldip }} mm</span>
+              </div>
+            </td>
+            <td class="font-weight-bold text-info">{{ item.extra_pvalue | number:'1.2-2' }} L</td>
+            <td>
+              <div class="dip-info">
+                <span class="badge badge-success-light">Power: {{ item.extra_dieseldip }} mm</span>
+              </div>
+            </td>
+            <td class="font-weight-bold text-success">{{ item.extra_dvalue | number:'1.2-2' }} L</td>
+            <td class="text-center">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="openEditDialog(item)" title="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteRow(item.id)" title="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="pagination-info">
+        Viewing page {{ currentPage }} of premium records
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+</div>

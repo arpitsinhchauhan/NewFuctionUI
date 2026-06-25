@@ -1,0 +1,75 @@
+<div class="transaction-wrapper">
+  <div class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">ATM & Digital Transactions</h4>
+        <p class="text-muted small mb-0">Monitor cash withdrawals and digital payments</p>
+      </div>
+      <div class="header-actions">
+        <div class="search-box-modern mr-3">
+          <mat-icon>search</mat-icon>
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by name or date...">
+          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <button mat-stroked-button color="primary" (click)="openExcelPdfAtm()">
+          <mat-icon>download</mat-icon>
+          <span>Export Records</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('date')" class="sortable">
+              Transaction Date
+              <mat-icon class="sort-icon" *ngIf="sortColumn === 'date'">
+                {{ sortDirection === 'asc' ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </th>
+            <th *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">Employee</th>
+            <th>Beneficiary Name</th>
+            <th>Amount (₹)</th>
+            <th>Payment Method</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of transaction | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+            <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
+            <td *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">
+              <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
+            </td>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar">{{ item.name.charAt(0) | uppercase }}</div>
+                <span>{{ item.name }}</span>
+              </div>
+            </td>
+            <td class="font-weight-bold text-primary">₹{{ item.amount | number:'1.2-2' }}</td>
+            <td>
+              <span class="status-pill info">{{ item.transaction }}</span>
+            </td>
+            <td class="text-center">
+              <div class="action-buttons">
+                <button mat-icon-button color="warn" (click)="deletetransaction(item.id)" title="Delete Transaction">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="pagination-info">
+        Viewing {{ (currentPage - 1) * 4 + 1 }} - {{ currentPage * 4 }} of {{ (transaction?.length || 0) }} entries
+      </div>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+    </div>
+  </div>
+</div>

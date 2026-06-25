@@ -1,0 +1,43 @@
+<div class="row p-1">
+    <div class="col-md-4">
+        <mat-form-field>
+            <!-- <span class="input-group-addon"><i class="material-icons">&#xE8B6;</i></span> -->
+            <input matInput vkeyboard (ngModelChange)="applyFilter($event)" [(ngModel)]="searchText"
+                placeholder="{{CT.REPORT_COMMON_SEARCH}}&hellip;">
+        </mat-form-field>
+    </div>
+</div>
+<mat-table #table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <ng-container *ngFor="let disCol of displayedColumns; let colIndex = index" matColumnDef="{{disCol.key}}">
+        <mat-header-cell *matHeaderCellDef [ngStyle]="getStyles(disCol)">{{disCol.title}}</mat-header-cell>
+        <mat-cell *matCellDef="let element" [ngStyle]="getStyles(disCol)"
+            [ngClass]="disCol.cssClass ? disCol.cssClass : ''">
+            <span
+                *ngIf="!disCol.valueGetter && disCol.type != CT.CUSTOM_TABLE_LINE && disCol.type != CT.CUSTOM_TABLE_BUTTON">
+                <p style="word-break: break-word;"
+                    [innerHTML]="element[disCol.key] | highlightSearch: filterText | safeHtml">
+                </p>
+            </span>
+            <span *ngIf="disCol.type == CT.CUSTOM_TABLE_BUTTON">
+                <i class=" material-icons xl-18 icon-margin" (click)="submitEvent(disCol, element)"
+                    style="cursor: pointer !important; padding-left: 10px;">{{CT.COMMON_VIEW_ICON}}</i>
+            </span>
+            <span *ngIf="disCol.valueGetter && disCol.type != CT.CUSTOM_TABLE_BUTTON">{{getValue(disCol,
+                element)}}</span>
+            <div *ngIf="!disCol.valueGetter && disCol.type == CT.CUSTOM_TABLE_LINE" id="progress-bar"
+                class="all-rounded">
+                <div id="progress-bar-percentage" class="all-rounded" [ngStyle]="{ 'width': element[disCol.key] }">
+                    <span>{{element[disCol.key]}}</span>
+                </div>
+            </div>
+
+
+        </mat-cell>
+    </ng-container>
+    <mat-header-row *matHeaderRowDef="displayedColumnNames">
+    </mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumnNames;">
+    </mat-row>
+</mat-table>
+<mat-paginator [pageSizeOptions]="[5, 10, 15, 50, 100]" showFirstLastButtons>
+</mat-paginator>

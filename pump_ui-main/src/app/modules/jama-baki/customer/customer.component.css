@@ -1,0 +1,11 @@
+/* Customer component styles */
+:host {
+  display: block;
+  width: 100%;
+}
+
+.customer-dialog {
+  width: 100%;
+  max-width: 100%;
+}
+

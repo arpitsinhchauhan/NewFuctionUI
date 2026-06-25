@@ -1,0 +1,58 @@
+<div class="employee-ledger-wrapper">
+  <mat-card class="card-modern">
+    <div class="card-header-modern">
+      <div class="header-main">
+        <h4 class="card-title-modern">Employee Expense Ledger</h4>
+        <p class="text-muted small mb-0">Detailed breakdown of personnel-related expenses and notes</p>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button color="primary" class="mr-2" (click)="exportToExcel()">
+          <mat-icon>download</mat-icon>
+          <span>Excel</span>
+        </button>
+        <button mat-stroked-button color="accent" class="mr-2" (click)="printTable()">
+          <mat-icon>print</mat-icon>
+          <span>Print</span>
+        </button>
+        <button mat-icon-button color="warn" (click)="cancel()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive-modern">
+      <table class="modern-table" id="expenseTable">
+        <thead>
+          <tr>
+            <th>Transaction Date</th>
+            <th>Expense Category</th>
+            <th>Disbursement Amount</th>
+            <th>Responsible Person</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of expensesAndNotes">
+            <td class="font-weight-medium">{{ row[0] }}</td>
+            <td>
+              <span class="status-pill warning">{{ row[1] }}</span>
+            </td>
+            <td class="font-weight-bold text-danger">₹{{ row[2] | number:'1.2-2' }}</td>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar">{{ row[3].charAt(0) | uppercase }}</div>
+                <span>{{ row[3] }}</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer-modern">
+      <div class="grand-total-section">
+        <span class="total-label">Total Employee Expenses:</span>
+        <span class="total-value text-danger">₹{{ totalAmount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </mat-card>
+</div>

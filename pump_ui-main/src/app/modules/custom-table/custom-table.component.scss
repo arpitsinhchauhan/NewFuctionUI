@@ -1,0 +1,114 @@
+table {
+    width: 100%;
+}
+
+.mat-cell,
+mat-cell {
+    word-wrap: anywhere !important;
+    padding-right: 8px !important;
+}
+
+::ng-deep .mat-cell {
+    display: flex !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+::ng-deep .mat-header-cell {
+    // display:flex !important;
+    align-items: flex-start !important;
+}
+
+@mixin mat-table-columns($columns) {
+    .mat-column- {
+
+        @each $colName,
+        $props in $columns {
+            $width: map-get($props, 'width');
+
+            &#{$colName} {
+                flex: $width;
+                min-width: $width;
+
+                @if map-has-key($props, 'color') {
+                    color: map-get($props, 'color');
+                }
+            }
+        }
+    }
+}
+
+mat-cell {
+    word-break: break-word;
+}
+
+.mat-header-cell {
+    color: black;
+    font-weight: 700 !important;
+}
+
+.all-rounded {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.spacer {
+    display: block;
+}
+
+#progress-bar {
+    width: 100%;
+    background: #cccccc;
+    position: relative;
+}
+
+#progress-bar-percentage {
+    background: #3063A5;
+    // padding: 5px 0px;
+    color: #FFF;
+    text-align: center;
+    height: 20px;
+}
+
+#progress-bar-percentage span {
+    display: inline-block;
+    position: absolute;
+    width: 100%;
+    left: 0;
+}
+
+.all-rounded {
+    margin-bottom: 12px !important;
+    height: 20px !important;
+}
+
+mat-footer-row,
+mat-row {
+    min-height: unset !important;
+}
+
+.mat-paginator {
+    background: transparent !important;
+}
+
+.mat-cell.mat-column-batchName {
+    font-weight: 400 !important;
+}
+
+.mat-cell.mat-column-createdByName {
+    font-weight: 400 !important;
+}
+
+.mat-cell.mat-column-prodDesc {
+    font-weight: 400 !important;
+}
+
+.mat-cell.mat-column-salableQty {
+    font-weight: 400 !important;
+}
+
+
+.mat-cell.mat-column-salableQty{
+   margin-top: 16px !important;
+} 

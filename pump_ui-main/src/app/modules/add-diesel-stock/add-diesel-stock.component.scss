@@ -1,0 +1,33 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    max-width: 500px;
+    margin: auto;
+  }
+  
+  mat-form-field {
+    width: 100%;
+  }
+  
+  button {
+    width: 100%;
+  }
+  
+  @media (min-width: 600px) {
+    form {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+  
+    mat-form-field {
+      width: 48%;
+    }
+  
+    button {
+      width: 48%;
+    }
+  }
+  

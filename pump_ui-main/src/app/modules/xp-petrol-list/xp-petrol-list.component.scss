@@ -1,0 +1,44 @@
+.search-add-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap; 
+  }
+  
+  .search-field {
+    width: 30%;
+    background-color: aliceblue;
+    border-radius: 4px;
+    padding: 3px 8px;
+  }
+  
+  .search-field .mat-form-field-underline,
+  .search-field .mat-form-field-subscript-wrapper {
+    display: none;
+  }
+  
+  .search-field .mat-form-field-flex {
+    min-height: unset;
+    height: 30px;
+    align-items: center;
+  }
+  
+  .search-input {
+    color: black;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .action-button {
+    padding: 6px 16px;
+  }
+  
+  .excel-button {
+    width: auto; /* Let button size adjust to content */
+  }
+  
+  

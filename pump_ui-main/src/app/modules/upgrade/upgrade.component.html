@@ -1,0 +1,50 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12" style="margin-top: 10px;">
+            <div class="card">
+                <div class="card-header card-header-danger">
+                    <h4 class="card-title ">User Feedback</h4>
+                </div>
+
+                <body>
+                    <div class="container">
+                        <!-- <h1>Feedback and Rating Form</h1> -->
+                        <form #userForm="ngForm" (ngSubmit)="getdata(userForm.value)">
+                            <div class="form-group">
+                                <label class="form-label" for="name">UserName:</label>
+                                <input class="form-control" type="text" id="Username" ngModel name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="email">Email Address:</label>
+                                <input class="form-control" type="email" id="Email" ngModel name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="feedback">Feedback:</label>
+                                <textarea class="form-control" id="Message" name="Message" rows="2" ngModel
+                                    name="message" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Rating:</label>
+                                <div class="rating-container">
+                                    <span class="rating-label">Rate:</span>
+                                    <span class="star" (click)="rate(1)"
+                                        [class.active]="currentRating >= 1">&#9733;</span>
+                                    <span class="star" (click)="rate(2)"
+                                        [class.active]="currentRating >= 2">&#9733;</span>
+                                    <span class="star" (click)="rate(3)"
+                                        [class.active]="currentRating >= 3">&#9733;</span>
+                                    <span class="star" (click)="rate(4)"
+                                        [class.active]="currentRating >= 4">&#9733;</span>
+                                    <span class="star" (click)="rate(5)"
+                                        [class.active]="currentRating >= 5">&#9733;</span>
+                                </div>
+                                <!-- <input type="hidden" name="rating" id="rating" value="" ngModel name="email"> -->
+                            </div>
+                            <button class="submit-btn" type="submit">Submit Feedback and Rating</button>
+                        </form>
+                    </div>
+                </body>
+            </div>
+        </div>
+    </div>
+</div>

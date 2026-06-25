@@ -1,0 +1,10 @@
+<!-- <h1>pdf</h1> -->
+<div>
+    <!-- <button (click)="downloadPDF()">Download PDF</button> -->
+    <div class="pdf-container" >
+        <pdf-viewer [src]="pdfDocumentSrc" [rotation]="0" [original-size]="false" [show-all]="true"
+            [fit-to-page]="false" [zoom]="zoom_to" [zoom-scale]="'page-width'" [stick-to-page]="false"
+            [render-text]="true" [external-link-target]="'blank'" [autoresize]="true" [show-borders]="false"
+            class="viewer"></pdf-viewer>
+    </div>
+</div> 

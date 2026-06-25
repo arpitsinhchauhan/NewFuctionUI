@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.table-responsive-modern {
+  margin-top: 4px;
+}
+
+.modern-table td {
+  min-width: 110px;
+}
+
+.modern-table td:first-child,
+.modern-table td:nth-child(9) {
+  min-width: 90px;
+}
+
+.table-input[readonly] {
+  background: color-mix(in srgb, var(--bg-main) 88%, var(--bg-card)) !important;
+  font-weight: 600;
+}

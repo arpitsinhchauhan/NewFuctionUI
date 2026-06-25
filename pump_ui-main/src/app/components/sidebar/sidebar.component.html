@@ -1,0 +1,52 @@
+<div class="sidebar-logo" [class.collapsed-logo]="isCollapsed">
+  <div class="logo-badge">
+    <mat-icon>local_gas_station</mat-icon>
+  </div>
+  <div class="logo-text-wrapper" *ngIf="!isCollapsed">
+    <span class="logo-text">PUMP MANAGER</span>
+    <span class="logo-subtitle">Fueling Efficiency</span>
+  </div>
+</div>
+
+<div class="sidebar-scroll">
+  <mat-nav-list class="nav-list">
+    <ng-container *ngFor="let section of menuSections">
+
+      <!-- Section Header -->
+      <div class="section-header" *ngIf="!isCollapsed">{{ section.section }}</div>
+      <div class="section-divider" *ngIf="isCollapsed"></div>
+
+      <ng-container *ngFor="let menuItem of section.items">
+
+        <!-- Single Route -->
+        <a mat-list-item *ngIf="!menuItem.children" [routerLink]="[menuItem.path]" routerLinkActive="active-link"
+          [matTooltip]="isCollapsed ? menuItem.title : ''" matTooltipPosition="right" 
+          class="menu-item" [class.collapsed-menu-item]="isCollapsed">
+          <mat-icon matListIcon>{{ menuItem.icon }}</mat-icon>
+          <span matLine *ngIf="!isCollapsed">{{ menuItem.title }}</span>
+        </a>
+
+        <!-- Dropdown Group -->
+        <div *ngIf="menuItem.children" class="menu-group">
+          <div mat-list-item class="menu-item group-header" [class.collapsed-menu-item]="isCollapsed"
+            [matTooltip]="isCollapsed ? menuItem.title : ''"
+            matTooltipPosition="right" (click)="!isCollapsed ? menuItem.expanded = !menuItem.expanded : null">
+            <mat-icon matListIcon>{{ menuItem.icon }}</mat-icon>
+            <span matLine *ngIf="!isCollapsed">{{ menuItem.title }}</span>
+            <mat-icon class="expand-icon" *ngIf="!isCollapsed">{{ menuItem.expanded ? 'expand_less' : 'expand_more'
+              }}</mat-icon>
+          </div>
+
+          <div class="submenu" [class.expanded]="menuItem.expanded && !isCollapsed">
+            <a mat-list-item *ngFor="let child of menuItem.children" [routerLink]="[child.path]"
+              routerLinkActive="active-link" class="menu-item child-item" [class.collapsed-menu-item]="isCollapsed">
+              <mat-icon matListIcon>{{ child.icon }}</mat-icon>
+              <span matLine *ngIf="!isCollapsed">{{ child.title }}</span>
+            </a>
+          </div>
+        </div>
+
+      </ng-container>
+    </ng-container>
+  </mat-nav-list>
+</div>

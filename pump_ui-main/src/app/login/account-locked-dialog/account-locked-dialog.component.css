@@ -1,0 +1,21 @@
+.icon-circle {
+  width: 72px;
+  height: 72px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.icon-circle mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+}
+
+.text-center p {
+  line-height: 1.5;
+}

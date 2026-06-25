@@ -1,0 +1,13 @@
+.pdf-container {
+    width: 600px;
+    height: 500px;
+    /* border: 1px solid #ccc; */
+    margin-bottom: 20px;
+    /* margin-left: -55%; */
+    position: relative;
+}
+
+.viewer {
+    width: 10%; 
+    height: 200px; 
+  }
