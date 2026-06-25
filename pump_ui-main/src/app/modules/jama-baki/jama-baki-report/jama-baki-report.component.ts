@@ -34,6 +34,17 @@ export class JamaBakiReportComponent implements OnInit {
   constructor(private http: HttpClient, private use: UserServiceService,
     public dialogRef: MatDialogRef<JamaBakiReportComponent>, @Inject(MAT_DIALOG_DATA) public jamaBaki: any,
     private notificationService: NotificationService, private dialog: MatDialog) {
+    if (!this.jamaBaki) {
+      this.jamaBaki = {
+        id: null,
+        date: '',
+        type: 'all'
+      };
+    } else {
+      if (this.jamaBaki.id === undefined) this.jamaBaki.id = null;
+      if (this.jamaBaki.date === undefined) this.jamaBaki.date = '';
+      if (this.jamaBaki.type === undefined) this.jamaBaki.type = 'all';
+    }
   }
   ngOnInit(): void {
     this.use.dialogZIndexAdjustment();
@@ -128,6 +139,13 @@ export class JamaBakiReportComponent implements OnInit {
     }
   }
 
+  onDateChange() {
+    if (this.purchaDipStockseDetails.date) {
+      this.jamaBaki.date = this.purchaDipStockseDetails.date;
+      this.getJamaBakiList();
+    }
+  }
+
   order() {
     this.userId = localStorage.getItem('userId');
 
@@ -136,7 +154,7 @@ export class JamaBakiReportComponent implements OnInit {
         id: item.id,
         name: item.customer?.name,
         customerId: item.customer?.id,
-        date: this.jamaBaki.date,
+        date: this.jamaBaki.date || this.purchaDipStockseDetails.date,
         userId: this.userId
       };
 
@@ -146,9 +164,20 @@ export class JamaBakiReportComponent implements OnInit {
           jama: item.jama,
           jamaNote: item.jamaNote
         };
+      } else if (this.jamaBaki.type === 'baki') {
+        return {
+          ...base,
+          baki: item.baki,
+          bakiNote: item.bakiNote,
+          type: item.type,
+          ltr: item.ltr,
+          rate: item.rate
+        };
       } else {
         return {
           ...base,
+          jama: item.jama,
+          jamaNote: item.jamaNote,
           baki: item.baki,
           bakiNote: item.bakiNote,
           type: item.type,
@@ -160,7 +189,7 @@ export class JamaBakiReportComponent implements OnInit {
 
     this.http.post<any>(API_JAMABAKI_ADD, payload).subscribe({
       next: () => {
-        this.notificationService.success(`${this.jamaBaki.type === 'jama' ? 'Jama' : 'Baki'} details added successfully.`);
+        this.notificationService.success(`${this.jamaBaki.type === 'jama' ? 'Jama' : (this.jamaBaki.type === 'baki' ? 'Baki' : 'Ledger')} details added successfully.`);
         this.dialogRef.close();
       },
       error: () => {
@@ -217,11 +246,21 @@ export class JamaBakiReportComponent implements OnInit {
     this.http.get<any[]>(API_JAMABAKI_LIST, { params }).subscribe((data) => {
       let filteredData = data;
       if (this.jamaBaki?.date) {
-        filteredData = filteredData.filter(
-          (item) =>
-            new Date(item.date).toDateString() ===
-            new Date(this.jamaBaki.date).toDateString()
-        );
+        try {
+          const targetDate = this.use.getFormattedDate(this.jamaBaki.date);
+          filteredData = filteredData.filter((item) => {
+            if (!item.date) return false;
+            try {
+              return this.use.getFormattedDate(item.date) === targetDate;
+            } catch (e) {
+              return false;
+            }
+          });
+        } catch (e) {
+          filteredData = [];
+        }
+      } else {
+        filteredData = [];
       }
       if (this.jamaBaki?.type === "jama") {
         filteredData = filteredData.filter(

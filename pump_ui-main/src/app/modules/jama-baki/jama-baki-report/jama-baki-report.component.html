@@ -18,7 +18,7 @@
             <div class="d-flex align-items-center gap-3">
                 <div class="form-group-modern mb-0" style="width: 200px;">
                     <label class="form-label-modern text-muted mb-1">Transaction Date</label>
-                    <input type="date" [(ngModel)]="purchaDipStockseDetails.date" class="form-control-modern">
+                    <input type="date" [(ngModel)]="purchaDipStockseDetails.date" (change)="onDateChange()" class="form-control-modern">
                 </div>
                 <button class="btn-premium btn-premium-secondary btn-sm mt-4" (click)="AddCustomer()" title="Add Customer">
                     <mat-icon class="me-1">person_add</mat-icon> New Customer
