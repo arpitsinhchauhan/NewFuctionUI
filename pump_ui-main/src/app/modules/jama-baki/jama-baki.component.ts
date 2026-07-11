@@ -74,7 +74,7 @@ export class JamaBakiComponent implements OnInit {
 
   openDialog() {
     const dialogRef = this.dialog.open(CustomerComponent, {
-      width: window.innerWidth > 991 ? '600px' : '95vw',
+      width: window.innerWidth > 991 ? 'auto' : '95vw',
       maxWidth: '95vw',
       disableClose: true,
       hasBackdrop: true,

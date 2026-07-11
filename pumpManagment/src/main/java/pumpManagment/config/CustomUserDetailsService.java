@@ -60,6 +60,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         newUser.setFirstName(user.getFirstName());
         newUser.setLastName(user.getLastName());
         newUser.setPhoneNumber(user.getPhoneNumber());
+        newUser.setFirstLogin(false);
 
         if ("EMPLOYEE".equalsIgnoreCase(user.getRole()) && user.getManagerId() != null) {
             java.util.Optional<DAOUser> managerOpt = userDao.findById(user.getManagerId());

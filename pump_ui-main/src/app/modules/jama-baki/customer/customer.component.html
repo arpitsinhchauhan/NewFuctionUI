@@ -24,26 +24,26 @@
 
     <div class="form-group-modern">
       <label class="form-label-modern">Full Name / Business Name</label>
-      <div class="d-flex align-items-center position-relative">
-        <mat-icon class="position-absolute ms-2 text-muted" style="font-size: 18px;">badge</mat-icon>
-        <input type="text" [(ngModel)]="customerDetails.name" class="form-control-modern ps-5" placeholder="Enter customer name">
+      <div class="input-with-icon">
+        <mat-icon>badge</mat-icon>
+        <input type="text" [(ngModel)]="customerDetails.name" class="form-control-modern" placeholder="Enter customer name">
       </div>
     </div>
 
     <div class="form-grid-modern">
       <div class="form-group-modern">
         <label class="form-label-modern">Phone Number</label>
-        <div class="d-flex align-items-center position-relative">
-          <mat-icon class="position-absolute ms-2 text-muted" style="font-size: 18px;">phone</mat-icon>
-          <input type="text" [(ngModel)]="customerDetails.phone" class="form-control-modern ps-5" placeholder="+91 00000 00000">
+        <div class="input-with-icon">
+          <mat-icon>phone</mat-icon>
+          <input type="text" [(ngModel)]="customerDetails.phone" class="form-control-modern" placeholder="+91 00000 00000">
         </div>
       </div>
 
       <div class="form-group-modern">
         <label class="form-label-modern">Email Address</label>
-        <div class="d-flex align-items-center position-relative">
-          <mat-icon class="position-absolute ms-2 text-muted" style="font-size: 18px;">email</mat-icon>
-          <input type="email" [(ngModel)]="customerDetails.email" class="form-control-modern ps-5" placeholder="customer@example.com">
+        <div class="input-with-icon">
+          <mat-icon>email</mat-icon>
+          <input type="email" [(ngModel)]="customerDetails.email" class="form-control-modern" placeholder="customer@example.com">
         </div>
       </div>
     </div>

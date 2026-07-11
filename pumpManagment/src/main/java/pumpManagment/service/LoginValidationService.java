@@ -97,12 +97,15 @@ public class LoginValidationService {
     }
 
     public void validateFirstLogin(DAOUser user) {
+        // Disabled first-time login mandatory password change to allow direct login as requested
+        /*
         if (!"reetrakadmin".equalsIgnoreCase(user.getUsername())) {
             SecurityPolicy policy = getSecurityPolicy();
             if (policy.isFirstLoginEnabled() && user.isFirstLogin()) {
                 throw new FirstTimeLoginException("Please set your password from application before logging in.");
             }
         }
+        */
     }
 
     public void validateLockAttempt(DAOUser user, SecurityPolicy policy) {

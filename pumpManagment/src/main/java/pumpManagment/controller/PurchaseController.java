@@ -293,7 +293,8 @@ public class PurchaseController {
 
             return ResponseEntity.ok(new AuthenticationResponse(
                     token, username, role, userId,
-                    petrolNozzle, dieselNozzle, xpPetrolNozzle, powerDieselNozzle, FirstName, lastname, pumpId, managerId));
+                    petrolNozzle, dieselNozzle, xpPetrolNozzle, powerDieselNozzle, FirstName, lastname, pumpId,
+                    managerId));
 
         } catch (pumpManagment.exception.LoginExceptions.UserDoesNotExistException e) {
             loginValidationService.logAudit(username, "Failed", e.getMessage(), ipAddress);
@@ -409,7 +410,7 @@ public class PurchaseController {
             userRepository.save(user);
 
             // ✅ CASCADE: if a PUMP_MANAGER updates their pump name/nozzles,
-            //    propagate those values to ALL employees under this manager.
+            // propagate those values to ALL employees under this manager.
             if ("PUMP_MANAGER".equals(userDTO.getRole()) || "user".equals(userDTO.getRole())) {
                 List<DAOUser> employees = userRepository.findByManagerIdAndRole(id, "EMPLOYEE");
                 for (DAOUser emp : employees) {
@@ -974,7 +975,22 @@ public class PurchaseController {
         for (String id : getTargetUserIds(userId)) {
             dip.addAll(dipStockRepository.findByUserId(id));
         }
-        return addEmployeeNamesToEntities(dip);
+        List<Map<String, Object>> list = addEmployeeNamesToEntities(dip);
+        for (Map<String, Object> map : list) {
+            Object userIdObj = map.get("userId");
+            if (userIdObj != null) {
+                try {
+                    Long uid = Long.valueOf(String.valueOf(userIdObj));
+                    Optional<DAOUser> uOpt = userRepository.findById(uid);
+                    if (uOpt.isPresent()) {
+                        map.put("employeeName", uOpt.get().getUsername());
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+        return list;
     }
 
     @GetMapping(value = "/dipvalueMainTable")
@@ -1610,12 +1626,14 @@ public class PurchaseController {
 
     private List<Map<String, Object>> addEmployeeNamesToEntities(List<?> entities) {
         List<Map<String, Object>> result = new ArrayList<>();
-        if (entities == null) return result;
+        if (entities == null)
+            return result;
         ObjectMapper mapper = new ObjectMapper();
         Map<Long, String> cache = new HashMap<>();
         for (Object entity : entities) {
             try {
-                Map<String, Object> map = mapper.convertValue(entity, new TypeReference<Map<String, Object>>() {});
+                Map<String, Object> map = mapper.convertValue(entity, new TypeReference<Map<String, Object>>() {
+                });
                 Object userIdObj = map.get("userId");
                 if (userIdObj != null) {
                     String userIdStr = String.valueOf(userIdObj);
@@ -1642,7 +1660,8 @@ public class PurchaseController {
                 result.add(map);
             } catch (Exception e) {
                 try {
-                    Map<String, Object> map = mapper.convertValue(entity, new TypeReference<Map<String, Object>>() {});
+                    Map<String, Object> map = mapper.convertValue(entity, new TypeReference<Map<String, Object>>() {
+                    });
                     result.add(map);
                 } catch (Exception ex) {
                     // Fallback
@@ -1712,7 +1731,8 @@ public class PurchaseController {
         try {
             Long managerId = Long.parseLong(userIdStr);
             Optional<DAOUser> userOpt = userRepository.findById(managerId);
-            if (userOpt.isPresent() && ("PUMP_MANAGER".equals(userOpt.get().getRole()) || "user".equals(userOpt.get().getRole()))) {
+            if (userOpt.isPresent()
+                    && ("PUMP_MANAGER".equals(userOpt.get().getRole()) || "user".equals(userOpt.get().getRole()))) {
                 List<DAOUser> employees = userRepository.findByManagerIdAndRole(managerId, "EMPLOYEE");
                 List<String> employeeIds = new ArrayList<>();
                 for (DAOUser emp : employees) {
@@ -1740,8 +1760,7 @@ public class PurchaseController {
                 allEntries.addAll(DailytotalRepository.findByDateBetweenAndUserId(startDate, endDate, id));
             }
             Map<String, Double> sumByDate = allEntries.stream().collect(
-                Collectors.groupingBy(dailytotal::getDate, Collectors.summingDouble(dailytotal::getDailyTotal))
-            );
+                    Collectors.groupingBy(dailytotal::getDate, Collectors.summingDouble(dailytotal::getDailyTotal)));
             List<dailytotal> entries = new ArrayList<>();
             sumByDate.forEach((date, sum) -> {
                 dailytotal dt = new dailytotal();
@@ -1922,8 +1941,10 @@ public class PurchaseController {
                 " WHERE " + dateCondition + " AND " + userCondition + ") j ON 1=1 " +
 
                 "LEFT JOIN (SELECT " +
-                " SUM(CASE WHEN extra_type = 'XP Petrol' THEN extra_total_purchase ELSE 0 END) AS XP_total_petrol_purchase, " +
-                " SUM(CASE WHEN extra_type = 'Power Diesel' THEN extra_total_purchase ELSE 0 END) AS Power_total_diesel_purchase " +
+                " SUM(CASE WHEN extra_type = 'XP Petrol' THEN extra_total_purchase ELSE 0 END) AS XP_total_petrol_purchase, "
+                +
+                " SUM(CASE WHEN extra_type = 'Power Diesel' THEN extra_total_purchase ELSE 0 END) AS Power_total_diesel_purchase "
+                +
                 " FROM extrapurchases " +
                 " WHERE " + dateCondition + " AND " + userCondition + ") extra ON 1=1 " +
 
@@ -4158,24 +4179,24 @@ public class PurchaseController {
     public ResponseEntity<?> resetDirect(@RequestBody Map<String, String> request) {
         String identity = request.get("identity");
         String newPassword = request.get("newPassword");
-        
+
         if (identity == null || identity.trim().isEmpty() || newPassword == null || newPassword.trim().isEmpty()) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Username/Email and New Password are required.");
             return ResponseEntity.badRequest().body(response);
         }
-        
+
         DAOUser daoUser = userRepository.findByUsername(identity.trim());
         if (daoUser == null) {
             daoUser = userRepository.findByEmail(identity.trim());
         }
-        
+
         if (daoUser == null) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "User not found with the provided username or email.");
             return ResponseEntity.badRequest().body(response);
         }
-        
+
         try {
             String encodedNewPassword = pumpPasswordEncoder.encode(newPassword);
             daoUser.setPassword(encodedNewPassword);
@@ -4183,9 +4204,9 @@ public class PurchaseController {
             daoUser.setPasswordChangedDate(new java.util.Date());
             daoUser.setFailedAttempt(0);
             daoUser.setAccountLocked(false);
-            
+
             userRepository.save(daoUser);
-            
+
             Map<String, String> successResponse = new HashMap<>();
             successResponse.put("message", "Password has been updated successfully.");
             return ResponseEntity.ok(successResponse);

@@ -47,15 +47,37 @@ export class MyHeaderInterceptor implements HttpInterceptor {
         } else {
           // Server-side error
           if (error.status !== 0) {
-            errorMessage = error.error?.message || `Server Error Code: ${error.status}\nMessage: ${error.message}`;
+            if (typeof error.error === 'string') {
+              errorMessage = error.error;
+            } else if (error.error && typeof error.error === 'object' && error.error.message) {
+              errorMessage = error.error.message;
+            } else {
+              errorMessage = `Server Error Code: ${error.status}\nMessage: ${error.message}`;
+            }
           } else {
             errorMessage = 'Unable to connect to the backend server. Please verify your connection.';
           }
         }
         
-        // Show toast notification of error
-        this.notificationService.failure(errorMessage);
-        return throwError(() => new Error(errorMessage));
+        // Suppress global toast notifications for business error codes handled specifically by LoginComponent
+        const errorCode = error.error && typeof error.error === 'object' ? error.error.code : null;
+        const isBusinessError = errorCode && [
+          'FIRST_LOGIN',
+          'ACCOUNT_LOCKED',
+          'PASSWORD_EXPIRED',
+          'INVALID_CREDENTIALS',
+          'USER_DEACTIVATED',
+          'ROLE_INACTIVE',
+          'COMPANY_DEACTIVATED',
+          'USER_NOT_FOUND'
+        ].includes(errorCode);
+
+        if (!isBusinessError) {
+          this.notificationService.failure(errorMessage);
+        }
+        
+        // Propagate the original HttpErrorResponse so subscribers can check error.error.code
+        return throwError(() => error);
       }),
       finalize(() => {
         // Decrement active request count and hide loader when all requests complete

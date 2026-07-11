@@ -1,28 +1,33 @@
-<div class="report-entry-wrapper">
-  <mat-card class="card-premium">
-    <div class="card-header-modern">
-      <div class="header-main">
-        <h4 class="card-title-modern">Add Diesel Sales Details</h4>
-        <p class="text-muted small mb-0">Enter daily meter readings for Diesel nozzles</p>
-      </div>
-      <div class="header-actions">
-        <button mat-icon-button (click)="cancel()" class="close-btn">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+<div class="card-premium dialog-modern-card">
+  <!-- Dialog Header -->
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title d-flex align-items-center">
+        <mat-icon class="me-2 text-warning">local_gas_station</mat-icon>
+        Add Diesel Sales Details
+      </h4>
+      <p class="card-subtitle text-muted">Enter daily meter readings for Diesel nozzles</p>
     </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
-    <div class="card-body mt-4">
-      <div class="row g-3 mb-4">
-        <div class="col-md-4">
+  <div class="card-body p-4">
+    <!-- Form Controls Row -->
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-md-6">
+        <div class="form-group-modern mb-0">
+          <label class="label-modern">Transaction Date</label>
           <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Transaction Date</mat-label>
             <input matInput [(ngModel)]="purchaDipStockseDetails.date" type="date" (change)="updateDate()">
           </mat-form-field>
         </div>
-        <div class="col-md-4">
+      </div>
+      <div class="col-md-6">
+        <div class="form-group-modern mb-0">
+          <label class="label-modern">Nozzle Count</label>
           <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Nozzle Count</mat-label>
             <mat-select [(ngModel)]="selectedNumber">
               <mat-option *ngFor="let number of numbers" [value]="number">
                 {{ number }} Nozzles
@@ -30,69 +35,81 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="col-md-4 d-flex align-items-center">
-          <button mat-flat-button color="primary" class="premium-btn-primary w-100" (click)="order()">
-            <mat-icon>add_task</mat-icon>
-            <span>Update All Entries</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="table-responsive-modern">
-        <table class="modern-table">
-          <thead>
-            <tr>
-              <th>Pump/Nozzle</th>
-              <th>Closing Meter</th>
-              <th>Opening Meter</th>
-              <th>Testing (L)</th>
-              <th>Total (Unit)</th>
-              <th>Qty (Ltr)</th>
-              <th>Rate (₹)</th>
-              <th class="text-right">Total Sell (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of row; let i = index" [hidden]="i >= selectedNumber">
-              <td>
-                <span class="font-weight-bold text-warning">{{ item.pump }}</span>
-              </td>
-              <td>
-                <input type="number" [(ngModel)]="item.close_meter" (input)="calculateTotals(item)"
-                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.close_meter)}" />
-              </td>
-              <td>
-                <input type="number" [(ngModel)]="item.open_meter" (input)="calculateTotals(item)"
-                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.open_meter)}" />
-              </td>
-              <td>
-                <input type="number" [(ngModel)]="item.testing" (input)="calculateTotals(item)"
-                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.testing)}" />
-              </td>
-              <td>
-                <span class="text-muted">{{ item.total }}</span>
-              </td>
-              <td class="font-weight-medium text-info">
-                {{ item.diesel_ltr | number:'1.2-2' }}
-              </td>
-              <td>
-                <input type="number" [(ngModel)]="item.rate" (input)="calculateTotals(item)"
-                       class="table-input no-spinner" [ngClass]="{'invalid-input': !isNumber(item.rate)}" />
-              </td>
-              <td class="text-right font-weight-bold text-success">
-                ₹{{ item.total_sell | number:'1.2-2' }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="card-footer-modern mt-4">
-        <div class="grand-total-section">
-          <span class="total-label">Grand Total Sales:</span>
-          <span class="total-value text-success">₹{{ totalPrice() | number:'1.2-2' }}</span>
-        </div>
       </div>
     </div>
-  </mat-card>
+
+    <!-- Table Section -->
+    <div class="table-responsive-modern border rounded-3">
+      <table class="modern-report-table">
+        <thead>
+          <tr>
+            <th>Pump/Nozzle</th>
+            <th>Closing Meter</th>
+            <th>Opening Meter</th>
+            <th>Total (Unit)</th>
+            <th>Testing (L)</th>
+            <th>Qty (Ltr)</th>
+            <th>Rate (₹)</th>
+            <th class="text-right">Total Sell (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of row; let i = index" [hidden]="i >= selectedNumber" class="align-middle">
+            <td>
+              <span class="font-weight-bold text-warning">{{ item.pump }}</span>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.close_meter" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.close_meter)}">
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.open_meter" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.open_meter)}">
+              </mat-form-field>
+            </td>
+            <td class="text-muted font-weight-medium text-center">
+              {{ item.total || 0 }}
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.testing" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.testing)}">
+              </mat-form-field>
+            </td>
+            <td class="font-weight-medium text-info">
+              {{ item.diesel_ltr | number:'1.2-2' }}
+            </td>
+            <td>
+              <mat-form-field appearance="outline" class="w-100 hide-subscript">
+                <input matInput type="number" [(ngModel)]="item.rate" (input)="calculateTotals(item)"
+                       class="no-spinner" [ngClass]="{'invalid-input': !isNumber(item.rate)}">
+              </mat-form-field>
+            </td>
+            <td class="text-right font-weight-bold text-success">
+              ₹{{ item.total_sell | number:'1.2-2' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Grand Total & Footer Section -->
+    <div class="valuation-box-modern mt-4">
+      <div class="valuation-info">
+        <span class="valuation-label">Grand Total Sales</span>
+        <span class="valuation-amount text-success">₹{{ totalPrice() | number:'1.2-2' }}</span>
+      </div>
+      <div class="dialog-actions-modern bg-transparent border-0 p-0">
+        <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-2">
+          Cancel
+        </button>
+        <button mat-flat-button color="primary" (click)="order()" class="px-5 py-2 btn-premium-primary">
+          <mat-icon class="me-2">save</mat-icon> Update All Entries
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

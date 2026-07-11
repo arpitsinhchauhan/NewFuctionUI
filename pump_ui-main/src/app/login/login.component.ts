@@ -193,14 +193,14 @@ export class LoginComponent implements OnInit {
             this.dialog.open(ChangePasswordDialogComponent, {
               width: '450px',
               panelClass: 'dialog-modern-wrapper',
-              data: { userId: error.error.userId, message: msg },
+              data: { userId: error.error.userId, message: msg, oldPassword: password },
               disableClose: true
             });
           } else if (code === 'FIRST_LOGIN') {
             this.dialog.open(ChangePasswordDialogComponent, {
               width: '450px',
               panelClass: 'dialog-modern-wrapper',
-              data: { userId: error.error.userId, message: msg },
+              data: { userId: error.error.userId, message: msg, oldPassword: password },
               disableClose: true
             });
           } else {

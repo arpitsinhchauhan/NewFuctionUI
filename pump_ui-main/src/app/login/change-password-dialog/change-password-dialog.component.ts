@@ -24,6 +24,7 @@ export class ChangePasswordDialogComponent implements OnInit {
     if (data) {
       this.userId = data.userId || '';
       this.message = data.message || this.message;
+      this.oldPassword = data.oldPassword || '';
     }
   }
 
@@ -55,7 +56,7 @@ export class ChangePasswordDialogComponent implements OnInit {
         this.dialogRef.close(true);
       },
       (err) => {
-        const errMsg = err.error || "Failed to update password.";
+        const errMsg = err.error?.message || err.error || "Failed to update password.";
         this.notificationService.failure(errMsg);
       }
     );

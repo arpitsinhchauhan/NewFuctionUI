@@ -658,8 +658,8 @@ small,
 
 /* Dialog Sizes */
 .dialog-sm {
-  width: 450px !important;
-  max-width: 95vw !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 @media (max-width: 768px) {
@@ -1358,7 +1358,8 @@ body {
 
 .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float .mat-form-field-label,
 .mat-form-field-appearance-outline.mat-form-field-can-float .mat-input-server:focus+.mat-form-field-label-wrapper .mat-form-field-label {
-  transform: translateY(-1.1em) scale(0.75) !important;
+  /* transform: translateY(-1.1em) scale(0.75) !important; */
+  color: white;
   width: 133.33333% !important;
 }
 
@@ -1438,11 +1439,14 @@ body {
   border: none !important;
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1) !important;
   z-index: 1050 !important;
+}
 
-  /* Universal Sidebar Text Fix */
-  & h1, & h2, & h3, & h4, & h5, & h6, & p, & span, & div, & mat-icon, & b, & strong, & label {
-    color: #ffffff !important;
-  }
+/* Universal Sidebar Text Fix */
+.mat-drawer h1, .mat-drawer h2, .mat-drawer h3, .mat-drawer h4, .mat-drawer h5, .mat-drawer h6,
+.mat-drawer p, .mat-drawer span, .mat-drawer div, .mat-drawer mat-icon, .mat-drawer b, .mat-drawer strong, .mat-drawer label,
+.admin-sidenav h1, .admin-sidenav h2, .admin-sidenav h3, .admin-sidenav h4, .admin-sidenav h5, .admin-sidenav h6,
+.admin-sidenav p, .admin-sidenav span, .admin-sidenav div, .admin-sidenav mat-icon, .admin-sidenav b, .admin-sidenav strong, .admin-sidenav label {
+  color: #ffffff !important;
 }
 
 .mat-drawer-content {
@@ -1705,6 +1709,18 @@ body.dark-theme .modern-toggle-group .mat-button-toggle-checked {
   margin-bottom: 12px;
 }
 
+.form-grid-modern.grid-2col {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 20px;
+}
+
+@media (max-width: 576px) {
+  .form-grid-modern.grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+}
+
 .form-group-modern {
   display: flex;
   flex-direction: column;
@@ -1737,8 +1753,29 @@ body.dark-theme .modern-toggle-group .mat-button-toggle-checked {
   width: 100% !important;
 }
 
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-icon mat-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted) !important;
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
 .input-with-icon .form-control-modern {
-  padding-left: 44px !important;
+  padding-left: 42px !important;
 }
 
 .form-control-modern:focus {
@@ -2046,28 +2083,34 @@ input[type=number] {
   max-width: min(96vw, 1100px) !important;
 }
 
-.cdk-overlay-pane.dialog-sm,
-.cdk-overlay-pane .dialog-sm {
-  width: min(96vw, 480px) !important;
-  max-width: min(96vw, 480px) !important;
-}
-
-.cdk-overlay-pane.dialog-md,
-.cdk-overlay-pane .dialog-md {
-  width: min(96vw, 720px) !important;
-  max-width: min(96vw, 720px) !important;
-}
-
-.cdk-overlay-pane.dialog-lg,
-.cdk-overlay-pane .dialog-lg,
+/* Base custom panel style */
 .cdk-overlay-pane.mat-dialog-custom-panel {
   width: min(96vw, 1040px) !important;
   max-width: min(96vw, 1040px) !important;
 }
 
+/* Specific size overrides */
+.cdk-overlay-pane.dialog-sm,
+.cdk-overlay-pane:has(.dialog-sm) {
+  width: min(96vw, 450px) !important;
+  max-width: min(96vw, 450px) !important;
+}
+
+.cdk-overlay-pane.dialog-md,
+.cdk-overlay-pane:has(.dialog-md) {
+  width: min(96vw, 720px) !important;
+  max-width: min(96vw, 720px) !important;
+}
+
+.cdk-overlay-pane.dialog-lg,
+.cdk-overlay-pane:has(.dialog-lg) {
+  width: min(96vw, 1040px) !important;
+  max-width: min(96vw, 1040px) !important;
+}
+
 .cdk-overlay-pane.dialog-xl,
-.cdk-overlay-pane .dialog-xl {
-  /* width: min(96vw, 1200px) !important; */
+.cdk-overlay-pane:has(.dialog-xl) {
+  width: min(96vw, 1200px) !important;
   max-width: min(96vw, 1200px) !important;
 }
 
@@ -2189,6 +2232,18 @@ input[type=number] {
 
 .mat-form-field-wrapper {
   padding-bottom: 0 !important;
+}
+
+.mat-form-field-invalid .mat-form-field-wrapper {
+  padding-bottom: 20px !important;
+}
+
+mat-error {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: var(--danger) !important;
+  display: block !important;
+  margin-top: 4px !important;
 }
 
 .mat-form-field-appearance-outline .mat-form-field-flex {

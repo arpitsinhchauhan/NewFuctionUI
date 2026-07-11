@@ -63,7 +63,7 @@
                 (selectionChange)="onManagerViewChange()">
                 <mat-option value="ALL">All Employees (Aggregated)</mat-option>
                 <mat-option *ngFor="let emp of managerEmployeeList" [value]="emp.id">
-                  {{ emp.firstName }} {{ emp.lastName }}
+                  {{ emp.username }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -161,19 +161,13 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let den of [
-                  {val: 2000, key: 'twothousand', display: twothousand},
-                  {val: 500, key: 'fivehundred', display: fivehundred},
-                  {val: 200, key: 'twohundred', display: twohundred},
-                  {val: 100, key: 'onehundred', display: onehundred},
-                  {val: 50, key: 'fifty', display: fifty},
-                  {val: 20, key: 'twenty', display: twenty},
-                  {val: 10, key: 'ten', display: ten}
-                ]">
+                  <tr *ngFor="let den of denominations; trackBy: trackByDenKey">
                     <td class="font-weight-medium">₹{{ den.val }}</td>
                     <td><input type="number" class="report-input" [(ngModel)]="multipliers[den.key]"
-                        (input)="calculateTotal()"></td>
-                    <td class="text-right">₹{{ den.display | number:'1.2-2' }}</td>
+                        (input)="calculateTotal()"
+                        (focus)="onDenominationFocus($event, den.key)"
+                        (blur)="onDenominationBlur(den.key)"></td>
+                    <td class="text-right">₹{{ getDenominationDisplay(den.key) | number:'1.2-2' }}</td>
                   </tr>
                   <tr class="grand-total-row">
                     <td colspan="2">Total Cash in Hand</td>

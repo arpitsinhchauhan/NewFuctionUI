@@ -24,6 +24,8 @@ export class DieselSellReportComponent implements OnInit {
   }
   ngOnInit(): void {
     this.userId = localStorage.getItem('userId');
+    this.purchaDipStockseDetails.date = this.formatDate(new Date());
+    this.updateDate();
   }
 
   updateDate() {

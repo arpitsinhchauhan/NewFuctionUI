@@ -55,6 +55,11 @@ export class JamaBakiReportComponent implements OnInit {
   getdata() {
     if (this.jamaBaki && this.jamaBaki.date) {
       this.purchaDipStockseDetails.date = this.jamaBaki.date;
+    } else {
+      this.purchaDipStockseDetails.date = this.use.getFormattedDate(new Date());
+      if (this.jamaBaki) {
+        this.jamaBaki.date = this.purchaDipStockseDetails.date;
+      }
     }
 
     this.userId = localStorage.getItem('userId');
@@ -62,8 +67,7 @@ export class JamaBakiReportComponent implements OnInit {
 
     this.http.get<any[]>(url).subscribe((data) => {
       this.names = data;
-      this.filteredNames = this.names
-      // [...this.names];
+      this.filteredNames = this.names;
       this.getJamaBakiList();
     });
   }

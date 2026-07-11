@@ -3,6 +3,7 @@
     "compilerOptions": {
         "outDir": "./dist/out-tsc",
         "baseUrl": "src",
+        "strict": false, // Not Commit Git
         "sourceMap": true,
         "declaration": false,
         "module": "es2020",

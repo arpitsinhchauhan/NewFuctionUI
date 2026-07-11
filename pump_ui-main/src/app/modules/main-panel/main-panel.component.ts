@@ -176,7 +176,7 @@ export class MainPanelComponent implements OnInit {
   note: String = '';
   creditNOteIOCL: number = 0;
   selectedShift: string = 'Morning';
-  
+
   // Manager Dashboard Properties
   userRole: string = '';
   managerSelectedDate: any = new Date();
@@ -211,6 +211,46 @@ export class MainPanelComponent implements OnInit {
 
   get totalManagerRevenue(): number {
     return this.filteredReports.reduce((sum, r) => sum + (Number(r.salesAmount) || 0), 0);
+  }
+
+  denominations = [
+    { val: 2000, key: 'twothousand' },
+    { val: 500, key: 'fivehundred' },
+    { val: 200, key: 'twohundred' },
+    { val: 100, key: 'onehundred' },
+    { val: 50, key: 'fifty' },
+    { val: 20, key: 'twenty' },
+    { val: 10, key: 'ten' }
+  ];
+
+  trackByDenKey(index: number, item: any): string {
+    return item.key;
+  }
+
+  getDenominationDisplay(key: string): number {
+    return (this as any)[key] || 0;
+  }
+
+  onDenominationFocus(event: any, key: string) {
+    const multipliersAny = this.multipliers as any;
+    if (multipliersAny[key] === 0 || multipliersAny[key] === '0') {
+      multipliersAny[key] = null;
+      if (event && event.target) {
+        event.target.value = '';
+      }
+    } else {
+      if (event && event.target) {
+        event.target.select();
+      }
+    }
+  }
+
+  onDenominationBlur(key: string) {
+    const multipliersAny = this.multipliers as any;
+    if (multipliersAny[key] === null || multipliersAny[key] === undefined || multipliersAny[key] === '') {
+      multipliersAny[key] = 0;
+      this.calculateTotal();
+    }
   }
 
   constructor(private dialog: MatDialog, private use: UserServiceService,
@@ -1466,7 +1506,7 @@ export class MainPanelComponent implements OnInit {
       html2canvas(frontContent, canvasOptions).then(frontCanvas => {
         const pageHeight = 297;
         const pageWidth = 210;
-        
+
         let printWidth = pageWidth;
         let printHeight = (frontCanvas.height * printWidth) / frontCanvas.width;
         let xOffset = 0;
@@ -1485,7 +1525,7 @@ export class MainPanelComponent implements OnInit {
         // Back Page - force a new page
         html2canvas(backPage, canvasOptions).then(backCanvas => {
           pdf.addPage();
-          
+
           let backPrintWidth = pageWidth;
           let backPrintHeight = (backCanvas.height * backPrintWidth) / backCanvas.width;
           let backXOffset = 0;
@@ -1792,7 +1832,7 @@ export class MainPanelComponent implements OnInit {
     // Filter by Search Query
     if (this.searchQuery) {
       const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         (r.employeeName && r.employeeName.toLowerCase().includes(query)) ||
         (r.createdBy && r.createdBy.toLowerCase().includes(query)) ||
         (r.shift && r.shift.toLowerCase().includes(query)) ||
@@ -1882,7 +1922,7 @@ export class MainPanelComponent implements OnInit {
       ]);
     }
 
-    let csvContent = "data:text/csv;charset=utf-8," 
+    let csvContent = "data:text/csv;charset=utf-8,"
       + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
 
     const encodedUri = encodeURI(csvContent);
@@ -2034,12 +2074,12 @@ export class MainPanelComponent implements OnInit {
   loadAggregatedDailyReportData() {
     const formatted = this.use.getFormattedDate(this.reportDate);
     const empIds = this.managerEmployeeList.map(emp => emp.id.toString());
-    
+
     if (empIds.length === 0) {
       this.resetAllDailyReportFields();
       return;
     }
-    
+
     // 1. Petrol Nozzles
     const petrolCalls = empIds.map(id => this.use.getPetrolList(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(petrolCalls).subscribe((results: any[][]) => {
