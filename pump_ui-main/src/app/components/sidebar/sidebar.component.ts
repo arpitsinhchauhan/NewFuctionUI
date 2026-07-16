@@ -107,8 +107,8 @@ export class SidebarComponent implements OnInit {
       this.userService.getUserPump(userId).subscribe({
         next: (response) => {
           const data = response?.data || {};
-          const xpPetrolEnabled = data?.xp_petrol_nozzle !== '0';
-          const powerDieselEnabled = data?.powe_diesel_nozzle !== '0';
+          const xpPetrolEnabled = Number(data?.xp_petrol_nozzle) > 0;
+          const powerDieselEnabled = Number(data?.powe_diesel_nozzle) > 0;
           this.buildMenu(xpPetrolEnabled, powerDieselEnabled);
           this.initScrollbar();
         },
@@ -198,7 +198,7 @@ export class SidebarComponent implements OnInit {
             class: 'group',
             children: [
               { path: '/Dipp', title: 'Petrol/Diesel Dip', icon: 'opacity' },
-              powerDieselEnabled ? { path: '/extraDipp', title: 'Extra Petrol/Diesel Dip', icon: 'opacity' } : null,
+              (xpPetrolEnabled || powerDieselEnabled) ? { path: '/extraDipp', title: 'Extra Petrol/Diesel Dip', icon: 'opacity' } : null,
               { path: '/atm', title: 'ATM & Cash', icon: 'payments' },
               { path: '/Jama&Baki', title: 'Ledger (Credit/Debit)', icon: 'account_balance' }
             ].filter(Boolean)
@@ -210,7 +210,7 @@ export class SidebarComponent implements OnInit {
             children: [
               { path: '/purchasedetails', title: 'Purchase Fuel', icon: 'local_gas_station' },
               { path: '/oilPurchasedetails', title: 'Purchase Oil', icon: 'oil_barrel' },
-              powerDieselEnabled ? { path: '/extraPurchasedetails', title: 'Extra Fuel Purchase', icon: 'add_shopping_cart' } : null
+              (xpPetrolEnabled || powerDieselEnabled) ? { path: '/extraPurchasedetails', title: 'Extra Fuel Purchase', icon: 'add_shopping_cart' } : null
             ].filter(Boolean)
           },
           {

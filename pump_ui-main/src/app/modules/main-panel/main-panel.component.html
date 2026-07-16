@@ -68,16 +68,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="meta-item">
-            <mat-form-field appearance="outline" class="modern-datepicker">
-              <mat-label>Shift</mat-label>
-              <mat-select [(ngModel)]="selectedShift" name="selectedShift">
-                <mat-option value="Morning">Morning Shift</mat-option>
-                <mat-option value="Evening">Evening Shift</mat-option>
-                <mat-option value="Night">Night Shift</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
+
           <!-- <div class="meta-item time-display">
           <mat-icon>schedule</mat-icon>
           <span>As of {{ currentTime }}</span>
@@ -110,36 +101,96 @@
               <!-- Petrol Rows -->
               <tr *ngFor="let petrol of petrolPumps.slice(0, showPetrolPumpsCount); let i = index" class="hover-row">
                 <td><span class="fuel-name-badge petrol-badge">{{ petrol.name }}</span></td>
-                <td><input type="number" class="report-input" [(ngModel)]="petrol.closingMeter" (input)="calculatePetrol(i)" placeholder="0"></td>
-                <td><input type="number" class="report-input" [(ngModel)]="petrol.openingMeter" (input)="calculatePetrol(i)" placeholder="0"></td>
-                <td><input type="number" class="report-input" [(ngModel)]="petrol.testing" (input)="calculatePetrol(i)" placeholder="0"></td>
-                <td><input type="number" class="report-input" [(ngModel)]="petrol.rate" (input)="calculatePetrol(i)" placeholder="0.00"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="petrol.closingMeter"
+                    (input)="calculatePetrol(i)" placeholder="0"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="petrol.openingMeter"
+                    (input)="calculatePetrol(i)" placeholder="0"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="petrol.testing" (input)="calculatePetrol(i)"
+                    placeholder="0"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="petrol.rate" (input)="calculatePetrol(i)"
+                    placeholder="0.00"></td>
                 <td><span class="calc-value">{{ petrol.saleLtr | number:'1.2-2' }} L</span></td>
-                <td><span class="calc-value text-primary">{{ (petrol.ltr < 0 ? petrol.ltr * -1 : petrol.ltr) | number:'1.2-2' }} L</span></td>
+                <td><span class="calc-value text-primary">{{ (petrol.ltr < 0 ? petrol.ltr * -1 : petrol.ltr) |
+                      number:'1.2-2' }} L</span>
+                </td>
                 <td class="text-right"><span class="amount-value">₹{{ petrol.total_rs | number:'1.2-2' }}</span></td>
               </tr>
               <tr class="total-row-modern petrol">
-                <td colspan="6" class="font-weight-bold"><mat-icon style="font-size:14px;vertical-align:middle;">local_gas_station</mat-icon> Petrol Sub-Total</td>
+                <td colspan="6" class="font-weight-bold"><mat-icon
+                    style="font-size:14px;vertical-align:middle;">local_gas_station</mat-icon> Petrol Sub-Total</td>
                 <td><strong>{{ petrolTotalLTR | number:'1.2-2' }} L</strong></td>
                 <td class="text-right"><strong>₹{{ petrolTotalRS | number:'1.2-2' }}</strong></td>
               </tr>
 
+              <!-- XP Petrol Rows -->
+              <ng-container *ngIf="showXpPetrolCount > 0">
+                <tr *ngFor="let xp of xpPetrol.slice(0, showXpPetrolCount); let i = index" class="hover-row">
+                  <td><span class="fuel-name-badge petrol-badge">{{ xp.name }}</span></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="xp.closingMeter" (input)="calculateXpPetrol(i)" placeholder="0"></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="xp.openingMeter" (input)="calculateXpPetrol(i)" placeholder="0"></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="xp.testing" (input)="calculateXpPetrol(i)" placeholder="0"></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="xp.rate" (input)="calculateXpPetrol(i)" placeholder="0.00"></td>
+                  <td><span class="calc-value">{{ xp.saleLtr | number:'1.2-2' }} L</span></td>
+                  <td><span class="calc-value text-primary">{{ (xp.ltr < 0 ? xp.ltr * -1 : xp.ltr) | number:'1.2-2' }} L</span></td>
+                  <td class="text-right"><span class="amount-value">₹{{ xp.total_rs | number:'1.2-2' }}</span></td>
+                </tr>
+                <tr class="total-row-modern petrol">
+                  <td colspan="6" class="font-weight-bold"><mat-icon
+                      style="font-size:14px;vertical-align:middle;">local_gas_station</mat-icon> XP Petrol Sub-Total</td>
+                  <td><strong>{{ xpPetrolTotalLTR | number:'1.2-2' }} L</strong></td>
+                  <td class="text-right"><strong>₹{{ xpPetrolTotalRS | number:'1.2-2' }}</strong></td>
+                </tr>
+              </ng-container>
+
               <!-- Diesel Rows -->
               <tr *ngFor="let diesel of dieselPumps.slice(0, showDieselPumpsCount); let i = index" class="hover-row">
                 <td><span class="fuel-name-badge diesel-badge">{{ diesel.name }}</span></td>
-                <td><input type="number" class="report-input" [(ngModel)]="diesel.closingMeter" (input)="calculateDiesel(i)" placeholder="0"></td>
-                <td><input type="number" class="report-input" [(ngModel)]="diesel.openingMeter" (input)="calculateDiesel(i)" placeholder="0"></td>
-                <td><input type="number" class="report-input" [(ngModel)]="diesel.testing" (input)="calculateDiesel(i)" placeholder="0"></td>
-                <td><input type="number" class="report-input" [(ngModel)]="diesel.rate" (input)="calculateDiesel(i)" placeholder="0.00"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="diesel.closingMeter"
+                    (input)="calculateDiesel(i)" placeholder="0"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="diesel.openingMeter"
+                    (input)="calculateDiesel(i)" placeholder="0"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="diesel.testing" (input)="calculateDiesel(i)"
+                    placeholder="0"></td>
+                <td><input type="number" class="report-input" [(ngModel)]="diesel.rate" (input)="calculateDiesel(i)"
+                    placeholder="0.00"></td>
                 <td><span class="calc-value">{{ diesel.saleLtr | number:'1.2-2' }} L</span></td>
-                <td><span class="calc-value text-warning">{{ (diesel.ltr < 0 ? diesel.ltr * -1 : diesel.ltr) | number:'1.2-2' }} L</span></td>
+                <td><span class="calc-value text-warning">{{ (diesel.ltr < 0 ? diesel.ltr * -1 : diesel.ltr) |
+                      number:'1.2-2' }} L</span>
+                </td>
                 <td class="text-right"><span class="amount-value">₹{{ diesel.total_rs | number:'1.2-2' }}</span></td>
               </tr>
               <tr class="total-row-modern diesel">
-                <td colspan="6" class="font-weight-bold"><mat-icon style="font-size:14px;vertical-align:middle;">ev_station</mat-icon> Diesel Sub-Total</td>
+                <td colspan="6" class="font-weight-bold"><mat-icon
+                    style="font-size:14px;vertical-align:middle;">ev_station</mat-icon> Diesel Sub-Total</td>
                 <td><strong>{{ dieselTotalLTR | number:'1.2-2' }} L</strong></td>
                 <td class="text-right"><strong>₹{{ dieselTotalRS | number:'1.2-2' }}</strong></td>
               </tr>
+
+              <!-- Power Diesel Rows -->
+              <ng-container *ngIf="showPowerDieselCount > 0">
+                <tr *ngFor="let pd of powerDiesel.slice(0, showPowerDieselCount); let i = index" class="hover-row">
+                  <td><span class="fuel-name-badge diesel-badge">{{ pd.name }}</span></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="pd.closingMeter"
+                      (input)="calculatepowerDiesel(i)" placeholder="0"></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="pd.openingMeter"
+                      (input)="calculatepowerDiesel(i)" placeholder="0"></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="pd.testing"
+                      (input)="calculatepowerDiesel(i)" placeholder="0"></td>
+                  <td><input type="number" class="report-input" [(ngModel)]="pd.rate" (input)="calculatepowerDiesel(i)"
+                      placeholder="0.00"></td>
+                  <td><span class="calc-value">{{ pd.saleLtr | number:'1.2-2' }} L</span></td>
+                  <td><span class="calc-value text-warning">{{ (pd.ltr < 0 ? pd.ltr * -1 : pd.ltr) | number:'1.2-2' }}
+                        L</span>
+                  </td>
+                  <td class="text-right"><span class="amount-value">₹{{ pd.total_rs | number:'1.2-2' }}</span></td>
+                </tr>
+                <tr class="total-row-modern diesel">
+                  <td colspan="6" class="font-weight-bold"><mat-icon
+                      style="font-size:14px;vertical-align:middle;">ev_station</mat-icon> Power Diesel Sub-Total</td>
+                  <td><strong>{{ powerDieselTotalLTR | number:'1.2-2' }} L</strong></td>
+                  <td class="text-right"><strong>₹{{ powerDieselTotalRS | number:'1.2-2' }}</strong></td>
+                </tr>
+              </ng-container>
             </tbody>
           </table>
         </div>
@@ -164,14 +215,13 @@
                   <tr *ngFor="let den of denominations; trackBy: trackByDenKey">
                     <td class="font-weight-medium">₹{{ den.val }}</td>
                     <td><input type="number" class="report-input" [(ngModel)]="multipliers[den.key]"
-                        (input)="calculateTotal()"
-                        (focus)="onDenominationFocus($event, den.key)"
+                        (input)="calculateTotal()" (focus)="onDenominationFocus($event, den.key)"
                         (blur)="onDenominationBlur(den.key)"></td>
                     <td class="text-right">₹{{ getDenominationDisplay(den.key) | number:'1.2-2' }}</td>
                   </tr>
                   <tr class="grand-total-row">
                     <td colspan="2">Total Cash in Hand</td>
-                    <td class="text-right">₹{{ totalCaseCase | number:'1.2-2' }}</td>
+                    <td class="text-right">₹{{ totalCase | number:'1.2-2' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -204,9 +254,13 @@
                 <span class="summary-label">Customer Deposits</span>
                 <span class="summary-value text-success">₹{{ jamaTotal | number:'1.2-2' }}</span>
               </div>
-              <div class="summary-item grand-total">
-                <span class="summary-label">Total Revenue</span>
+              <div class="summary-item">
+                <span class="summary-label">Total Revenue (Fuel Sales)</span>
                 <span class="summary-value">₹{{ totalRs | number:'1.2-2' }}</span>
+              </div>
+              <div class="summary-item grand-total">
+                <span class="summary-label">Total Expected Cash</span>
+                <span class="summary-value">₹{{ totalCase | number:'1.2-2' }}</span>
               </div>
             </div>
 

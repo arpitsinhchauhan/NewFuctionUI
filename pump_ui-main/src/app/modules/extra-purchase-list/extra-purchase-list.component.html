@@ -13,7 +13,11 @@
             <mat-icon>close</mat-icon>
           </button>
         </div>
-        <button mat-stroked-button color="primary" (click)="openExcelPdf()">
+        <button mat-flat-button class="btn-premium btn-premium-primary me-2" (click)="openDialog()">
+          <mat-icon>add</mat-icon>
+          <span>Add Purchase</span>
+        </button>
+        <button mat-stroked-button class="btn-premium btn-premium-secondary" (click)="openExcelPdf()">
           <mat-icon>download</mat-icon>
           <span>Export Excel</span>
         </button>

@@ -122,7 +122,13 @@
     }
     
     // Select value and input text
-    input, .mat-input-element, .mat-select-value, .mat-select-value-text { 
+    input, 
+    .mat-input-element, 
+    .mat-select-value, 
+    .mat-select-value-text,
+    .mat-select-value-text *,
+    mat-select,
+    mat-select * { 
       color: #0f172a !important; 
       font-weight: 600 !important; 
     }

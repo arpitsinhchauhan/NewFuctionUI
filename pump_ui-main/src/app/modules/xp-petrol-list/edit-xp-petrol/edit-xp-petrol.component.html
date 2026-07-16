@@ -1,84 +1,119 @@
-<div class="dialog-modern-container" style="width: 700px;">
-  <div class="dialog-header-modern">
-    <div class="header-main">
-      <h4>
-        <mat-icon class="text-primary">local_gas_station</mat-icon>
-        XP Petrol Sales
-        <span class="dialog-type-badge badge-edit">Update Mode</span>
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">local_gas_station</mat-icon>
+        Edit XP Petrol Sales
       </h4>
+      <p class="card-subtitle">Update meter readings and calculate sales volume</p>
     </div>
-    <button mat-icon-button (click)="cancel()" class="text-muted">
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <div class="dialog-content-modern">
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Reading Date</label>
-        <input type="date" class="form-control-modern" [(ngModel)]="xpPetrolDetails.date">
+  <div class="card-body p-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Reading Date</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="xpPetrolDetails.date" type="date">
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="form-group-modern">
-        <label class="form-label-modern">Assigned Pump</label>
-        <select class="form-control-modern" [(ngModel)]="xpPetrolDetails.pump">
-          <option value="" disabled selected>Select Pump</option>
-          <option *ngFor="let pump of xppumpList" [value]="pump">{{ pump }}</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-grid-modern" style="grid-template-columns: 1fr 1fr 1fr;">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Closing Meter</label>
-        <input type="number" class="form-control-modern" [(ngModel)]="xpPetrolDetails.close_meter" (input)="calculateValues()" placeholder="0.00">
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Assigned Pump</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select [(ngModel)]="xpPetrolDetails.pump">
+              <mat-option *ngFor="let pump of xppumpList" [value]="pump">
+                <mat-icon class="me-2 text-primary opacity-50">gas_meter</mat-icon> {{ pump }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="form-group-modern">
-        <label class="form-label-modern">Opening Meter</label>
-        <input type="number" class="form-control-modern" [(ngModel)]="xpPetrolDetails.open_meter" (input)="calculateValues()" placeholder="0.00">
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Closing Meter (End)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="xpPetrolDetails.close_meter" type="text" (ngModelChange)="calculateValues()" placeholder="000000.00">
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="form-group-modern">
-        <label class="form-label-modern">Raw Difference</label>
-        <div class="form-control-modern bg-light text-right font-weight-bold">
-          {{ (xpPetrolDetails.total) | number:'1.2-2' }}
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Opening Meter (Start)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="xpPetrolDetails.open_meter" type="text" (ngModelChange)="calculateValues()" placeholder="000000.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Meter Difference (Raw)</label>
+          <div class="p-3 bg-light rounded-2 border d-flex align-items-center justify-content-between h-48">
+            <span class="text-muted small">Total:</span>
+            <span class="font-weight-bold">{{ (xpPetrolDetails.total) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Testing / Internal Usage (Ltrs)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="xpPetrolDetails.testing" type="text" (ngModelChange)="calculateValues()" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Net XP Petrol Volume (Sales)</label>
+          <div class="p-3 bg-light rounded-2 border d-flex align-items-center justify-content-between h-48">
+            <span class="text-muted small">Ltrs:</span>
+            <span class="font-weight-bold text-primary">{{ (xpPetrolDetails.xppetrol_ltr) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Unit Rate (₹/Ltr)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-icon matPrefix class="me-2 opacity-50">currency_rupee</mat-icon>
+            <input matInput [(ngModel)]="xpPetrolDetails.rate" type="text" (ngModelChange)="calculateValues()" placeholder="00.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6 mt-3">
+        <div class="p-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <mat-icon class="text-primary me-2">monetization_on</mat-icon>
+            <span class="text-muted font-weight-medium">Total Sales Revenue:</span>
+          </div>
+          <span class="text-primary fs-3 font-weight-bold">
+            ₹ {{ xpPetrolDetails.total_sell | number:'1.2-2' }}
+          </span>
         </div>
       </div>
     </div>
 
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Testing / Usage (L)</label>
-        <input type="number" class="form-control-modern" [(ngModel)]="xpPetrolDetails.testing" (input)="calculateValues()" placeholder="0.00">
-      </div>
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
 
-      <div class="form-group-modern">
-        <label class="form-label-modern">Unit Rate (₹)</label>
-        <input type="number" class="form-control-modern" [(ngModel)]="xpPetrolDetails.rate" (input)="calculateValues()" placeholder="00.00">
-      </div>
+      <button mat-flat-button color="primary" (click)="Edit(xpPetrolDetails)" class="px-5 py-2">
+        <mat-icon class="me-2">save</mat-icon> Update Sales Record
+      </button>
     </div>
-
-    <!-- Summary Section -->
-    <div class="valuation-box-modern">
-      <div class="valuation-info">
-        <span class="valuation-label">Net Sales Volume:</span>
-        <div class="h4 mb-0 font-weight-bold text-primary">{{ (xpPetrolDetails.xppetrol_ltr) | number:'1.2-2' }} L</div>
-      </div>
-      <div class="valuation-total text-right">
-        <span class="valuation-label">Total Revenue:</span>
-        <div class="valuation-amount">₹{{ xpPetrolDetails.total_sell | number:'1.2-2' }}</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="dialog-actions-modern">
-    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
-      Cancel
-    </button>
-    <button class="btn-premium btn-premium-primary btn-md" (click)="Edit(xpPetrolDetails)">
-      <mat-icon>save</mat-icon>
-      Update Sales Record
-    </button>
   </div>
 </div>

@@ -1,80 +1,106 @@
-<div class="dialog-modern-container" style="width: 800px;">
-  <div class="dialog-header-modern">
-    <div class="header-main">
-      <h4>
-        <mat-icon class="me-2 vertical-align-middle">add_business</mat-icon>
+<div class="card-premium dialog-modern-card">
+  <div class="card-header-modern">
+    <div class="header-text">
+      <h4 class="card-title">
+        <mat-icon class="me-2 text-primary">shopping_cart</mat-icon>
         Edit Extra Purchase
       </h4>
+      <p class="card-subtitle">Update purchase details, taxes, and cess values</p>
     </div>
-    <button mat-icon-button (click)="cancel()" class="text-white">
+    <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <div class="dialog-content-modern">
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Purchase Date</label>
-        <input type="date" class="form-control-modern" [(ngModel)]="extraPurchaseDetails.date">
+  <div class="card-body p-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Purchase Date</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraPurchaseDetails.date" type="date">
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="form-group-modern">
-        <label class="form-label-modern">Purchase Type</label>
-        <select class="form-control-modern" [(ngModel)]="extraPurchaseDetails.extraType">
-          <option value="XP Petrol">XP Petrol</option>
-          <option value="Power Diesel">Power Diesel</option>
-        </select>
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Purchase Type</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select [(ngModel)]="extraPurchaseDetails.extraType">
+              <mat-option value="XP Petrol">XP Petrol</mat-option>
+              <mat-option value="Power Diesel">Power Diesel</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Quantity</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraPurchaseDetails.extra_quantity" type="number" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">Total Amount (₹)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraPurchaseDetails.extra_total" type="number" (ngModelChange)="calculateTotalPurchase()" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group-modern">
+          <label class="label-modern">VAT (₹)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraPurchaseDetails.extra_vat" type="number" (ngModelChange)="calculateTotalPurchase()" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">Cess (₹)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraPurchaseDetails.extra_cess" type="number" (ngModelChange)="calculateTotalPurchase()" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group-modern">
+          <label class="label-modern">JTC Percentage (%)</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput [(ngModel)]="extraPurchaseDetails.extra_jtcpercentage" type="number" (ngModelChange)="calculateTotalPurchase()" placeholder="0.00">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-md-12 mt-3">
+        <div class="p-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <mat-icon class="text-primary me-2">payments</mat-icon>
+            <span class="text-muted font-weight-medium">Total Purchase Amount:</span>
+          </div>
+          <span class="text-primary fs-3 font-weight-bold">
+            ₹ {{ extraPurchaseDetails.extra_total_purchase | number:'1.2-2' }}
+          </span>
+        </div>
       </div>
     </div>
 
-    <div class="form-grid-modern" style="grid-template-columns: 1fr 1fr 1fr;">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Quantity</label>
-        <input type="number" class="form-control-modern text-right" [(ngModel)]="extraPurchaseDetails.extra_quantity" placeholder="0.00">
-      </div>
+    <div class="dialog-actions-modern mt-4">
+      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
+        Cancel
+      </button>
 
-      <div class="form-group-modern">
-        <label class="form-label-modern">Total Amount (₹)</label>
-        <input type="number" class="form-control-modern text-right" [(ngModel)]="extraPurchaseDetails.extra_total" (input)="calculateTotalPurchase()" placeholder="0.00">
-      </div>
-
-      <div class="form-group-modern">
-        <label class="form-label-modern">VAT (₹)</label>
-        <input type="number" class="form-control-modern text-right" [(ngModel)]="extraPurchaseDetails.extra_vat" (input)="calculateTotalPurchase()" placeholder="0.00">
-      </div>
+      <button mat-flat-button color="primary" *ngIf="data" (click)="Edit(extraPurchaseDetails)" class="px-5 py-2">
+        <mat-icon class="me-2">save</mat-icon> Update Purchase
+      </button>
     </div>
-
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Cess (₹)</label>
-        <input type="number" class="form-control-modern text-right" [(ngModel)]="extraPurchaseDetails.extra_cess" (input)="calculateTotalPurchase()" placeholder="0.00">
-      </div>
-
-      <div class="form-group-modern">
-        <label class="form-label-modern">JTC Percentage (%)</label>
-        <input type="number" class="form-control-modern text-right" [(ngModel)]="extraPurchaseDetails.extra_jtcpercentage" (input)="calculateTotalPurchase()" placeholder="0.00">
-      </div>
-    </div>
-
-    <!-- Summary Box -->
-    <div class="valuation-box-modern">
-      <div class="valuation-info">
-        <span class="valuation-label">Total Purchase Amount</span>
-        <div class="text-muted small">Comprehensive extra purchase valuation</div>
-      </div>
-      <div class="valuation-amount">
-        ₹ {{ extraPurchaseDetails.extra_total_purchase | number:'1.2-2' }}
-      </div>
-    </div>
-  </div>
-
-  <div class="dialog-actions-modern">
-    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
-      Cancel
-    </button>
-    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data" (click)="Edit(extraPurchaseDetails)">
-      <mat-icon class="me-2">save</mat-icon> 
-      Update Purchase
-    </button>
   </div>
 </div>

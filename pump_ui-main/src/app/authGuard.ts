@@ -53,23 +53,26 @@ export class AuthGuard implements CanActivate {
       }
       return of(true);
     }
-   if (requestedPath === '/XPpetrol' || requestedPath === '/powerDiesel' ||  requestedPath === '/extraDipp' ||  requestedPath === '/extraPurchasedetails') {
+    if (requestedPath === '/XPpetrol' || requestedPath === '/powerDiesel' ||  requestedPath === '/extraDipp' ||  requestedPath === '/extraPurchasedetails') {
       return this.authService.getUserPump(userId).pipe(
         map(response => {
           const data = response?.data;
-          if (requestedPath === '/XPpetrol' && data?.xp_petrol_nozzle === "0") {
+          const xpEnabled = Number(data?.xp_petrol_nozzle) > 0;
+          const powerEnabled = Number(data?.powe_diesel_nozzle) > 0;
+
+          if (requestedPath === '/XPpetrol' && !xpEnabled) {
             this.router.navigate(['/dashboard']);
             return false;
           }
-          if (requestedPath === '/powerDiesel' && data?.powe_diesel_nozzle === "0") {
+          if (requestedPath === '/powerDiesel' && !powerEnabled) {
             this.router.navigate(['/dashboard']);
             return false;
           }
-          if (requestedPath === '/extraDipp' && data?.powe_diesel_nozzle === "0") {
+          if (requestedPath === '/extraDipp' && !xpEnabled && !powerEnabled) {
             this.router.navigate(['/dashboard']);
             return false;
           }
-          if (requestedPath === '/extraPurchasedetails' && data?.powe_diesel_nozzle === "0") {
+          if (requestedPath === '/extraPurchasedetails' && !xpEnabled && !powerEnabled) {
             this.router.navigate(['/dashboard']);
             return false;
           }
