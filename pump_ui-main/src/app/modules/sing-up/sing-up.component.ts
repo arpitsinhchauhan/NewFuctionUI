@@ -1,16 +1,10 @@
-// import { HttpClient } from '@angular/common/http';
-// import { Component, OnInit } from '@angular/core';
-// import { UserDTO } from 'app/UserDTO';
-// import { UserServiceService } from 'app/user-service.service';
-// import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 
-// @Component({
-//   selector: 'app-sing-up',
-//   templateUrl: './sing-up.component.html',
-//   styleUrls: ['./sing-up.component.css']
-// })
-// export class SingUPComponent implements OnInit {
-//   hide = true;
+@Component({
+  selector: 'app-sing-up',
+  template: ''
+})
+export class SingUPComponent {}
 //   user: UserDTO;
 //   constructor(private http: HttpClient,
 //     private router: Router,

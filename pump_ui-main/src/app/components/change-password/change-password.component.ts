@@ -17,17 +17,19 @@ export class ChangePasswordComponent implements OnInit {
   hideOld = true;
   hideNew = true;
   hideConfirm = true;
+  isSelf = true;
   //userId = localStorage.getItem('userId');
 
   constructor(private fb: FormBuilder, @Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<ChangePasswordComponent>,
     private http: HttpClient, private user: UserServiceService, private notificationService: NotificationService) {
     this.users = this.data.userId;
+    this.isSelf = this.data.isSelf !== false;
   }
 
   ngOnInit(): void {
     this.changePasswordForm = this.fb.group(
       {
-        oldPassword: ['', Validators.required],
+        oldPassword: ['', this.isSelf ? [Validators.required] : []],
         newPassword: ['', Validators.required],
         confirmPassword: ['', Validators.required]
       },

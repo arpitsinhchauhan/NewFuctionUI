@@ -22,6 +22,8 @@ public interface jamabakiRepository extends JpaRepository<jamabaki, Integer> {
 
     List<jamabaki> findByUserId(String userId);
 
+    List<jamabaki> findByDateAndUserId(String date, String userId);
+
     Optional<jamabaki> findByUserIdAndDateAndName(String userId, String date, String name);
 
 //    @Query("SELECT j.date, SUM(j.amount) FROM jamabaki j WHERE j.sender LIKE %:sender% GROUP BY j.date")

@@ -365,6 +365,23 @@
   color: var(--primary);
   font-weight: 600;
   text-decoration: underline;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.inline-edit-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.click-cell:hover .inline-edit-icon {
+  opacity: 1;
 }
 
 .modern-textarea {
@@ -689,5 +706,50 @@
       text-decoration: none !important;
       color: inherit !important;
     }
+  }
+}
+
+.erp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.erp-modal-container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 950px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  &.lg {
+    max-width: 1150px;
+  }
+}
+
+.compact-erp-table {
+  font-size: 13px;
+  th {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px;
+  }
+  td {
+    padding: 8px 10px;
+    vertical-align: middle;
   }
 }

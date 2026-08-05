@@ -188,6 +188,19 @@ export const API_XP_Petrol: string = `${prefix}/portal/api/XPpetrolList`;
 export const API_POWER_DIESEL: string = `${prefix}/portal/api/powerDiesel`;
 
 export const API_XP_POWER_SAVE: string = `${prefix}/portal/api/saveXPPowerReport`;
+
+export const API_PREVIOUS_CLOSING_METER: string = `${prefix}/portal/api/shift/previousClosingMeter`;
+export const API_CLOSE_SHIFT: string = `${prefix}/portal/api/shift/closeShift`;
+export const API_REOPEN_SHIFT: string = `${prefix}/portal/api/shift/reopenShift`;
+export const API_SHIFT_SALES_REPORT: string = `${prefix}/portal/api/shift/shiftSalesReport`;
+export const API_DAILY_CONSOLIDATED_REPORT: string = `${prefix}/portal/api/shift/dailyConsolidatedReport`;
+
+export const API_EOD_STATUS: string = `${prefix}/api/eod/status`;
+export const API_EOD_VALIDATE: string = `${prefix}/api/eod/validate`;
+export const API_EOD_CLOSE_DAY: string = `${prefix}/api/eod/closeDay`;
+export const API_EOD_REOPEN_DAY: string = `${prefix}/api/eod/reopenDay`;
+export const API_EOD_CHECK_LOCK: string = `${prefix}/api/eod/checkLock`;
+export const API_EOD_AUDIT_LOGS: string = `${prefix}/api/eod/auditLogs`;
 export const API_USER_PUMP: string = `${prefix}/portal/api/userPump`;
 export const API_PETROL_STOCK_ADDEDIT = `${prefix}/portal/api/petrolStockAddEdit`;
 export const API_DIESEL_STOCK_ADDEDIT = `${prefix}/portal/api/dieselStockAddEdit`;

@@ -49,6 +49,21 @@ public class powerDiesel {
     @Column(name = "user_id")
     private String userId;
 
+    @Column(name = "shift")
+    private String shift;
+
+    @Column(name = "shift_status")
+    private String shiftStatus = "OPEN";
+
+    @Column(name = "shift_close_time")
+    private String shiftCloseTime;
+
+    @Column(name = "closed_by")
+    private String closedBy;
+
+    @Column(name = "employee_name")
+    private String employeeName;
+
     @Transient
     private List<powerDiesel> rows;
 
@@ -148,5 +163,43 @@ public class powerDiesel {
         this.rows = rows;
     }
 
-    
+    public String getShift() {
+        return shift;
+    }
+
+    public void setShift(String shift) {
+        this.shift = shift;
+    }
+
+    public String getShiftStatus() {
+        return shiftStatus;
+    }
+
+    public void setShiftStatus(String shiftStatus) {
+        this.shiftStatus = shiftStatus;
+    }
+
+    public String getShiftCloseTime() {
+        return shiftCloseTime;
+    }
+
+    public void setShiftCloseTime(String shiftCloseTime) {
+        this.shiftCloseTime = shiftCloseTime;
+    }
+
+    public String getClosedBy() {
+        return closedBy;
+    }
+
+    public void setClosedBy(String closedBy) {
+        this.closedBy = closedBy;
+    }
+
+    public String getEmployeeName() {
+        return employeeName;
+    }
+
+    public void setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
 }

@@ -257,7 +257,7 @@ export class NavbarComponent implements OnInit {
   chnagePassword() {
     const dialogRef = this.dialog.open(ChangePasswordComponent, {
       panelClass: 'dialog-sm',
-      data: { userId: this.userId },
+      data: { userId: this.userId, isSelf: true },
       disableClose: true,
     });
 

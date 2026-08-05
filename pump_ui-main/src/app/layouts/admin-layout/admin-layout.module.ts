@@ -40,6 +40,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { CustomTableComponent } from 'app/modules/custom-table/custom-table.component';
 import { MatDatepicker, matDatepickerAnimations, MatDatepickerModule } from '@angular/material/datepicker';
 import { LoaderPreviewComponent } from 'app/modules/loader-preview/loader-preview.component';
+import { DayClosingComponent } from 'app/modules/day-closing/day-closing.component';
 
 @NgModule({
   imports: [
@@ -91,7 +92,8 @@ import { LoaderPreviewComponent } from 'app/modules/loader-preview/loader-previe
     KharchSellPdfExcelComponent,
     AtmTransactionPdfExcelComponent,
     CustomTableComponent,
-    LoaderPreviewComponent
+    LoaderPreviewComponent,
+    DayClosingComponent
   ]
 })
 

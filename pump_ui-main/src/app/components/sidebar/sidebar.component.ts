@@ -76,6 +76,11 @@ export const ROUTES: any[] = [
       { path: '/customer', title: 'Customer Ledger', icon: 'contacts_product', class: '', roles: ['Owner'] },
       { path: '/Report', title: 'Financial Reports', icon: 'picture_as_pdf', class: '', roles: ['Owner'] },
     ]
+  },
+  {
+    section: 'ADMINISTRATION', items: [
+      { path: '/day-closing', title: 'Day Closing (EOD)', icon: 'event_available', class: '', roles: ['Owner'] }
+    ]
   }
 ];
 

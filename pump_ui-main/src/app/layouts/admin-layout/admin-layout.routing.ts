@@ -28,7 +28,7 @@ import { SettingsComponent } from 'app/modules/settings/settings.component';
 import { XpPetrolListComponent } from 'app/modules/xp-petrol-list/xp-petrol-list.component';
 import { UserProfileComponent } from 'app/user-profile/user-profile.component';
 import { LoaderPreviewComponent } from 'app/modules/loader-preview/loader-preview.component';
-
+import { DayClosingComponent } from 'app/modules/day-closing/day-closing.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'admin/dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
@@ -61,6 +61,7 @@ export const AdminLayoutRoutes: Routes = [
     { path: 'dailyReport', component: MainPanelComponent, canActivate: [AuthGuard] },
     { path: 'customer', component: CustomerListComponent, canActivate: [AuthGuard] },
     { path: 'loader-preview', component: LoaderPreviewComponent, canActivate: [AuthGuard] },
+    { path: 'day-closing', component: DayClosingComponent, canActivate: [AuthGuard] },
 ];    // { path: 'map', component: MapComponent , canActivate: [AuthGuard]},
 // {
 //   path: '',

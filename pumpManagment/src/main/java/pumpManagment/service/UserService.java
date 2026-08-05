@@ -1,6 +1,9 @@
 package pumpManagment.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pumpManagment.config.CipherUtil;
@@ -17,13 +20,46 @@ public class UserService {
     @Autowired
     private PumpPasswordEncoder pumpPasswordEncoder;
 
-    public void changePasswordByUserId(Long userId, String oldPassword, String newPassword) throws Exception {
+    public void changePasswordByUserId(Long userId, String oldPassword, String newPassword, Long loggedInUserId) throws Exception {
         DAOUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Validate old password
-        if (!pumpPasswordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new RuntimeException("Old password is incorrect");
+        // Validate old password if not administrative bypass
+        boolean skipOldPassword = false;
+        if (oldPassword == null || oldPassword.trim().isEmpty()) {
+            // First check loggedInUserId parameter
+            if (loggedInUserId != null) {
+                DAOUser loggedInUser = userRepository.findById(loggedInUserId).orElse(null);
+                if (loggedInUser != null) {
+                    String loggedInRole = loggedInUser.getRole();
+                    if (("PUMP_MANAGER".equalsIgnoreCase(loggedInRole) || "SUPER_ADMIN".equalsIgnoreCase(loggedInRole) || "admin".equalsIgnoreCase(loggedInRole))
+                            && !loggedInUser.getId().equals(userId)) {
+                        skipOldPassword = true;
+                    }
+                }
+            }
+
+            // Fallback to SecurityContextHolder
+            if (!skipOldPassword) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.getPrincipal() instanceof UserDetails) {
+                    String loggedInUsername = ((UserDetails) auth.getPrincipal()).getUsername();
+                    DAOUser loggedInUser = userRepository.findByUsername(loggedInUsername);
+                    if (loggedInUser != null) {
+                        String loggedInRole = loggedInUser.getRole();
+                        if (("PUMP_MANAGER".equalsIgnoreCase(loggedInRole) || "SUPER_ADMIN".equalsIgnoreCase(loggedInRole) || "admin".equalsIgnoreCase(loggedInRole))
+                                && !loggedInUser.getId().equals(userId)) {
+                            skipOldPassword = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!skipOldPassword) {
+            if (oldPassword == null || oldPassword.trim().isEmpty() || !pumpPasswordEncoder.matches(oldPassword, user.getPassword())) {
+                throw new RuntimeException("Old password is incorrect");
+            }
         }
 
         // Encode new password and update

@@ -245,11 +245,16 @@ export class AddUserComponent implements OnInit {
 
 
   openChangePassword(): void {
+    const loggedInId = localStorage.getItem('userId');
+    const isSelf = String(this.data?.id) === String(loggedInId);
     this.dialog.open(ChangePasswordComponent, {
       width: '420px',
       panelClass: 'dialog-sm',
       disableClose: true,
-      data: { userId: this.data.id }
+      data: { 
+        userId: this.data.id,
+        isSelf: isSelf
+      }
     });
   }
 

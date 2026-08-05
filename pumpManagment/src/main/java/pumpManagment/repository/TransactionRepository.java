@@ -22,6 +22,8 @@ public interface TransactionRepository extends JpaRepository<transaction, Intege
 
     List<transaction> findByUserId(String userId);
 
+    List<transaction> findByDateAndUserId(String date, String userId);
+
     @Query(value = "SELECT t.date, SUM(t.amount) AS amount "
             + "FROM transaction t "
             + "WHERE t.date BETWEEN :startDate AND :endDate "

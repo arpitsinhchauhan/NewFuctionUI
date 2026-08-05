@@ -176,6 +176,17 @@ export class MainPanelComponent implements OnInit {
   note: String = '';
   creditNOteIOCL: number = 0;
   selectedShift: string = 'Morning';
+  availableShifts: string[] = ['Morning', 'Afternoon', 'Night'];
+  currentShiftStatus: string = 'OPEN';
+  isShiftLocked: boolean = false;
+  isDayLocked: boolean = false;
+  shiftClosedBy: string = '';
+  shiftCloseTime: string = '';
+
+  showShiftReportModal: boolean = false;
+  showDailyConsolidatedModal: boolean = false;
+  shiftReportData: any = null;
+  dailyConsolidatedData: any = null;
 
   // Manager Dashboard Properties
   userRole: string = '';
@@ -286,6 +297,10 @@ export class MainPanelComponent implements OnInit {
       this.getPowerDieselGatt();
       this.getcreditNOteIOCL();
       this.getOilPurchaseList();
+      this.use.checkEodLock(formatted, this.userId).subscribe(res => {
+        this.isDayLocked = res && res.locked;
+      });
+      setTimeout(() => this.fetchPreviousClosingMeters(), 300);
     } else {
       this.notificationService.failure("Plz Select the date..");
     }
@@ -365,119 +380,80 @@ export class MainPanelComponent implements OnInit {
     );
   }
 
+  private aggregateFuelItems(pumps: any[], allItems: any[], ltrKey: string) {
+    pumps.forEach(pump => {
+      pump.openingMeter = null;
+      pump.closingMeter = null;
+      pump.saleLtr = 0;
+      pump.testing = null;
+      pump.ltr = 0;
+      pump.rate = null;
+      pump.total_rs = 0;
+    });
+
+    if (!allItems || allItems.length === 0) return;
+
+    const pumpGroupMap = new Map<string, any[]>();
+    allItems.forEach((item: any) => {
+      if (item && item.pump) {
+        if (!pumpGroupMap.has(item.pump)) {
+          pumpGroupMap.set(item.pump, []);
+        }
+        pumpGroupMap.get(item.pump).push(item);
+      }
+    });
+
+    pumpGroupMap.forEach((items, pumpName) => {
+      const pump = pumps.find(p => p.name === pumpName);
+      if (pump && items.length > 0) {
+        // Sort by id ascending (chronological shift order)
+        items.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+        const firstItem = items[0];
+        const lastItem = items[items.length - 1];
+
+        pump.openingMeter = (firstItem.open_meter !== null && firstItem.open_meter !== undefined && firstItem.open_meter !== '') ? +firstItem.open_meter : null;
+        pump.closingMeter = (lastItem.close_meter !== null && lastItem.close_meter !== undefined && lastItem.close_meter !== '') ? +lastItem.close_meter : null;
+
+        pump.testing = items.reduce((sum, i) => sum + (+i.testing || 0), 0);
+
+        if (pump.openingMeter !== null && pump.closingMeter !== null) {
+          pump.saleLtr = Math.abs(pump.closingMeter - pump.openingMeter);
+        } else {
+          pump.saleLtr = items.reduce((sum, i) => sum + (+i[ltrKey] || 0), 0);
+        }
+
+        pump.rate = (lastItem.rate !== null && lastItem.rate !== undefined && lastItem.rate !== '') ? +lastItem.rate : null;
+        pump.ltr = (pump.saleLtr || 0) - (pump.testing || 0);
+        pump.total_rs = parseFloat(items.reduce((sum, i) => sum + (+i.total_sell || 0), 0).toFixed(2));
+      }
+    });
+  }
+
   getPetrolStock(date: string, userId: string) {
     this.use.getPetrolList(date, userId).subscribe((data: any[]) => {
-      this.petrolPumps.forEach(pump => {
-        pump.openingMeter = null;
-        pump.closingMeter = null;
-        pump.saleLtr = 0;
-        pump.testing = null;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-
-      data.forEach((item: any) => {
-        const pump = this.petrolPumps.find(p => p.name === item.pump);
-        if (pump) {
-          pump.openingMeter = +item.open_meter;
-          pump.closingMeter = +item.close_meter;
-          pump.testing = +item.testing;
-          pump.saleLtr = +item.petrol_ltr;
-          pump.rate = +item.rate;
-          pump.ltr = +item.total;
-          pump.total_rs = +item.total_sell;
-        }
-      });
+      this.aggregateFuelItems(this.petrolPumps, data || [], 'petrol_ltr');
       this.calculateTotals();
     });
   }
 
   getDieselStock(date: string, userId: string) {
     this.use.getDieselList(date, userId).subscribe((data: any[]) => {
-      // console.log('Diesel Data:', data);
-
-      // Reset dieselPumps array before mapping new data
-      this.dieselPumps.forEach(pump => {
-        pump.openingMeter = null;
-        pump.closingMeter = null;
-        pump.saleLtr = 0;
-        pump.testing = null;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-
-      // Map the response data to dieselPumps based on pump name
-      data.forEach((item: any) => {
-        const pump = this.dieselPumps.find(p => p.name === item.pump);
-        if (pump) {
-          pump.openingMeter = +item.open_meter;
-          pump.closingMeter = +item.close_meter;
-          pump.testing = +item.testing;
-          pump.saleLtr = +item.diesel_ltr;
-          pump.rate = +item.rate;
-          pump.ltr = +item.total;
-          pump.total_rs = +item.total_sell;
-        }
-      });
+      this.aggregateFuelItems(this.dieselPumps, data || [], 'diesel_ltr');
       this.calculateTotals();
     });
   }
 
-
   getXPPetrol(date: string, userId: string) {
     this.use.getXPPetrolList(date, userId).subscribe((data: any[]) => {
-      this.xpPetrol.forEach(pump => {
-        pump.openingMeter = null;
-        pump.closingMeter = null;
-        pump.saleLtr = 0;
-        pump.testing = null;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-
-      data.forEach((item: any) => {
-        const pump = this.xpPetrol.find(p => p.name === item.pump);
-        if (pump) {
-          pump.openingMeter = +item.open_meter;
-          pump.closingMeter = +item.close_meter;
-          pump.testing = +item.testing;
-          pump.saleLtr = +item.xppetrol_ltr;
-          pump.rate = +item.rate;
-          pump.ltr = +item.total;
-          pump.total_rs = +item.total_sell;
-        }
-      });
+      this.aggregateFuelItems(this.xpPetrol, data || [], 'xppetrol_ltr');
       this.calculateTotals();
     });
   }
 
   getpowerDiesel(date: string, userId: string) {
     this.use.getpowerDiesel(date, userId).subscribe((data: any[]) => {
-      this.powerDiesel.forEach(pump => {
-        pump.openingMeter = null;
-        pump.closingMeter = null;
-        pump.saleLtr = 0;
-        pump.testing = null;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-
-      data.forEach((item: any) => {
-        const pump = this.powerDiesel.find(p => p.name === item.pump);
-        if (pump) {
-          pump.openingMeter = +item.open_meter;
-          pump.closingMeter = +item.close_meter;
-          pump.testing = +item.testing;
-          pump.saleLtr = +item.powerdiesel_ltr;
-          pump.rate = +item.rate;
-          pump.ltr = +item.total;
-          pump.total_rs = +item.total_sell;
-        }
-      });
+      this.aggregateFuelItems(this.powerDiesel, data || [], 'powerdiesel_ltr');
       this.calculateTotals();
     });
   }
@@ -597,6 +573,189 @@ export class MainPanelComponent implements OnInit {
     );
 
     this.updateTotalRs();
+  }
+
+  onShiftChange() {
+    this.showSelectedDate();
+  }
+
+  checkOpeningMismatch(pump: any) {
+    if (pump && pump.autoOpeningMeter !== undefined && pump.autoOpeningMeter !== null && pump.openingMeter !== null) {
+      pump.warningMismatch = (+pump.openingMeter !== +pump.autoOpeningMeter);
+    } else {
+      pump.warningMismatch = false;
+    }
+  }
+
+  fetchPreviousClosingMeters() {
+    if (!this.reportDate) return;
+    const formatted = this.use.getFormattedDate(this.reportDate);
+
+    // Petrol
+    this.petrolPumps.slice(0, this.showPetrolPumpsCount).forEach((pump, index) => {
+      if (pump.openingMeter === null || pump.openingMeter === 0) {
+        this.use.getPreviousClosingMeter('petrol', pump.name, formatted).subscribe(res => {
+          if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
+            if (pump.openingMeter === null || pump.openingMeter === 0) {
+              pump.openingMeter = +res.previousClosingMeter;
+              pump.autoOpeningMeter = +res.previousClosingMeter;
+              this.calculatePetrol(index);
+            }
+          }
+        });
+      }
+    });
+
+    // Diesel
+    this.dieselPumps.slice(0, this.showDieselPumpsCount).forEach((pump, index) => {
+      if (pump.openingMeter === null || pump.openingMeter === 0) {
+        this.use.getPreviousClosingMeter('diesel', pump.name, formatted).subscribe(res => {
+          if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
+            if (pump.openingMeter === null || pump.openingMeter === 0) {
+              pump.openingMeter = +res.previousClosingMeter;
+              pump.autoOpeningMeter = +res.previousClosingMeter;
+              this.calculateDiesel(index);
+            }
+          }
+        });
+      }
+    });
+
+    // XP Petrol
+    if (this.showXpPetrolCount > 0) {
+      this.xpPetrol.slice(0, this.showXpPetrolCount).forEach((pump, index) => {
+        if (pump.openingMeter === null || pump.openingMeter === 0) {
+          this.use.getPreviousClosingMeter('xppetrol', pump.name, formatted).subscribe(res => {
+            if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
+              if (pump.openingMeter === null || pump.openingMeter === 0) {
+                pump.openingMeter = +res.previousClosingMeter;
+                pump.autoOpeningMeter = +res.previousClosingMeter;
+                this.calculateXpPetrol(index);
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // Power Diesel
+    if (this.showPowerDieselCount > 0) {
+      this.powerDiesel.slice(0, this.showPowerDieselCount).forEach((pump, index) => {
+        if (pump.openingMeter === null || pump.openingMeter === 0) {
+          this.use.getPreviousClosingMeter('powerdiesel', pump.name, formatted).subscribe(res => {
+            if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
+              if (pump.openingMeter === null || pump.openingMeter === 0) {
+                pump.openingMeter = +res.previousClosingMeter;
+                pump.autoOpeningMeter = +res.previousClosingMeter;
+                this.calculatepowerDiesel(index);
+              }
+            }
+          });
+        }
+      });
+    }
+  }
+
+  onCloseShift() {
+    if (!this.reportDate) {
+      this.notificationService.failure("Please select date first.");
+      return;
+    }
+    const formatted = this.use.getFormattedDate(this.reportDate);
+    const username = localStorage.getItem('username') || 'Operator';
+
+    // Close petrol shift
+    this.petrolPumps.slice(0, this.showPetrolPumpsCount).forEach(p => {
+      this.use.closeShift({
+        fuelType: 'petrol',
+        date: formatted,
+        shift: this.selectedShift,
+        pump: p.name,
+        userId: this.userId,
+        closedBy: username
+      }).subscribe();
+    });
+
+    // Close diesel shift
+    this.dieselPumps.slice(0, this.showDieselPumpsCount).forEach(d => {
+      this.use.closeShift({
+        fuelType: 'diesel',
+        date: formatted,
+        shift: this.selectedShift,
+        pump: d.name,
+        userId: this.userId,
+        closedBy: username
+      }).subscribe();
+    });
+
+    this.isShiftLocked = true;
+    this.currentShiftStatus = 'CLOSED';
+    this.notificationService.success("🔒 Shift " + this.selectedShift + " has been closed and locked.");
+  }
+
+  onReopenShift() {
+    if (!this.reportDate) return;
+    const formatted = this.use.getFormattedDate(this.reportDate);
+
+    this.petrolPumps.slice(0, this.showPetrolPumpsCount).forEach(p => {
+      this.use.reopenShift({
+        fuelType: 'petrol',
+        date: formatted,
+        shift: this.selectedShift,
+        pump: p.name,
+        userId: this.userId
+      }).subscribe();
+    });
+
+    this.dieselPumps.slice(0, this.showDieselPumpsCount).forEach(d => {
+      this.use.reopenShift({
+        fuelType: 'diesel',
+        date: formatted,
+        shift: this.selectedShift,
+        pump: d.name,
+        userId: this.userId
+      }).subscribe();
+    });
+
+    this.isShiftLocked = false;
+    this.currentShiftStatus = 'OPEN';
+    this.notificationService.success("🔓 Shift " + this.selectedShift + " unlocked successfully.");
+  }
+
+  openShiftReportModal() {
+    if (!this.reportDate) {
+      this.notificationService.failure("Please select date first.");
+      return;
+    }
+    const formatted = this.use.getFormattedDate(this.reportDate);
+    this.use.getShiftSalesReport(formatted, this.userId, this.selectedShift).subscribe(res => {
+      if (res && res.shiftRecords) {
+        this.shiftReportData = res.shiftRecords;
+        this.showShiftReportModal = true;
+      }
+    });
+  }
+
+  openDailyConsolidatedModal() {
+    if (!this.reportDate) {
+      this.notificationService.failure("Please select date first.");
+      return;
+    }
+    const formatted = this.use.getFormattedDate(this.reportDate);
+    this.use.getDailyConsolidatedReport(formatted, this.userId).subscribe(res => {
+      if (res && res.success) {
+        this.dailyConsolidatedData = res;
+        this.showDailyConsolidatedModal = true;
+      }
+    });
+  }
+
+  closeShiftReportModal() {
+    this.showShiftReportModal = false;
+  }
+
+  closeDailyConsolidatedModal() {
+    this.showDailyConsolidatedModal = false;
   }
 
 
@@ -1047,7 +1206,7 @@ export class MainPanelComponent implements OnInit {
   }
 
 
-  get totalCase(): number {
+  get totalRevenue(): number {
     return (
       (Number(this.totalRs) || 0) +
       (Number(this.oilsellTotal) || 0) -
@@ -1055,9 +1214,16 @@ export class MainPanelComponent implements OnInit {
       (Number(this.kharchTotal) || 0) -
       (Number(this.bakiTotal) || 0) +
       (Number(this.jamaTotal) || 0) -
-      (Number(this.Petrolgatt) || 0) +
+      (Number(this.Petrolgatt) || 0) -
+      (Number(this.dieselgatt) || 0) -
+      (Number(this.XpPetrolgatt) || 0) -
+      (Number(this.PowerDieselgatt) || 0) +
       (Number(this.creditNOteIOCL) || 0)
     );
+  }
+
+  get totalCase(): number {
+    return this.totalRevenue;
   }
 
 
@@ -2083,160 +2249,32 @@ export class MainPanelComponent implements OnInit {
     // 1. Petrol Nozzles
     const petrolCalls = empIds.map(id => this.use.getPetrolList(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(petrolCalls).subscribe((results: any[][]) => {
-      this.petrolPumps.forEach(pump => {
-        pump.openingMeter = 0;
-        pump.closingMeter = 0;
-        pump.saleLtr = 0;
-        pump.testing = 0;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-      let hasData = false;
-      results.forEach(data => {
-        if (!data || data.length === 0) return;
-        hasData = true;
-        data.forEach((item: any) => {
-          const pump = this.petrolPumps.find(p => p.name === item.pump);
-          if (pump) {
-            pump.openingMeter += +item.open_meter || 0;
-            pump.closingMeter += +item.close_meter || 0;
-            pump.testing += +item.testing || 0;
-            pump.saleLtr += +item.petrol_ltr || 0;
-            pump.rate = +item.rate || pump.rate;
-            pump.ltr += +item.total || 0;
-            pump.total_rs += +item.total_sell || 0;
-          }
-        });
-      });
-      if (!hasData) {
-        this.petrolPumps.forEach(pump => {
-          pump.openingMeter = null;
-          pump.closingMeter = null;
-          pump.testing = null;
-          pump.rate = null;
-        });
-      }
+      const allItems = results.reduce((acc, curr) => acc.concat(curr || []), []);
+      this.aggregateFuelItems(this.petrolPumps, allItems, 'petrol_ltr');
       this.calculateTotals();
     });
 
     // 2. Diesel Nozzles
     const dieselCalls = empIds.map(id => this.use.getDieselList(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(dieselCalls).subscribe((results: any[][]) => {
-      this.dieselPumps.forEach(pump => {
-        pump.openingMeter = 0;
-        pump.closingMeter = 0;
-        pump.saleLtr = 0;
-        pump.testing = 0;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-      let hasData = false;
-      results.forEach(data => {
-        if (!data || data.length === 0) return;
-        hasData = true;
-        data.forEach((item: any) => {
-          const pump = this.dieselPumps.find(p => p.name === item.pump);
-          if (pump) {
-            pump.openingMeter += +item.open_meter || 0;
-            pump.closingMeter += +item.close_meter || 0;
-            pump.testing += +item.testing || 0;
-            pump.saleLtr += +item.diesel_ltr || 0;
-            pump.rate = +item.rate || pump.rate;
-            pump.ltr += +item.total || 0;
-            pump.total_rs += +item.total_sell || 0;
-          }
-        });
-      });
-      if (!hasData) {
-        this.dieselPumps.forEach(pump => {
-          pump.openingMeter = null;
-          pump.closingMeter = null;
-          pump.testing = null;
-          pump.rate = null;
-        });
-      }
+      const allItems = results.reduce((acc, curr) => acc.concat(curr || []), []);
+      this.aggregateFuelItems(this.dieselPumps, allItems, 'diesel_ltr');
       this.calculateTotals();
     });
 
     // 3. XP Petrol Nozzles
     const xpCalls = empIds.map(id => this.use.getXPPetrolList(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(xpCalls).subscribe((results: any[][]) => {
-      this.xpPetrol.forEach(pump => {
-        pump.openingMeter = 0;
-        pump.closingMeter = 0;
-        pump.saleLtr = 0;
-        pump.testing = 0;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-      let hasData = false;
-      results.forEach(data => {
-        if (!data || data.length === 0) return;
-        hasData = true;
-        data.forEach((item: any) => {
-          const pump = this.xpPetrol.find(p => p.name === item.pump);
-          if (pump) {
-            pump.openingMeter += +item.open_meter || 0;
-            pump.closingMeter += +item.close_meter || 0;
-            pump.testing += +item.testing || 0;
-            pump.saleLtr += +item.xppetrol_ltr || 0;
-            pump.rate = +item.rate || pump.rate;
-            pump.ltr += +item.total || 0;
-            pump.total_rs += +item.total_sell || 0;
-          }
-        });
-      });
-      if (!hasData) {
-        this.xpPetrol.forEach(pump => {
-          pump.openingMeter = null;
-          pump.closingMeter = null;
-          pump.testing = null;
-          pump.rate = null;
-        });
-      }
+      const allItems = results.reduce((acc, curr) => acc.concat(curr || []), []);
+      this.aggregateFuelItems(this.xpPetrol, allItems, 'xppetrol_ltr');
       this.calculateTotals();
     });
 
     // 4. Power Diesel Nozzles
     const powerCalls = empIds.map(id => this.use.getpowerDiesel(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(powerCalls).subscribe((results: any[][]) => {
-      this.powerDiesel.forEach(pump => {
-        pump.openingMeter = 0;
-        pump.closingMeter = 0;
-        pump.saleLtr = 0;
-        pump.testing = 0;
-        pump.ltr = 0;
-        pump.rate = null;
-        pump.total_rs = 0;
-      });
-      let hasData = false;
-      results.forEach(data => {
-        if (!data || data.length === 0) return;
-        hasData = true;
-        data.forEach((item: any) => {
-          const pump = this.powerDiesel.find(p => p.name === item.pump);
-          if (pump) {
-            pump.openingMeter += +item.open_meter || 0;
-            pump.closingMeter += +item.close_meter || 0;
-            pump.testing += +item.testing || 0;
-            pump.saleLtr += +item.powerdiesel_ltr || 0;
-            pump.rate = +item.rate || pump.rate;
-            pump.ltr += +item.total || 0;
-            pump.total_rs += +item.total_sell || 0;
-          }
-        });
-      });
-      if (!hasData) {
-        this.powerDiesel.forEach(pump => {
-          pump.openingMeter = null;
-          pump.closingMeter = null;
-          pump.testing = null;
-          pump.rate = null;
-        });
-      }
+      const allItems = results.reduce((acc, curr) => acc.concat(curr || []), []);
+      this.aggregateFuelItems(this.powerDiesel, allItems, 'powerdiesel_ltr');
       this.calculateTotals();
     });
 

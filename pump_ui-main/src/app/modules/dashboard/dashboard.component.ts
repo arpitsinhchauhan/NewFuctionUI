@@ -89,6 +89,7 @@ export class DashboardComponent implements OnInit {
   employeeReportsCount: number = 0;
   shiftReportsCount: number = 0;
   pendingReportsCount: number = 0;
+  realMeterSummary: any = null;
 
 
 
@@ -296,6 +297,25 @@ export class DashboardComponent implements OnInit {
     for (let y = currentYear - 4; y <= currentYear + 1; y++) {
       this.yearList.push(y);
     }
+    this.loadRealMeterSummary();
+  }
+
+  eodStatusData: any = null;
+
+  loadRealMeterSummary() {
+    if (!this.userId) return;
+    const todayStr = this.use.getFormattedDate(new Date());
+    this.use.getDailyConsolidatedReport(todayStr, this.userId).subscribe(res => {
+      if (res && res.success) {
+        this.realMeterSummary = res;
+      }
+    });
+
+    this.use.getEodStatus(todayStr, this.userId).subscribe(res => {
+      if (res && res.success) {
+        this.eodStatusData = res;
+      }
+    });
   }
 
   onNozzleFilterChange() {

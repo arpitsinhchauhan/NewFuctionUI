@@ -22,6 +22,8 @@ public interface kharchrepository extends JpaRepository<kharch, Integer> {
 
     List<kharch> findByUserId(String userId);
 
+    List<kharch> findByDateAndUserId(String date, String userId);
+
     @Query(value = "SELECT date, SUM(price) AS total_price FROM kharch GROUP BY date", nativeQuery = true)
     List<Object[]> findDateAndTotalPrice();
 

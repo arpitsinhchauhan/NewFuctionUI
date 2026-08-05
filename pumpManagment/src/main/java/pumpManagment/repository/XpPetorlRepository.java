@@ -30,6 +30,17 @@ public interface XpPetorlRepository extends JpaRepository<xpPetrol, Integer>{
     List<xpPetrol> findByDateBetweenAndUserId(String startDate, String endDate, String userId);
     
     Optional<xpPetrol> findByDateAndPumpAndUserId(String date, String pump, String userId);
+
+    Optional<xpPetrol> findByDateAndPumpAndShiftAndUserId(String date, String pump, String shift, String userId);
+
+    Optional<xpPetrol> findByDateAndPumpAndShift(String date, String pump, String shift);
+
+    List<xpPetrol> findByDateAndShiftAndUserId(String date, String shift, String userId);
+
+    List<xpPetrol> findByDateAndShift(String date, String shift);
+
+    @Query(value = "SELECT close_meter FROM xppetrol WHERE pump = :pump AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, id DESC LIMIT 1", nativeQuery = true)
+    Optional<String> findPreviousClosingMeter(@Param("pump") String pump, @Param("date") String date, @Param("currentId") Integer currentId);
     
 //    @Query(value = "SELECT SUM(p.xppetrol_ltr) FROM xppetrol p WHERE YEAR(p.date) = YEAR(CURDATE()) AND p.user_id = :userId", nativeQuery = true)
 //    Double findTotalXPPetrolLtrForCurrentYear(@Param("userId") String userId);

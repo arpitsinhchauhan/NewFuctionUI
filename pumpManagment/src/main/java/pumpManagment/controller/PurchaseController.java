@@ -112,6 +112,9 @@ public class PurchaseController {
     private PetrolSellRepository petrolSellRepository;
 
     @Autowired
+    private pumpManagment.repository.DayClosingRepository dayClosingRepository;
+
+    @Autowired
     private OilSellRepository oilSellRepository;
 
     @Autowired
@@ -3345,90 +3348,109 @@ public class PurchaseController {
         List<Map<String, Object>> petrolData = (List<Map<String, Object>>) payload.get("petrolInputData");
         List<Map<String, Object>> dieselData = (List<Map<String, Object>>) payload.get("dieselInputData");
 
-        if (petrolData.isEmpty() && dieselData.isEmpty()) {
+        if ((petrolData == null || petrolData.isEmpty()) && (dieselData == null || dieselData.isEmpty())) {
             ApiResponse response = new ApiResponse("No data to save.");
             return ResponseEntity.ok(response);
         }
 
         try {
             // 🚀 **Save or Update Petrol Data**
-            List<PetrolSell> petrolEntities = petrolData.stream()
-                    .map(data -> {
-                        String date = (String) data.get("date");
-                        String userId = (String) data.get("user_id");
-                        String pump = (String) data.get("pump");
-                        Optional<PetrolSell> existingPetrol = petrolSellRepository.findByDateAndPumpAndUserId(date,
-                                pump, userId);
+            if (petrolData != null && !petrolData.isEmpty()) {
+                List<PetrolSell> petrolEntities = petrolData.stream()
+                        .map(data -> {
+                            String date = (String) data.get("date");
+                            String userId = (String) data.get("user_id");
+                            String pump = (String) data.get("pump");
+                            String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
+                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
 
-                        PetrolSell petrol;
-                        if (existingPetrol.isPresent()) {
-                            petrol = existingPetrol.get();
-                            // If present, update values
-                            petrol.setOpen_meter((String) data.get("open_meter"));
-                            petrol.setClose_meter((String) data.get("close_meter"));
-                            petrol.setTesting((String) data.get("testing"));
-                            petrol.setRate((String) data.get("rate"));
-                            petrol.setTotal((String) data.get("total"));
-                            petrol.setTotal_sell((String) data.get("total_sell"));
-                            petrol.setPetrol_ltr((String) data.get("petrol_ltr"));
-                        } else {
-                            petrol = new PetrolSell();
-                            petrol.setDate(date);
-                            petrol.setUserId(userId);
-                            petrol.setPump(pump);
-                            petrol.setOpen_meter((String) data.get("open_meter"));
-                            petrol.setClose_meter((String) data.get("close_meter"));
-                            petrol.setTesting((String) data.get("testing"));
-                            petrol.setRate((String) data.get("rate"));
-                            petrol.setTotal((String) data.get("total"));
-                            petrol.setTotal_sell((String) data.get("total_sell"));
-                            petrol.setPetrol_ltr((String) data.get("petrol_ltr"));
-                        }
-                        return petrol;
-                    })
-                    .collect(Collectors.toList());
-            petrolSellRepository.saveAll(petrolEntities);
+                            Optional<PetrolSell> existingPetrol = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            if (!existingPetrol.isPresent()) {
+                                existingPetrol = petrolSellRepository.findByDateAndPumpAndUserId(date, pump, userId);
+                            }
+
+                            PetrolSell petrol;
+                            if (existingPetrol.isPresent()) {
+                                petrol = existingPetrol.get();
+                                petrol.setOpen_meter((String) data.get("open_meter"));
+                                petrol.setClose_meter((String) data.get("close_meter"));
+                                petrol.setTesting((String) data.get("testing"));
+                                petrol.setRate((String) data.get("rate"));
+                                petrol.setTotal((String) data.get("total"));
+                                petrol.setTotal_sell((String) data.get("total_sell"));
+                                petrol.setPetrol_ltr((String) data.get("petrol_ltr"));
+                                petrol.setShift(shift);
+                                if (employeeName != null && !employeeName.isEmpty()) petrol.setEmployeeName(employeeName);
+                            } else {
+                                petrol = new PetrolSell();
+                                petrol.setDate(date);
+                                petrol.setUserId(userId);
+                                petrol.setPump(pump);
+                                petrol.setOpen_meter((String) data.get("open_meter"));
+                                petrol.setClose_meter((String) data.get("close_meter"));
+                                petrol.setTesting((String) data.get("testing"));
+                                petrol.setRate((String) data.get("rate"));
+                                petrol.setTotal((String) data.get("total"));
+                                petrol.setTotal_sell((String) data.get("total_sell"));
+                                petrol.setPetrol_ltr((String) data.get("petrol_ltr"));
+                                petrol.setShift(shift);
+                                petrol.setShiftStatus("OPEN");
+                                petrol.setEmployeeName(employeeName);
+                            }
+                            return petrol;
+                        })
+                        .collect(Collectors.toList());
+                petrolSellRepository.saveAll(petrolEntities);
+            }
 
             // 🚀 **Save or Update Diesel Data**
-            List<Dieselsell> dieselEntities = dieselData.stream()
-                    .map(data -> {
-                        String date = (String) data.get("date");
-                        String userId = (String) data.get("user_id");
-                        String pump = (String) data.get("pump");
+            if (dieselData != null && !dieselData.isEmpty()) {
+                List<Dieselsell> dieselEntities = dieselData.stream()
+                        .map(data -> {
+                            String date = (String) data.get("date");
+                            String userId = (String) data.get("user_id");
+                            String pump = (String) data.get("pump");
+                            String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
+                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
 
-                        // 🔍 Check if data already exists for date and pump
-                        Optional<Dieselsell> existingDiesel = dieselSellRepository.findByDateAndPumpAndUserId(date,
-                                pump, userId);
+                            Optional<Dieselsell> existingDiesel = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            if (!existingDiesel.isPresent()) {
+                                existingDiesel = dieselSellRepository.findByDateAndPumpAndUserId(date, pump, userId);
+                            }
 
-                        Dieselsell diesel;
-                        if (existingDiesel.isPresent()) {
-                            diesel = existingDiesel.get();
-                            // If present, update values
-                            diesel.setOpen_meter((String) data.get("open_meter"));
-                            diesel.setClose_meter((String) data.get("close_meter"));
-                            diesel.setTesting((String) data.get("testing"));
-                            diesel.setRate((String) data.get("rate"));
-                            diesel.setTotal((String) data.get("total"));
-                            diesel.setTotal_sell((String) data.get("total_sell"));
-                            diesel.setDiesel_ltr((String) data.get("diesel_ltr"));
-                        } else {
-                            // If not present, create new
-                            diesel = new Dieselsell();
-                            diesel.setDate(date);
-                            diesel.setUserId(userId);
-                            diesel.setPump(pump);
-                            diesel.setOpen_meter((String) data.get("open_meter"));
-                            diesel.setClose_meter((String) data.get("close_meter"));
-                            diesel.setTesting((String) data.get("testing"));
-                            diesel.setRate((String) data.get("rate"));
-                            diesel.setTotal((String) data.get("total"));
-                            diesel.setTotal_sell((String) data.get("total_sell"));
-                            diesel.setDiesel_ltr((String) data.get("diesel_ltr"));
-                        }
-                        return diesel;
-                    })
-                    .collect(Collectors.toList());
-            dieselSellRepository.saveAll(dieselEntities);
+                            Dieselsell diesel;
+                            if (existingDiesel.isPresent()) {
+                                diesel = existingDiesel.get();
+                                diesel.setOpen_meter((String) data.get("open_meter"));
+                                diesel.setClose_meter((String) data.get("close_meter"));
+                                diesel.setTesting((String) data.get("testing"));
+                                diesel.setRate((String) data.get("rate"));
+                                diesel.setTotal((String) data.get("total"));
+                                diesel.setTotal_sell((String) data.get("total_sell"));
+                                diesel.setDiesel_ltr((String) data.get("diesel_ltr"));
+                                diesel.setShift(shift);
+                                if (employeeName != null && !employeeName.isEmpty()) diesel.setEmployeeName(employeeName);
+                            } else {
+                                diesel = new Dieselsell();
+                                diesel.setDate(date);
+                                diesel.setUserId(userId);
+                                diesel.setPump(pump);
+                                diesel.setOpen_meter((String) data.get("open_meter"));
+                                diesel.setClose_meter((String) data.get("close_meter"));
+                                diesel.setTesting((String) data.get("testing"));
+                                diesel.setRate((String) data.get("rate"));
+                                diesel.setTotal((String) data.get("total"));
+                                diesel.setTotal_sell((String) data.get("total_sell"));
+                                diesel.setDiesel_ltr((String) data.get("diesel_ltr"));
+                                diesel.setShift(shift);
+                                diesel.setShiftStatus("OPEN");
+                                diesel.setEmployeeName(employeeName);
+                            }
+                            return diesel;
+                        })
+                        .collect(Collectors.toList());
+                dieselSellRepository.saveAll(dieselEntities);
+            }
 
             ApiResponse response = new ApiResponse("Data saved/updated successfully!");
             return ResponseEntity.ok(response);
@@ -3443,90 +3465,107 @@ public class PurchaseController {
         List<Map<String, Object>> xpPetrol = (List<Map<String, Object>>) payload.get("XppetrolInputData");
         List<Map<String, Object>> powerdiesel = (List<Map<String, Object>>) payload.get("powerDieselInputData");
 
-        if (xpPetrol.isEmpty() && powerdiesel.isEmpty()) {
+        if ((xpPetrol == null || xpPetrol.isEmpty()) && (powerdiesel == null || powerdiesel.isEmpty())) {
             ApiResponse response = new ApiResponse("No data to save.");
             return ResponseEntity.ok(response);
         }
 
         try {
-            // 🚀 **Save or Update Petrol Data**
-            List<xpPetrol> xppetrolEntities = xpPetrol.stream()
-                    .map(data -> {
-                        String date = (String) data.get("date");
-                        String userId = (String) data.get("user_id");
-                        String pump = (String) data.get("pump");
-                        Optional<xpPetrol> existingPetrol = xpPetorlRepository.findByDateAndPumpAndUserId(date, pump,
-                                userId);
+            if (xpPetrol != null && !xpPetrol.isEmpty()) {
+                List<xpPetrol> xppetrolEntities = xpPetrol.stream()
+                        .map(data -> {
+                            String date = (String) data.get("date");
+                            String userId = (String) data.get("user_id");
+                            String pump = (String) data.get("pump");
+                            String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
+                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
 
-                        xpPetrol xp;
-                        if (existingPetrol.isPresent()) {
-                            xp = existingPetrol.get();
-                            // If present, update values
-                            xp.setOpen_meter((String) data.get("open_meter"));
-                            xp.setClose_meter((String) data.get("close_meter"));
-                            xp.setTesting((String) data.get("testing"));
-                            xp.setRate((String) data.get("rate"));
-                            xp.setTotal((String) data.get("total"));
-                            xp.setTotal_sell((String) data.get("total_sell"));
-                            xp.setXppetrol_ltr((String) data.get("xppetrol_ltr"));
-                        } else {
-                            xp = new xpPetrol();
-                            xp.setDate(date);
-                            xp.setUserId(userId);
-                            xp.setPump(pump);
-                            xp.setOpen_meter((String) data.get("open_meter"));
-                            xp.setClose_meter((String) data.get("close_meter"));
-                            xp.setTesting((String) data.get("testing"));
-                            xp.setRate((String) data.get("rate"));
-                            xp.setTotal((String) data.get("total"));
-                            xp.setTotal_sell((String) data.get("total_sell"));
-                            xp.setXppetrol_ltr((String) data.get("xppetrol_ltr"));
-                        }
-                        return xp;
-                    })
-                    .collect(Collectors.toList());
-            xpPetorlRepository.saveAll(xppetrolEntities);
+                            Optional<xpPetrol> existingPetrol = xpPetorlRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            if (!existingPetrol.isPresent()) {
+                                existingPetrol = xpPetorlRepository.findByDateAndPumpAndUserId(date, pump, userId);
+                            }
 
-            // 🚀 **Save or Update Diesel Data**
-            List<powerDiesel> powerdieselEntities = powerdiesel.stream()
-                    .map(data -> {
-                        String date = (String) data.get("date");
-                        String userId = (String) data.get("user_id");
-                        String pump = (String) data.get("pump");
+                            xpPetrol xp;
+                            if (existingPetrol.isPresent()) {
+                                xp = existingPetrol.get();
+                                xp.setOpen_meter((String) data.get("open_meter"));
+                                xp.setClose_meter((String) data.get("close_meter"));
+                                xp.setTesting((String) data.get("testing"));
+                                xp.setRate((String) data.get("rate"));
+                                xp.setTotal((String) data.get("total"));
+                                xp.setTotal_sell((String) data.get("total_sell"));
+                                xp.setXppetrol_ltr((String) data.get("xppetrol_ltr"));
+                                xp.setShift(shift);
+                                if (employeeName != null && !employeeName.isEmpty()) xp.setEmployeeName(employeeName);
+                            } else {
+                                xp = new xpPetrol();
+                                xp.setDate(date);
+                                xp.setUserId(userId);
+                                xp.setPump(pump);
+                                xp.setOpen_meter((String) data.get("open_meter"));
+                                xp.setClose_meter((String) data.get("close_meter"));
+                                xp.setTesting((String) data.get("testing"));
+                                xp.setRate((String) data.get("rate"));
+                                xp.setTotal((String) data.get("total"));
+                                xp.setTotal_sell((String) data.get("total_sell"));
+                                xp.setXppetrol_ltr((String) data.get("xppetrol_ltr"));
+                                xp.setShift(shift);
+                                xp.setShiftStatus("OPEN");
+                                xp.setEmployeeName(employeeName);
+                            }
+                            return xp;
+                        })
+                        .collect(Collectors.toList());
+                xpPetorlRepository.saveAll(xppetrolEntities);
+            }
 
-                        // 🔍 Check if data already exists for date and pump
-                        Optional<powerDiesel> existingDiesel = powerDieselRepository.findByDateAndPumpAndUserId(date,
-                                pump, userId);
+            if (powerdiesel != null && !powerdiesel.isEmpty()) {
+                List<powerDiesel> powerdieselEntities = powerdiesel.stream()
+                        .map(data -> {
+                            String date = (String) data.get("date");
+                            String userId = (String) data.get("user_id");
+                            String pump = (String) data.get("pump");
+                            String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
+                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
 
-                        powerDiesel power;
-                        if (existingDiesel.isPresent()) {
-                            power = existingDiesel.get();
-                            // If present, update values
-                            power.setOpen_meter((String) data.get("open_meter"));
-                            power.setClose_meter((String) data.get("close_meter"));
-                            power.setTesting((String) data.get("testing"));
-                            power.setRate((String) data.get("rate"));
-                            power.setTotal((String) data.get("total"));
-                            power.setTotal_sell((String) data.get("total_sell"));
-                            power.setPowerdiesel_ltr((String) data.get("powerdiesel_ltr"));
-                        } else {
-                            // If not present, create new
-                            power = new powerDiesel();
-                            power.setDate(date);
-                            power.setUserId(userId);
-                            power.setPump(pump);
-                            power.setOpen_meter((String) data.get("open_meter"));
-                            power.setClose_meter((String) data.get("close_meter"));
-                            power.setTesting((String) data.get("testing"));
-                            power.setRate((String) data.get("rate"));
-                            power.setTotal((String) data.get("total"));
-                            power.setTotal_sell((String) data.get("total_sell"));
-                            power.setPowerdiesel_ltr((String) data.get("powerdiesel_ltr"));
-                        }
-                        return power;
-                    })
-                    .collect(Collectors.toList());
-            powerDieselRepository.saveAll(powerdieselEntities);
+                            Optional<powerDiesel> existingDiesel = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            if (!existingDiesel.isPresent()) {
+                                existingDiesel = powerDieselRepository.findByDateAndPumpAndUserId(date, pump, userId);
+                            }
+
+                            powerDiesel power;
+                            if (existingDiesel.isPresent()) {
+                                power = existingDiesel.get();
+                                power.setOpen_meter((String) data.get("open_meter"));
+                                power.setClose_meter((String) data.get("close_meter"));
+                                power.setTesting((String) data.get("testing"));
+                                power.setRate((String) data.get("rate"));
+                                power.setTotal((String) data.get("total"));
+                                power.setTotal_sell((String) data.get("total_sell"));
+                                power.setPowerdiesel_ltr((String) data.get("powerdiesel_ltr"));
+                                power.setShift(shift);
+                                if (employeeName != null && !employeeName.isEmpty()) power.setEmployeeName(employeeName);
+                            } else {
+                                power = new powerDiesel();
+                                power.setDate(date);
+                                power.setUserId(userId);
+                                power.setPump(pump);
+                                power.setOpen_meter((String) data.get("open_meter"));
+                                power.setClose_meter((String) data.get("close_meter"));
+                                power.setTesting((String) data.get("testing"));
+                                power.setRate((String) data.get("rate"));
+                                power.setTotal((String) data.get("total"));
+                                power.setTotal_sell((String) data.get("total_sell"));
+                                power.setPowerdiesel_ltr((String) data.get("powerdiesel_ltr"));
+                                power.setShift(shift);
+                                power.setShiftStatus("OPEN");
+                                power.setEmployeeName(employeeName);
+                            }
+                            return power;
+                        })
+                        .collect(Collectors.toList());
+                powerDieselRepository.saveAll(powerdieselEntities);
+            }
 
             ApiResponse response = new ApiResponse("Data saved/updated successfully!");
             return ResponseEntity.ok(response);
@@ -4165,13 +4204,17 @@ public class PurchaseController {
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<ApiResponse> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
+            Long loggedInUserId = null;
+            if (request.getLoggedInUserId() != null && !request.getLoggedInUserId().trim().isEmpty()) {
+                loggedInUserId = Long.valueOf(request.getLoggedInUserId().trim());
+            }
             userService.changePasswordByUserId(Long.valueOf(request.getUserId()), request.getOldPassword(),
-                    request.getNewPassword());
-            return ResponseEntity.ok("Password changed successfully.");
+                    request.getNewPassword(), loggedInUserId);
+            return ResponseEntity.ok(new ApiResponse("Password changed successfully."));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to change password: " + e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse("Failed to change password: " + e.getMessage()));
         }
     }
 
@@ -4331,6 +4374,411 @@ public class PurchaseController {
             @RequestParam String userId) {
         List<Object[]> list = loclcreditRepository.findReportBycredit(startDate, endDate, userId);
         return list;
+    }
+
+    // ==========================================
+    // MULTI-SHIFT METER ERP REST ENDPOINTS
+    // ==========================================
+
+    @GetMapping("/shift/previousClosingMeter")
+    public ResponseEntity<Map<String, Object>> getPreviousClosingMeter(
+            @RequestParam String fuelType,
+            @RequestParam String pump,
+            @RequestParam String date,
+            @RequestParam(required = false) Integer currentId) {
+        Map<String, Object> res = new HashMap<>();
+        Optional<String> meter = Optional.empty();
+        if ("petrol".equalsIgnoreCase(fuelType)) {
+            meter = petrolSellRepository.findPreviousClosingMeter(pump, date, currentId);
+        } else if ("diesel".equalsIgnoreCase(fuelType)) {
+            meter = dieselSellRepository.findPreviousClosingMeter(pump, date, currentId);
+        } else if ("powerdiesel".equalsIgnoreCase(fuelType) || "power_diesel".equalsIgnoreCase(fuelType)) {
+            meter = powerDieselRepository.findPreviousClosingMeter(pump, date, currentId);
+        } else if ("xppetrol".equalsIgnoreCase(fuelType) || "xp_petrol".equalsIgnoreCase(fuelType)) {
+            meter = xpPetorlRepository.findPreviousClosingMeter(pump, date, currentId);
+        }
+        res.put("success", true);
+        res.put("previousClosingMeter", meter.orElse(""));
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/shift/closeShift")
+    public ResponseEntity<ApiResponse> closeShift(@RequestBody Map<String, Object> payload) {
+        String fuelType = String.valueOf(payload.get("fuelType"));
+        String date = String.valueOf(payload.get("date"));
+        String shift = String.valueOf(payload.get("shift"));
+        String pump = String.valueOf(payload.get("pump"));
+        String userId = String.valueOf(payload.get("userId"));
+        String closedBy = payload.get("closedBy") != null ? String.valueOf(payload.get("closedBy")) : "Admin";
+        String closeTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
+
+        if ("petrol".equalsIgnoreCase(fuelType)) {
+            Optional<PetrolSell> ps = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (ps.isPresent()) {
+                PetrolSell p = ps.get();
+                p.setShiftStatus("CLOSED");
+                p.setShiftCloseTime(closeTime);
+                p.setClosedBy(closedBy);
+                petrolSellRepository.save(p);
+            }
+        } else if ("diesel".equalsIgnoreCase(fuelType)) {
+            Optional<Dieselsell> ds = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (ds.isPresent()) {
+                Dieselsell d = ds.get();
+                d.setShiftStatus("CLOSED");
+                d.setShiftCloseTime(closeTime);
+                d.setClosedBy(closedBy);
+                dieselSellRepository.save(d);
+            }
+        } else if ("powerdiesel".equalsIgnoreCase(fuelType)) {
+            Optional<powerDiesel> pd = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (pd.isPresent()) {
+                powerDiesel p = pd.get();
+                p.setShiftStatus("CLOSED");
+                p.setShiftCloseTime(closeTime);
+                p.setClosedBy(closedBy);
+                powerDieselRepository.save(p);
+            }
+        } else if ("xppetrol".equalsIgnoreCase(fuelType)) {
+            Optional<xpPetrol> xp = xpPetorlRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (xp.isPresent()) {
+                xpPetrol x = xp.get();
+                x.setShiftStatus("CLOSED");
+                x.setShiftCloseTime(closeTime);
+                x.setClosedBy(closedBy);
+                xpPetorlRepository.save(x);
+            }
+        }
+        return ResponseEntity.ok(new ApiResponse("Shift closed successfully."));
+    }
+
+    @PostMapping("/shift/reopenShift")
+    public ResponseEntity<ApiResponse> reopenShift(@RequestBody Map<String, Object> payload) {
+        String fuelType = String.valueOf(payload.get("fuelType"));
+        String date = String.valueOf(payload.get("date"));
+        String shift = String.valueOf(payload.get("shift"));
+        String pump = String.valueOf(payload.get("pump"));
+        String userId = String.valueOf(payload.get("userId"));
+
+        if ("petrol".equalsIgnoreCase(fuelType)) {
+            Optional<PetrolSell> ps = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (ps.isPresent()) {
+                PetrolSell p = ps.get();
+                p.setShiftStatus("OPEN");
+                petrolSellRepository.save(p);
+            }
+        } else if ("diesel".equalsIgnoreCase(fuelType)) {
+            Optional<Dieselsell> ds = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (ds.isPresent()) {
+                Dieselsell d = ds.get();
+                d.setShiftStatus("OPEN");
+                dieselSellRepository.save(d);
+            }
+        } else if ("powerdiesel".equalsIgnoreCase(fuelType)) {
+            Optional<powerDiesel> pd = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (pd.isPresent()) {
+                powerDiesel p = pd.get();
+                p.setShiftStatus("OPEN");
+                powerDieselRepository.save(p);
+            }
+        } else if ("xppetrol".equalsIgnoreCase(fuelType)) {
+            Optional<xpPetrol> xp = xpPetorlRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            if (xp.isPresent()) {
+                xpPetrol x = xp.get();
+                x.setShiftStatus("OPEN");
+                xpPetorlRepository.save(x);
+            }
+        }
+        return ResponseEntity.ok(new ApiResponse("Shift unlocked/reopened successfully."));
+    }
+
+    @GetMapping("/shift/shiftSalesReport")
+    public ResponseEntity<Map<String, Object>> getShiftSalesReport(
+            @RequestParam String date,
+            @RequestParam String userId,
+            @RequestParam(required = false, defaultValue = "ALL") String shift) {
+        Map<String, Object> response = new HashMap<>();
+        List<Map<String, Object>> shiftRecords = new ArrayList<>();
+
+        List<String> targetUserIds = getTargetUserIds(userId);
+
+        for (String id : targetUserIds) {
+            List<PetrolSell> pList = petrolSellRepository.findByDateAndUserId(date, id);
+            for (PetrolSell p : pList) {
+                if ("ALL".equalsIgnoreCase(shift) || shift.equalsIgnoreCase(p.getShift())) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("fuelType", "Petrol");
+                    item.put("pump", p.getPump());
+                    item.put("shift", p.getShift() != null ? p.getShift() : "Morning");
+                    item.put("operator", p.getEmployeeName() != null ? p.getEmployeeName() : "Operator");
+                    item.put("openMeter", p.getOpen_meter());
+                    item.put("closeMeter", p.getClose_meter());
+                    item.put("testing", p.getTesting());
+                    item.put("meterSale", p.getTotal());
+                    item.put("netSale", p.getPetrol_ltr());
+                    item.put("rate", p.getRate());
+                    item.put("amount", p.getTotal_sell());
+                    item.put("status", p.getShiftStatus() != null ? p.getShiftStatus() : "OPEN");
+                    shiftRecords.add(item);
+                }
+            }
+
+            List<Dieselsell> dList = dieselSellRepository.findByDateAndUserId(date, id);
+            for (Dieselsell d : dList) {
+                if ("ALL".equalsIgnoreCase(shift) || shift.equalsIgnoreCase(d.getShift())) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("fuelType", "Diesel");
+                    item.put("pump", d.getPump());
+                    item.put("shift", d.getShift() != null ? d.getShift() : "Morning");
+                    item.put("operator", d.getEmployeeName() != null ? d.getEmployeeName() : "Operator");
+                    item.put("openMeter", d.getOpen_meter());
+                    item.put("closeMeter", d.getClose_meter());
+                    item.put("testing", d.getTesting());
+                    item.put("meterSale", d.getTotal());
+                    item.put("netSale", d.getDiesel_ltr());
+                    item.put("rate", d.getRate());
+                    item.put("amount", d.getTotal_sell());
+                    item.put("status", d.getShiftStatus() != null ? d.getShiftStatus() : "OPEN");
+                    shiftRecords.add(item);
+                }
+            }
+
+            List<xpPetrol> xpList = xpPetorlRepository.findByDateAndUserId(date, id);
+            for (xpPetrol xp : xpList) {
+                if ("ALL".equalsIgnoreCase(shift) || shift.equalsIgnoreCase(xp.getShift())) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("fuelType", "XP Petrol");
+                    item.put("pump", xp.getPump());
+                    item.put("shift", xp.getShift() != null ? xp.getShift() : "Morning");
+                    item.put("operator", xp.getEmployeeName() != null ? xp.getEmployeeName() : "Operator");
+                    item.put("openMeter", xp.getOpen_meter());
+                    item.put("closeMeter", xp.getClose_meter());
+                    item.put("testing", xp.getTesting());
+                    item.put("meterSale", xp.getTotal());
+                    item.put("netSale", xp.getXppetrol_ltr());
+                    item.put("rate", xp.getRate());
+                    item.put("amount", xp.getTotal_sell());
+                    item.put("status", xp.getShiftStatus() != null ? xp.getShiftStatus() : "OPEN");
+                    shiftRecords.add(item);
+                }
+            }
+
+            List<powerDiesel> pdList = powerDieselRepository.findByDateAndUserId(date, id);
+            for (powerDiesel pd : pdList) {
+                if ("ALL".equalsIgnoreCase(shift) || shift.equalsIgnoreCase(pd.getShift())) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("fuelType", "Power Diesel");
+                    item.put("pump", pd.getPump());
+                    item.put("shift", pd.getShift() != null ? pd.getShift() : "Morning");
+                    item.put("operator", pd.getEmployeeName() != null ? pd.getEmployeeName() : "Operator");
+                    item.put("openMeter", pd.getOpen_meter());
+                    item.put("closeMeter", pd.getClose_meter());
+                    item.put("testing", pd.getTesting());
+                    item.put("meterSale", pd.getTotal());
+                    item.put("netSale", pd.getPowerdiesel_ltr());
+                    item.put("rate", pd.getRate());
+                    item.put("amount", pd.getTotal_sell());
+                    item.put("status", pd.getShiftStatus() != null ? pd.getShiftStatus() : "OPEN");
+                    shiftRecords.add(item);
+                }
+            }
+        }
+
+        response.put("success", true);
+        response.put("date", date);
+        response.put("shiftRecords", shiftRecords);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/shift/dailyConsolidatedReport")
+    public ResponseEntity<Map<String, Object>> getDailyConsolidatedReport(
+            @RequestParam String date,
+            @RequestParam String userId) {
+        Map<String, Object> response = new HashMap<>();
+        List<Map<String, Object>> pumpConsolidatedList = new ArrayList<>();
+
+        List<String> targetUserIds = getTargetUserIds(userId);
+
+        double grandMeterSale = 0.0;
+        double grandTesting = 0.0;
+        double grandNetSale = 0.0;
+        double grandTotalAmount = 0.0;
+
+        // Group records per pump for each fuel type
+        Map<String, List<PetrolSell>> petrolByPump = new HashMap<>();
+        Map<String, List<Dieselsell>> dieselByPump = new HashMap<>();
+        Map<String, List<xpPetrol>> xpByPump = new HashMap<>();
+        Map<String, List<powerDiesel>> powerByPump = new HashMap<>();
+
+        for (String id : targetUserIds) {
+            for (PetrolSell p : petrolSellRepository.findByDateAndUserId(date, id)) {
+                petrolByPump.computeIfAbsent(p.getPump(), k -> new ArrayList<>()).add(p);
+            }
+            for (Dieselsell d : dieselSellRepository.findByDateAndUserId(date, id)) {
+                dieselByPump.computeIfAbsent(d.getPump(), k -> new ArrayList<>()).add(d);
+            }
+            for (xpPetrol xp : xpPetorlRepository.findByDateAndUserId(date, id)) {
+                xpByPump.computeIfAbsent(xp.getPump(), k -> new ArrayList<>()).add(xp);
+            }
+            for (powerDiesel pd : powerDieselRepository.findByDateAndUserId(date, id)) {
+                powerByPump.computeIfAbsent(pd.getPump(), k -> new ArrayList<>()).add(pd);
+            }
+        }
+
+        // Process Petrol Pumps
+        for (Map.Entry<String, List<PetrolSell>> entry : petrolByPump.entrySet()) {
+            List<PetrolSell> list = entry.getValue();
+            if (list.isEmpty()) continue;
+            list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
+            PetrolSell first = list.get(0);
+            PetrolSell last = list.get(list.size() - 1);
+
+            double realOpen = parseDoubleSafely(first.getOpen_meter());
+            double realClose = parseDoubleSafely(last.getClose_meter());
+            double meterDiff = realClose - realOpen;
+
+            double totalTesting = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTesting())).sum();
+            double totalNetSale = list.stream().mapToDouble(i -> parseDoubleSafely(i.getPetrol_ltr())).sum();
+            double totalAmount = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTotal_sell())).sum();
+
+            grandMeterSale += meterDiff;
+            grandTesting += totalTesting;
+            grandNetSale += totalNetSale;
+            grandTotalAmount += totalAmount;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("fuelType", "Petrol");
+            map.put("pump", entry.getKey());
+            map.put("realOpeningMeter", realOpen);
+            map.put("realClosingMeter", realClose);
+            map.put("totalMeterSale", meterDiff);
+            map.put("totalTesting", totalTesting);
+            map.put("netSale", totalNetSale);
+            map.put("totalAmount", totalAmount);
+            map.put("shiftCount", list.size());
+            pumpConsolidatedList.add(map);
+        }
+
+        // Process Diesel Pumps
+        for (Map.Entry<String, List<Dieselsell>> entry : dieselByPump.entrySet()) {
+            List<Dieselsell> list = entry.getValue();
+            if (list.isEmpty()) continue;
+            list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
+            Dieselsell first = list.get(0);
+            Dieselsell last = list.get(list.size() - 1);
+
+            double realOpen = parseDoubleSafely(first.getOpen_meter());
+            double realClose = parseDoubleSafely(last.getClose_meter());
+            double meterDiff = realClose - realOpen;
+
+            double totalTesting = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTesting())).sum();
+            double totalNetSale = list.stream().mapToDouble(i -> parseDoubleSafely(i.getDiesel_ltr())).sum();
+            double totalAmount = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTotal_sell())).sum();
+
+            grandMeterSale += meterDiff;
+            grandTesting += totalTesting;
+            grandNetSale += totalNetSale;
+            grandTotalAmount += totalAmount;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("fuelType", "Diesel");
+            map.put("pump", entry.getKey());
+            map.put("realOpeningMeter", realOpen);
+            map.put("realClosingMeter", realClose);
+            map.put("totalMeterSale", meterDiff);
+            map.put("totalTesting", totalTesting);
+            map.put("netSale", totalNetSale);
+            map.put("totalAmount", totalAmount);
+            map.put("shiftCount", list.size());
+            pumpConsolidatedList.add(map);
+        }
+
+        // Process XP Petrol Pumps
+        for (Map.Entry<String, List<xpPetrol>> entry : xpByPump.entrySet()) {
+            List<xpPetrol> list = entry.getValue();
+            if (list.isEmpty()) continue;
+            list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
+            xpPetrol first = list.get(0);
+            xpPetrol last = list.get(list.size() - 1);
+
+            double realOpen = parseDoubleSafely(first.getOpen_meter());
+            double realClose = parseDoubleSafely(last.getClose_meter());
+            double meterDiff = realClose - realOpen;
+
+            double totalTesting = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTesting())).sum();
+            double totalNetSale = list.stream().mapToDouble(i -> parseDoubleSafely(i.getXppetrol_ltr())).sum();
+            double totalAmount = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTotal_sell())).sum();
+
+            grandMeterSale += meterDiff;
+            grandTesting += totalTesting;
+            grandNetSale += totalNetSale;
+            grandTotalAmount += totalAmount;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("fuelType", "XP Petrol");
+            map.put("pump", entry.getKey());
+            map.put("realOpeningMeter", realOpen);
+            map.put("realClosingMeter", realClose);
+            map.put("totalMeterSale", meterDiff);
+            map.put("totalTesting", totalTesting);
+            map.put("netSale", totalNetSale);
+            map.put("totalAmount", totalAmount);
+            map.put("shiftCount", list.size());
+            pumpConsolidatedList.add(map);
+        }
+
+        // Process Power Diesel Pumps
+        for (Map.Entry<String, List<powerDiesel>> entry : powerByPump.entrySet()) {
+            List<powerDiesel> list = entry.getValue();
+            if (list.isEmpty()) continue;
+            list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
+            powerDiesel first = list.get(0);
+            powerDiesel last = list.get(list.size() - 1);
+
+            double realOpen = parseDoubleSafely(first.getOpen_meter());
+            double realClose = parseDoubleSafely(last.getClose_meter());
+            double meterDiff = realClose - realOpen;
+
+            double totalTesting = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTesting())).sum();
+            double totalNetSale = list.stream().mapToDouble(i -> parseDoubleSafely(i.getPowerdiesel_ltr())).sum();
+            double totalAmount = list.stream().mapToDouble(i -> parseDoubleSafely(i.getTotal_sell())).sum();
+
+            grandMeterSale += meterDiff;
+            grandTesting += totalTesting;
+            grandNetSale += totalNetSale;
+            grandTotalAmount += totalAmount;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("fuelType", "Power Diesel");
+            map.put("pump", entry.getKey());
+            map.put("realOpeningMeter", realOpen);
+            map.put("realClosingMeter", realClose);
+            map.put("totalMeterSale", meterDiff);
+            map.put("totalTesting", totalTesting);
+            map.put("netSale", totalNetSale);
+            map.put("totalAmount", totalAmount);
+            map.put("shiftCount", list.size());
+            pumpConsolidatedList.add(map);
+        }
+
+        response.put("success", true);
+        response.put("date", date);
+        response.put("pumpConsolidatedList", pumpConsolidatedList);
+        response.put("grandMeterSale", grandMeterSale);
+        response.put("grandTesting", grandTesting);
+        response.put("grandNetSale", grandNetSale);
+        response.put("grandTotalAmount", grandTotalAmount);
+
+        return ResponseEntity.ok(response);
+    }
+
+    private double parseDoubleSafely(String val) {
+        if (val == null || val.trim().isEmpty()) return 0.0;
+        try {
+            return Double.parseDouble(val.trim());
+        } catch (Exception e) {
+            return 0.0;
+        }
     }
 
 }

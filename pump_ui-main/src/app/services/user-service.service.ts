@@ -49,6 +49,17 @@ import {
   API_PURCHASE,
   API_DIP,
   API_SAVE_FUEL_REPORT,
+  API_PREVIOUS_CLOSING_METER,
+  API_CLOSE_SHIFT,
+  API_REOPEN_SHIFT,
+  API_SHIFT_SALES_REPORT,
+  API_DAILY_CONSOLIDATED_REPORT,
+  API_EOD_STATUS,
+  API_EOD_VALIDATE,
+  API_EOD_CLOSE_DAY,
+  API_EOD_REOPEN_DAY,
+  API_EOD_CHECK_LOCK,
+  API_EOD_AUDIT_LOGS,
   API_DAILY_REPORT_SUBMIT,
   API_GET_EMPLOYEE_REPORTS,
   API_GET_MANAGER_REPORTS,
@@ -815,11 +826,17 @@ export class UserServiceService {
   }
 
   changePassword(changePasswordData: any, userId: any): Observable<any> {
+    const token = localStorage.getItem('token');
+    const loggedInUserId = localStorage.getItem('userId');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     const payload = {
       ...changePasswordData,
-      userId: userId
+      userId: userId,
+      loggedInUserId: loggedInUserId
     };
-    return this.http.post<any>(API_CHANGE_PASSWORD, payload);
+    return this.http.post<any>(API_CHANGE_PASSWORD, payload, { headers });
   }
 
 
@@ -899,5 +916,60 @@ export class UserServiceService {
 
   resetForgotPasswordDirect(identity: string, newPassword: string): Observable<any> {
     return this.http.post<any>(API_FORGOT_PASSWORD_DIRECT, { identity, newPassword });
+  }
+
+  getPreviousClosingMeter(fuelType: string, pump: string, date: string, currentId?: number): Observable<any> {
+    let params = new HttpParams().set('fuelType', fuelType).set('pump', pump).set('date', date);
+    if (currentId) {
+      params = params.set('currentId', currentId.toString());
+    }
+    return this.http.get<any>(API_PREVIOUS_CLOSING_METER, { params });
+  }
+
+  closeShift(payload: any): Observable<any> {
+    return this.http.post<any>(API_CLOSE_SHIFT, payload);
+  }
+
+  reopenShift(payload: any): Observable<any> {
+    return this.http.post<any>(API_REOPEN_SHIFT, payload);
+  }
+
+  getShiftSalesReport(date: string, userId: string, shift: string = 'ALL'): Observable<any> {
+    const params = new HttpParams().set('date', date).set('userId', userId).set('shift', shift);
+    return this.http.get<any>(API_SHIFT_SALES_REPORT, { params });
+  }
+
+  getDailyConsolidatedReport(date: string, userId: string): Observable<any> {
+    const params = new HttpParams().set('date', date).set('userId', userId);
+    return this.http.get<any>(API_DAILY_CONSOLIDATED_REPORT, { params });
+  }
+
+  getEodStatus(date: string, userId: string): Observable<any> {
+    const params = new HttpParams().set('date', date).set('userId', userId);
+    return this.http.get<any>(API_EOD_STATUS, { params });
+  }
+
+  validateEod(date: string, userId: string): Observable<any> {
+    const params = new HttpParams().set('date', date).set('userId', userId);
+    return this.http.get<any>(API_EOD_VALIDATE, { params });
+  }
+
+  closeDay(payload: any): Observable<any> {
+    return this.http.post<any>(API_EOD_CLOSE_DAY, payload);
+  }
+
+  reopenDay(payload: any): Observable<any> {
+    return this.http.post<any>(API_EOD_REOPEN_DAY, payload);
+  }
+
+  checkEodLock(date: string, userId: string): Observable<any> {
+    const params = new HttpParams().set('date', date).set('userId', userId);
+    return this.http.get<any>(API_EOD_CHECK_LOCK, { params });
+  }
+
+  getEodAuditLogs(date: string = '', userId: string): Observable<any> {
+    let params = new HttpParams().set('userId', userId);
+    if (date) params = params.set('date', date);
+    return this.http.get<any>(API_EOD_AUDIT_LOGS, { params });
   }
 }

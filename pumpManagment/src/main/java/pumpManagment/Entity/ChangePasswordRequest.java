@@ -5,6 +5,7 @@ public class ChangePasswordRequest {
     private String oldPassword;
     private String newPassword;
     private String userId;
+    private String loggedInUserId;
 
     public String getOldPassword() {
         return oldPassword;
@@ -28,5 +29,13 @@ public class ChangePasswordRequest {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getLoggedInUserId() {
+        return loggedInUserId;
+    }
+
+    public void setLoggedInUserId(String loggedInUserId) {
+        this.loggedInUserId = loggedInUserId;
     }
 }
