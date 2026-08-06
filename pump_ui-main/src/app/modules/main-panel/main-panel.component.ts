@@ -244,13 +244,13 @@ export class MainPanelComponent implements OnInit {
 
   onDenominationFocus(event: any, key: string) {
     const multipliersAny = this.multipliers as any;
-    if (multipliersAny[key] === 0 || multipliersAny[key] === '0') {
+    if (multipliersAny[key] === 0 || multipliersAny[key] === '0' || multipliersAny[key] === null) {
       multipliersAny[key] = null;
       if (event && event.target) {
         event.target.value = '';
       }
     } else {
-      if (event && event.target) {
+      if (event && event.target && typeof event.target.select === 'function') {
         event.target.select();
       }
     }
@@ -258,10 +258,10 @@ export class MainPanelComponent implements OnInit {
 
   onDenominationBlur(key: string) {
     const multipliersAny = this.multipliers as any;
-    if (multipliersAny[key] === null || multipliersAny[key] === undefined || multipliersAny[key] === '') {
-      multipliersAny[key] = 0;
-      this.calculateTotal();
+    if (multipliersAny[key] === null || multipliersAny[key] === undefined || multipliersAny[key] === '' || multipliersAny[key] === 0) {
+      multipliersAny[key] = null;
     }
+    this.calculateTotal();
   }
 
   constructor(private dialog: MatDialog, private use: UserServiceService,
@@ -1226,6 +1226,10 @@ export class MainPanelComponent implements OnInit {
     return this.totalRevenue;
   }
 
+  get cashDifference(): number {
+    return (Number(this.totalCaseCase) || 0) - (Number(this.totalCase) || 0);
+  }
+
 
   dipstock() {
     const dataToSend: any = {
@@ -1741,24 +1745,24 @@ export class MainPanelComponent implements OnInit {
         if (data && data.length > 0) {
           this.note = data[0].note;
           this.totalCaseCase = data[0].totalCase;
-          this.multipliers.twothousand = data[0].twothousand;
-          this.multipliers.fivehundred = data[0].fivehundred;
-          this.multipliers.twohundred = data[0].twohundred;
-          this.multipliers.onehundred = data[0].onehundred;
-          this.multipliers.fifty = data[0].fifty;
-          this.multipliers.twenty = data[0].twenty;
-          this.multipliers.ten = data[0].ten;
+          this.multipliers.twothousand = data[0].twothousand || null;
+          this.multipliers.fivehundred = data[0].fivehundred || null;
+          this.multipliers.twohundred = data[0].twohundred || null;
+          this.multipliers.onehundred = data[0].onehundred || null;
+          this.multipliers.fifty = data[0].fifty || null;
+          this.multipliers.twenty = data[0].twenty || null;
+          this.multipliers.ten = data[0].ten || null;
           this.calculateTotal();
         } else {
           this.note = '';
           this.totalCaseCase = 0;
-          this.multipliers.twothousand = 0;
-          this.multipliers.fivehundred = 0;
-          this.multipliers.twohundred = 0;
-          this.multipliers.onehundred = 0;
-          this.multipliers.fifty = 0;
-          this.multipliers.twenty = 0;
-          this.multipliers.ten = 0;
+          this.multipliers.twothousand = null;
+          this.multipliers.fivehundred = null;
+          this.multipliers.twohundred = null;
+          this.multipliers.onehundred = null;
+          this.multipliers.fifty = null;
+          this.multipliers.twenty = null;
+          this.multipliers.ten = null;
           this.calculateTotal();
         }
       },
@@ -2392,18 +2396,22 @@ export class MainPanelComponent implements OnInit {
       results.forEach(data => {
         if (data && data.length > 0) {
           const row = data[0];
-          this.multipliers.twothousand += +row.twothousand || 0;
-          this.multipliers.fivehundred += +row.fivehundred || 0;
-          this.multipliers.twohundred += +row.twohundred || 0;
-          this.multipliers.onehundred += +row.onehundred || 0;
-          this.multipliers.fifty += +row.fifty || 0;
-          this.multipliers.twenty += +row.twenty || 0;
-          this.multipliers.ten += +row.ten || 0;
+          this.multipliers.twothousand = (this.multipliers.twothousand || 0) + (+row.twothousand || 0);
+          this.multipliers.fivehundred = (this.multipliers.fivehundred || 0) + (+row.fivehundred || 0);
+          this.multipliers.twohundred = (this.multipliers.twohundred || 0) + (+row.twohundred || 0);
+          this.multipliers.onehundred = (this.multipliers.onehundred || 0) + (+row.onehundred || 0);
+          this.multipliers.fifty = (this.multipliers.fifty || 0) + (+row.fifty || 0);
+          this.multipliers.twenty = (this.multipliers.twenty || 0) + (+row.twenty || 0);
+          this.multipliers.ten = (this.multipliers.ten || 0) + (+row.ten || 0);
           if (row.note) {
             if (this.note) this.note += ' | ';
             this.note += row.note;
           }
         }
+      });
+      const multAny = this.multipliers as any;
+      Object.keys(multAny).forEach(k => {
+        if (!multAny[k]) multAny[k] = null;
       });
       this.calculateTotal();
     });

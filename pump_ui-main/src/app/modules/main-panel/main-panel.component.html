@@ -277,12 +277,12 @@
                     <td class="font-weight-medium">₹{{ den.val }}</td>
                     <td><input type="number" class="report-input" [(ngModel)]="multipliers[den.key]"
                         (input)="calculateTotal()" (focus)="onDenominationFocus($event, den.key)"
-                        (blur)="onDenominationBlur(den.key)"></td>
+                        (blur)="onDenominationBlur(den.key)" placeholder="0"></td>
                     <td class="text-right">₹{{ getDenominationDisplay(den.key) | number:'1.2-2' }}</td>
                   </tr>
                   <tr class="grand-total-row">
                     <td colspan="2">Total Cash in Hand</td>
-                    <td class="text-right">₹{{ totalCase | number:'1.2-2' }}</td>
+                    <td class="text-right">₹{{ totalCaseCase | number:'1.2-2' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -323,6 +323,19 @@
                 <span class="summary-label">Total Expected Cash</span>
                 <span class="summary-value">₹{{ totalCase | number:'1.2-2' }}</span>
               </div>
+              <!-- <div class="summary-item">
+                <span class="summary-label">Counted Cash in Hand</span>
+                <span class="summary-value text-info">₹{{ totalCaseCase | number:'1.2-2' }}</span>
+              </div>
+              <div class="summary-item" [ngClass]="cashDifference < 0 ? 'text-danger font-weight-bold' : (cashDifference > 0 ? 'text-success font-weight-bold' : 'text-muted')">
+                <span class="summary-label">Cash Variance</span>
+                <span class="summary-value">
+                  {{ cashDifference > 0 ? '+' : '' }}₹{{ cashDifference | number:'1.2-2' }}
+                  <small *ngIf="cashDifference < 0">(Shortage)</small>
+                  <small *ngIf="cashDifference > 0">(Excess)</small>
+                  <small *ngIf="cashDifference === 0">(Balanced)</small>
+                </span>
+              </div> -->
             </div>
 
             <div class="note-section-modern mt-4">
