@@ -2,20 +2,109 @@
   display: block;
 }
 
-.table-responsive-modern {
-  margin-top: 4px;
+.card-premium {
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.modern-table td {
-  min-width: 110px;
+.card-header-modern {
+  background: #f8fafc;
 }
 
-.modern-table td:first-child,
-.modern-table td:nth-child(9) {
-  min-width: 90px;
+.card-title-modern {
+  font-size: 1.15rem;
+  color: #0f172a;
 }
 
-.table-input[readonly] {
-  background: color-mix(in srgb, var(--bg-main) 88%, var(--bg-card)) !important;
-  font-weight: 600;
+.btn-close-custom {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close-custom:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.modern-date-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  width: 100%;
+}
+
+.modern-date-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.modern-report-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.modern-report-table th {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.modern-report-table td {
+  padding: 6px 8px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.report-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 0.88rem;
+  transition: border-color 0.2s ease;
+  background: #ffffff;
+}
+
+.report-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+.grand-total-box {
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.invalid-input {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
 }

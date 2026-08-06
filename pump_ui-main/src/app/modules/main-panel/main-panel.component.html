@@ -57,7 +57,7 @@
             </mat-form-field>
           </div>
 
-          <div class="meta-item" *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee'">
+          <div class="meta-item no-print" *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee'">
             <mat-form-field appearance="outline" class="modern-datepicker">
               <mat-label>Shift</mat-label>
               <mat-select [(ngModel)]="selectedShift" name="selectedShift" (selectionChange)="onShiftChange()">
@@ -66,7 +66,7 @@
             </mat-form-field>
           </div>
 
-          <div class="meta-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'">
+          <div class="meta-item no-print" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'">
             <mat-form-field appearance="outline" class="modern-datepicker">
               <mat-label>Employee</mat-label>
               <mat-select [(ngModel)]="selectedEmployeeIdForView" name="selectedEmployeeIdForView"
@@ -80,14 +80,13 @@
           </div>
 
           <!-- ERP Action Buttons -->
-          <div class="meta-item d-flex align-items-center gap-2 flex-nowrap">
+          <div class="meta-item d-flex align-items-center gap-2 flex-nowrap no-print">
             <button type="button" class="btn btn-sm btn-info text-nowrap" (click)="openShiftReportModal()">
               <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">assessment</mat-icon> Shift Sales
               Report
             </button>
 
-            <button type="button" class="btn btn-sm btn-primary text-nowrap"
-              (click)="openDailyConsolidatedModal()">
+            <button type="button" class="btn btn-sm btn-primary text-nowrap" (click)="openDailyConsolidatedModal()">
               <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">donut_large</mat-icon> Daily
               Consolidated Report
             </button>
@@ -104,7 +103,8 @@
         <!-- Fuel Sales Section -->
         <div class="section-title-modern">
           <mat-icon>local_gas_station</mat-icon>
-          <h3>Fuel Sales Summary<span *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee'"> ({{ selectedShift }} Shift)</span></h3>
+          <h3>Fuel Sales Summary<span *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee'"> ({{ selectedShift }}
+              Shift)</span></h3>
         </div>
 
         <div class="table-responsive-modern mb-4">
@@ -313,10 +313,24 @@
                 <span class="summary-label">Customer Deposits</span>
                 <span class="summary-value text-success">₹{{ jamaTotal | number:'1.2-2' }}</span>
               </div>
-              <div class="summary-item">
+              <div class="summary-item" (click)="openPurchase()">
+                <span class="summary-label">Fuel Purchase (Petrol/Diesel)</span>
+                <span class="summary-value text-info">{{ ((petolQuantity || 0) + (dieselQuantity || 0)) | number:'1.2-2'
+                  }} L</span>
+              </div>
+              <div class="summary-item" *ngIf="showXpPetrolCount > 0 || showPowerDieselCount > 0" (click)="openExtraPurchase()">
+                <span class="summary-label">Extra Fuel Purchase (XP/Power)</span>
+                <span class="summary-value text-info">{{ ((xpPetolQuantity || 0) + (powerDieselQuantity || 0)) |
+                  number:'1.2-2' }} L</span>
+              </div>
+              <div class="summary-item" (click)="openOilPurchase()">
+                <span class="summary-label">Lube Oil Purchase</span>
+                <span class="summary-value text-info">{{ (oilQuantity || 0) | number:'1.2-2' }} L</span>
+              </div>
+              <!-- <div class="summary-item">
                 <span class="summary-label">Total Revenue (Fuel Sales)</span>
                 <span class="summary-value">₹{{ totalRevenue | number:'1.2-2' }}</span>
-              </div>
+              </div> -->
               <div class="summary-item grand-total">
                 <span class="summary-label">Total Expected Cash</span>
                 <span class="summary-value">₹{{ totalCase | number:'1.2-2' }}</span>

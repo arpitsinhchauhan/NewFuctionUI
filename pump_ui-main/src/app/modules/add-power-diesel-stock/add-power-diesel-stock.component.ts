@@ -42,7 +42,7 @@ export class AddPowerDieselStockComponent implements OnInit {
     }
   
     onSubmit() {
-      this.userId = localStorage.getItem('userId');
+      this.userId = this.PowerdieselStock?.userId || localStorage.getItem('userId');
       if (this.stockForm.invalid) return;
     
       const payload = {

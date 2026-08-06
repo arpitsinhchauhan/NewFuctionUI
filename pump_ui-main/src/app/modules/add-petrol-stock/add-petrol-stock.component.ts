@@ -41,7 +41,7 @@ export class AddPetrolStockComponent implements OnInit {
   }
 
   onSubmit() {
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.petrolStock?.userId || localStorage.getItem('userId');
     if (this.stockForm.invalid) return;
   
     const payload = {

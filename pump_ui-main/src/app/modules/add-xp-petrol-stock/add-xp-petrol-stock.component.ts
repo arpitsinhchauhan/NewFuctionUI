@@ -42,7 +42,7 @@ export class AddXpPetrolStockComponent implements OnInit {
     }
   
     onSubmit() {
-      this.userId = localStorage.getItem('userId');
+      this.userId = this.XppetrolStock?.userId || localStorage.getItem('userId');
       if (this.stockForm.invalid) return;
       const payload = {
         ...this.stockForm.value,

@@ -1,10 +1,93 @@
-h4 {
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--text-main) !important;
-  margin-bottom: 0;
+:host {
+  display: block;
+}
+
+.card-premium {
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-modern {
+  background: #f8fafc;
+}
+
+.card-title-modern {
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.btn-close-custom {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close-custom:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.modern-date-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
+  width: 100%;
+}
+
+.modern-date-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.modern-report-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+.modern-report-table th {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.modern-report-table td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.report-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+  background: #ffffff;
+}
+
+.report-input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 .no-spinner::-webkit-outer-spin-button,
@@ -12,12 +95,16 @@ h4 {
   -webkit-appearance: none;
   margin: 0;
 }
-
 .no-spinner {
   -moz-appearance: textfield;
 }
 
-.invalid-input:hover {
-  border-color: darkred;
-  background-color: #ffe6e6;
+.grand-total-box {
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.invalid-input {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
 }

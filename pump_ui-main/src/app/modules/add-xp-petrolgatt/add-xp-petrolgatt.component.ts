@@ -42,7 +42,7 @@ export class AddXpPetrolgattComponent implements OnInit {
   }
 
   onSubmit() {
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.xppetrolgatt?.userId || localStorage.getItem('userId');
     if (this.gattForm.invalid) return;
   
     const payload = {

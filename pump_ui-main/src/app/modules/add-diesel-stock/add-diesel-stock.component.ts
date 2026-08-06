@@ -42,7 +42,7 @@ export class AddDieselStockComponent implements OnInit {
   }
 
   onSubmit() {
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.dieselStock?.userId || localStorage.getItem('userId');
     if (this.stockForm.invalid) return;
   
     const payload = {

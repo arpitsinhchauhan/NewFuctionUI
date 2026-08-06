@@ -42,7 +42,7 @@ export class AddGattComponent implements OnInit {
     }
   
     onSubmit() {
-      this.userId = localStorage.getItem('userId');
+      this.userId = this.petrolgatt?.userId || localStorage.getItem('userId');
       if (this.stockForm.invalid) return;
     
       const  payload = {

@@ -1,10 +1,22 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { API_PURCHASE_ADD, API_PURCHASE_LIST } from 'app/serviceult';
 import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
+
+export interface PurchaseRow {
+  id?: any;
+  type: string;
+  quantity: any;
+  total: any;
+  vat: any;
+  cess: any;
+  total_purchase: any;
+  jtcpercentage: any;
+  date: string;
+  userId: string;
+}
 
 @Component({
   selector: 'app-purchase-report',
@@ -13,12 +25,15 @@ import { UserServiceService } from 'app/services/user-service.service';
 })
 export class PurchaseReportComponent implements OnInit {
 
-  isReload: boolean;
-  // userId: string;
+  isReload: boolean = false;
   userId = localStorage.getItem('userId');
+  purchaDipStockseDetails = {
+    date: ''
+  };
+
   row: PurchaseRow[] = [
     {
-      id: this.purchase.id,
+      id: this.purchase?.id,
       type: 'Petrol',
       quantity: '',
       total: '',
@@ -30,7 +45,7 @@ export class PurchaseReportComponent implements OnInit {
       userId: this.userId
     },
     {
-      id: this.purchase.id,
+      id: this.purchase?.id,
       type: 'Diesel',
       quantity: '',
       total: '',
@@ -43,35 +58,48 @@ export class PurchaseReportComponent implements OnInit {
     }
   ];
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,
-    private use: UserServiceService, @Inject(MAT_DIALOG_DATA) public purchase: any,
+    private use: UserServiceService,
+    @Inject(MAT_DIALOG_DATA) public purchase: any,
     public dialogRef: MatDialogRef<PurchaseReportComponent>,
-    private notificationService: NotificationService) {
-  }
+    private notificationService: NotificationService
+  ) { }
+
   ngOnInit(): void {
     this.use.dialogZIndexAdjustment();
     if (this.purchase && this.purchase.date) {
       this.purchaDipStockseDetails.date = this.purchase.date;
+    } else {
+      const today = new Date().toISOString().split('T')[0];
+      this.purchaDipStockseDetails.date = today;
     }
     this.getPurchaseReport();
   }
 
   updateDate() {
-    this.row.forEach(row => {
-      row.date = this.purchaDipStockseDetails.date;
-    });
+    if (this.row) {
+      this.row.forEach(row => {
+        row.date = this.purchaDipStockseDetails.date;
+      });
+    }
+    if (this.purchase) {
+      this.purchase.date = this.purchaDipStockseDetails.date;
+    }
+    this.getPurchaseReport();
   }
-  purchaDipStockseDetails = {
-    date: ''
-  };
 
-
-
+  calculateRow(item: any) {
+    const total = Number(item.total) || 0;
+    const vat = Number(item.vat) || 0;
+    const cess = Number(item.cess) || 0;
+    item.total_purchase = total + vat + cess;
+  }
 
   addTable() {
     this.row.push({
-      id: this.purchase.id,
+      id: this.purchase?.id,
       type: '',
       quantity: '',
       total: '',
@@ -95,7 +123,6 @@ export class PurchaseReportComponent implements OnInit {
       0
     );
   }
-
 
   validateData(): boolean {
     if (!this.purchaDipStockseDetails.date) {
@@ -129,7 +156,6 @@ export class PurchaseReportComponent implements OnInit {
     return true;
   }
 
-
   order() {
     if (!this.validateData()) {
       return;
@@ -140,31 +166,14 @@ export class PurchaseReportComponent implements OnInit {
 
     this.http.post<any>(API_PURCHASE_ADD, this.row)
       .subscribe(response => {
-        if (response.length === 0) {
-          this.notificationService.failure("No data received from the server.");
-          this.row = [];
-          this.dialogRef.close();
-          return;
-        }
         this.notificationService.success("Purchase data Succefully Add");
-        this.purchaDipStockseDetails.date = null;
-        this.row = [];
-        this.dialogRef.close();
+        this.isReload = true;
+        this.dialogRef.close({ 'isReload': true });
+      }, error => {
+        this.notificationService.failure("Error saving purchase data");
       });
   }
 
-  Edit(purchaseDetails: any) {
-    // singupobj.ID=this.x.id;
-    this.use.getUpdatePurchase(purchaseDetails).subscribe(
-      (response) => {
-        this.notificationService.success('Purchase data updated successfully');
-      },
-      (error) => {
-        console.error('Error updating society data:', error);
-      }
-    );
-    this.dialogRef.close({ 'isReload': this.isReload });
-  }
   isNumber(value: any): boolean {
     return !isNaN(value) && value !== '';
   }
@@ -176,19 +185,19 @@ export class PurchaseReportComponent implements OnInit {
   getPurchaseReport() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
+    const selectedDate = this.purchaDipStockseDetails.date || this.purchase?.date;
 
     this.http.get<any[]>(API_PURCHASE_LIST, { params }).subscribe((data: any[]) => {
       let filteredData: any[] = [];
 
-      if (this.purchase?.date) {
+      if (selectedDate) {
         filteredData = data.filter(
-          (item) => new Date(item.date).toDateString() === new Date(this.purchase.date).toDateString()
+          (item) => new Date(item.date).toDateString() === new Date(selectedDate).toDateString()
         );
       } else {
         filteredData = data;
       }
 
-      // Always enforce Petrol and Diesel rows
       const petrolRow = filteredData.find(item => item.type === 'Petrol') || {
         id: this.purchase?.id,
         type: 'Petrol',
@@ -198,7 +207,7 @@ export class PurchaseReportComponent implements OnInit {
         cess: '',
         jtcpercentage: '',
         total_purchase: '',
-        date: this.purchaDipStockseDetails.date || '',
+        date: selectedDate || '',
         userId: this.userId
       };
 
@@ -211,14 +220,12 @@ export class PurchaseReportComponent implements OnInit {
         cess: '',
         jtcpercentage: '',
         total_purchase: '',
-        date: this.purchaDipStockseDetails.date || '',
+        date: selectedDate || '',
         userId: this.userId
       };
 
-      // Ensure Petrol & Diesel always appear at the top
       this.row = [petrolRow, dieselRow, ...filteredData.filter(item => item.type !== 'Petrol' && item.type !== 'Diesel')];
     });
   }
 
 }
-

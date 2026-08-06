@@ -41,7 +41,7 @@ export class AddPowerDieselgattComponent implements OnInit {
   }
 
   onSubmit() {
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.PowerDieselgatt?.userId || localStorage.getItem('userId');
     if (this.PowerDieselForm.invalid) return;
   
     const  payload = {

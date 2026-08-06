@@ -921,7 +921,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddPetrolStockComponent, {
       data: {
         date: formattedDate,
-        openstock: this.Petrol_Ugadto_Stock
+        openstock: this.Petrol_Ugadto_Stock,
+        userId: this.userId || localStorage.getItem('userId')
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -937,11 +938,12 @@ export class MainPanelComponent implements OnInit {
 
   getPetrolUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getPetrolStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.Petrol_Ugadto_Stock = data.petrol ?? data.petrol_stock ?? (typeof data === 'number' ? data : 0);
+          const item = Array.isArray(data) ? data[0] : data;
+          this.Petrol_Ugadto_Stock = item ? (item.petrol ?? item.petrol_stock ?? item.openstock ?? (typeof item === 'number' ? item : 0)) : 0;
         } else {
           this.Petrol_Ugadto_Stock = 0;
         }
@@ -958,7 +960,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddDieselStockComponent, {
       data: {
         date: formattedDate,
-        dieselopenstock: this.Diesel_Ugadto_Stock
+        dieselopenstock: this.Diesel_Ugadto_Stock,
+        userId: localStorage.getItem('userId') || this.userId
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -969,13 +972,15 @@ export class MainPanelComponent implements OnInit {
       }
     });
   }
+
   getDieselUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getDieselStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.Diesel_Ugadto_Stock = data.diesel ?? data.diesel_stock ?? (typeof data === 'number' ? data : 0);
+          const item = Array.isArray(data) ? data[0] : data;
+          this.Diesel_Ugadto_Stock = item ? (item.diesel ?? item.diesel_stock ?? item.dieselopenstock ?? (typeof item === 'number' ? item : 0)) : 0;
         } else {
           this.Diesel_Ugadto_Stock = 0;
         }
@@ -992,7 +997,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddXpPetrolStockComponent, {
       data: {
         date: formattedDate,
-        xp_ugadto_stock: this.XP_Petrol_Ugadto_Stock
+        xp_ugadto_stock: this.XP_Petrol_Ugadto_Stock,
+        userId: localStorage.getItem('userId') || this.userId
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1006,11 +1012,12 @@ export class MainPanelComponent implements OnInit {
 
   getxpPetrolUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getXpPetrolStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.XP_Petrol_Ugadto_Stock = data.Xppetrol ?? data.xp_petrol ?? (typeof data === 'number' ? data : 0);
+          const item = Array.isArray(data) ? data[0] : data;
+          this.XP_Petrol_Ugadto_Stock = item ? (item.Xppetrol ?? item.xp_petrol ?? item.xp_ugadto_stock ?? item.xp_petrol_stock ?? (typeof item === 'number' ? item : 0)) : 0;
         } else {
           this.XP_Petrol_Ugadto_Stock = 0;
         }
@@ -1027,7 +1034,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddPowerDieselStockComponent, {
       data: {
         date: formattedDate,
-        power_ugadto_stock: this.Power_Diesel_Ugadto_Stock
+        power_ugadto_stock: this.Power_Diesel_Ugadto_Stock,
+        userId: localStorage.getItem('userId') || this.userId
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1041,11 +1049,12 @@ export class MainPanelComponent implements OnInit {
 
   getpowerDieselUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getPowerDieselStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.Power_Diesel_Ugadto_Stock = data.Powerdiesel ?? data.power_diesel ?? (typeof data === 'number' ? data : 0);
+          const item = Array.isArray(data) ? data[0] : data;
+          this.Power_Diesel_Ugadto_Stock = item ? (item.Powerdiesel ?? item.power_diesel ?? item.power_ugadto_stock ?? item.power_diesel_stock ?? (typeof item === 'number' ? item : 0)) : 0;
         } else {
           this.Power_Diesel_Ugadto_Stock = 0;
         }
@@ -1294,6 +1303,7 @@ export class MainPanelComponent implements OnInit {
   extraDipstock() {
     const dataToSend: any = {
       date: this.use.getFormattedDate(this.reportDate),
+      userId: this.userId || localStorage.getItem('userId')
     };
 
     if (this.Petrol_dip || this.Petrol_stock || this.Diesel_dip || this.Diesel_stock) {
@@ -1815,7 +1825,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddGattComponent, {
       data: {
         date: formattedDate,
-        petrolgatt: this.Petrolgatt
+        petrolgatt: this.Petrolgatt,
+        userId: this.userId || localStorage.getItem('userId')
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1850,7 +1861,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddDieselgattComponent, {
       data: {
         date: formattedDate,
-        dieselgatt: this.dieselgatt
+        dieselgatt: this.dieselgatt,
+        userId: this.userId || localStorage.getItem('userId')
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1885,7 +1897,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddXpPetrolgattComponent, {
       data: {
         date: formattedDate,
-        xppetrolgatt: this.XpPetrolgatt
+        xppetrolgatt: this.XpPetrolgatt,
+        userId: this.userId || localStorage.getItem('userId')
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1920,7 +1933,8 @@ export class MainPanelComponent implements OnInit {
     const dialogRef = this.dialog.open(AddPowerDieselgattComponent, {
       data: {
         date: formattedDate,
-        PowerDieselgatt: this.PowerDieselgatt
+        PowerDieselgatt: this.PowerDieselgatt,
+        userId: this.userId || localStorage.getItem('userId')
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -2328,36 +2342,61 @@ export class MainPanelComponent implements OnInit {
       this.bakiTotal = results.reduce((sum, data) => sum + (data && data.length > 0 ? (Number(data[0][1]) || 0) : 0), 0);
     });
 
-    // 9. Purchases list
-    const purchaseCalls = empIds.map(id => this.use.getPurchaseiList(formatted, id).pipe(catchError(() => of([]))));
-    forkJoin(purchaseCalls).subscribe((results: any[][]) => {
-      this.petrolPurchaseLTR = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
-      this.dieselPurchaseLTR = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
+    // 9. Purchases list (Inventory Monitoring - current user ID)
+    const currentUserId = localStorage.getItem('userId') || this.userId;
+    this.use.getPurchaseiList(formatted, currentUserId).subscribe(list => {
+      this.petrolPurchaseLTR = 0;
+      this.dieselPurchaseLTR = 0;
+      if (list && list.length > 0) {
+        for (const item of list) {
+          const [quantity, type] = item;
+          if (type === 'Petrol') this.petrolPurchaseLTR = quantity || 0;
+          else if (type === 'Diesel') this.dieselPurchaseLTR = quantity || 0;
+        }
+      }
     });
 
-    // 10. Extra Purchases list
-    const extraPurchaseCalls = empIds.map(id => this.use.getExtraPurchaseiList(formatted, id).pipe(catchError(() => of([]))));
-    forkJoin(extraPurchaseCalls).subscribe((results: any[][]) => {
-      this.xpPetolQuantity = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
-      this.powerDieselQuantity = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
+    // 10. Extra Purchases list (Inventory Monitoring - current user ID)
+    this.use.getExtraPurchaseiList(formatted, currentUserId).subscribe(list => {
+      this.xpPetolQuantity = 0;
+      this.powerDieselQuantity = 0;
+      if (list && list.length > 0) {
+        for (const item of list) {
+          const [quantity, type] = item;
+          if (type === 'XP Petrol') this.xpPetolQuantity = quantity || 0;
+          else if (type === 'Power Diesel') this.powerDieselQuantity = quantity || 0;
+        }
+      }
     });
 
-    // 11. Dip list
-    const dipCalls = empIds.map(id => this.use.getDipList(formatted, id).pipe(catchError(() => of([]))));
-    forkJoin(dipCalls).subscribe((results: any[][]) => {
-      this.Petrol_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][2]) || 0) : 0), 0);
-      this.Petrol_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][3]) || 0) : 0), 0);
-      this.Diesel_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
-      this.Diesel_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
+    // 11. Dip list (Inventory Monitoring - current user ID)
+    this.use.getDipList(formatted, currentUserId).subscribe(data => {
+      if (data && data.length > 0 && Array.isArray(data[0])) {
+        this.Petrol_dip = data[0][2] ?? 0;
+        this.Petrol_stock = data[0][3] ?? 0;
+        this.Diesel_dip = data[0][0] ?? 0;
+        this.Diesel_stock = data[0][1] ?? 0;
+      } else {
+        this.Petrol_dip = 0;
+        this.Petrol_stock = 0;
+        this.Diesel_dip = 0;
+        this.Diesel_stock = 0;
+      }
     });
 
-    // 12. Extra Dip list
-    const extraDipCalls = empIds.map(id => this.use.getextraDipList(formatted, id).pipe(catchError(() => of([]))));
-    forkJoin(extraDipCalls).subscribe((results: any[][]) => {
-      this.Extra_Petrol_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][2]) || 0) : 0), 0);
-      this.Extra_Petrol_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][3]) || 0) : 0), 0);
-      this.Extra_Diesel_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
-      this.Extra_Diesel_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
+    // 12. Extra Dip list (Inventory Monitoring - current user ID)
+    this.use.getextraDipList(formatted, currentUserId).subscribe(data => {
+      if (data && data.length > 0) {
+        this.Extra_Petrol_dip = data[0][2] ?? 0;
+        this.Extra_Petrol_stock = data[0][3] ?? 0;
+        this.Extra_Diesel_dip = data[0][0] ?? 0;
+        this.Extra_Diesel_stock = data[0][1] ?? 0;
+      } else {
+        this.Extra_Petrol_dip = 0;
+        this.Extra_Petrol_stock = 0;
+        this.Extra_Diesel_dip = 0;
+        this.Extra_Diesel_stock = 0;
+      }
     });
 
     // 13. Cash Details
@@ -2437,40 +2476,56 @@ export class MainPanelComponent implements OnInit {
       this.calculateTotal();
     });
 
-    // Stock levels
-    const petrolStockCalls = empIds.map(id => this.use.getPetrolStock(formatted, id).pipe(catchError(() => of(0))));
-    forkJoin(petrolStockCalls).subscribe((results: any[]) => {
-      this.Petrol_Ugadto_Stock = results.reduce((sum, val) => sum + (val && typeof val === 'object' ? (Number(val.petrol) || 0) : (Number(val) || 0)), 0);
+    // Stock levels (Inventory Monitoring - current user ID)
+    this.use.getPetrolStock(formatted, currentUserId).subscribe(data => {
+      if (data) {
+        const item = Array.isArray(data) ? data[0] : data;
+        this.Petrol_Ugadto_Stock = item ? (item.petrol ?? item.petrol_stock ?? item.openstock ?? (typeof item === 'number' ? item : 0)) : 0;
+      } else {
+        this.Petrol_Ugadto_Stock = 0;
+      }
     });
-    const dieselStockCalls = empIds.map(id => this.use.getDieselStock(formatted, id).pipe(catchError(() => of(0))));
-    forkJoin(dieselStockCalls).subscribe((results: any[]) => {
-      this.Diesel_Ugadto_Stock = results.reduce((sum, val) => sum + (val && typeof val === 'object' ? (Number(val.diesel) || 0) : (Number(val) || 0)), 0);
+    this.use.getDieselStock(formatted, currentUserId).subscribe(data => {
+      if (data) {
+        const item = Array.isArray(data) ? data[0] : data;
+        this.Diesel_Ugadto_Stock = item ? (item.diesel ?? item.diesel_stock ?? item.dieselopenstock ?? (typeof item === 'number' ? item : 0)) : 0;
+      } else {
+        this.Diesel_Ugadto_Stock = 0;
+      }
     });
-    const xpStockCalls = empIds.map(id => this.use.getXpPetrolStock(formatted, id).pipe(catchError(() => of(0))));
-    forkJoin(xpStockCalls).subscribe((results: any[]) => {
-      this.XP_Petrol_Ugadto_Stock = results.reduce((sum, val) => sum + (val && typeof val === 'object' ? (Number(val.xp_petrol) || 0) : (Number(val) || 0)), 0);
+    this.use.getXpPetrolStock(formatted, currentUserId).subscribe(data => {
+      if (data) {
+        const item = Array.isArray(data) ? data[0] : data;
+        this.XP_Petrol_Ugadto_Stock = item ? (item.Xppetrol ?? item.xp_petrol ?? item.xp_ugadto_stock ?? item.xp_petrol_stock ?? (typeof item === 'number' ? item : 0)) : 0;
+      } else {
+        this.XP_Petrol_Ugadto_Stock = 0;
+      }
     });
-    const powerStockCalls = empIds.map(id => this.use.getPowerDieselStock(formatted, id).pipe(catchError(() => of(0))));
-    forkJoin(powerStockCalls).subscribe((results: any[]) => {
-      this.Power_Diesel_Ugadto_Stock = results.reduce((sum, val) => sum + (val && typeof val === 'object' ? (Number(val.power_diesel) || 0) : (Number(val) || 0)), 0);
+    this.use.getPowerDieselStock(formatted, currentUserId).subscribe(data => {
+      if (data) {
+        const item = Array.isArray(data) ? data[0] : data;
+        this.Power_Diesel_Ugadto_Stock = item ? (item.Powerdiesel ?? item.power_diesel ?? item.power_ugadto_stock ?? item.power_diesel_stock ?? (typeof item === 'number' ? item : 0)) : 0;
+      } else {
+        this.Power_Diesel_Ugadto_Stock = 0;
+      }
     });
 
-    // Gatt Petrol, Diesel, XP, Power Diesel
-    const petrolGattCalls = empIds.map(id => this.use.getPetrolGatt(formatted, id).pipe(catchError(() => of(null))));
-    forkJoin(petrolGattCalls).subscribe((results: any[]) => {
-      this.Petrolgatt = results.reduce((sum, res) => sum + (res?.petrolgatt || 0), 0);
+    // Gatt Petrol, Diesel, XP, Power Diesel (Inventory Monitoring - current user ID)
+    this.use.getPetrolGatt(formatted, currentUserId).subscribe((res: any) => {
+      const item = Array.isArray(res) ? res[0] : res;
+      this.Petrolgatt = item?.petrolgatt || 0;
     });
-    const dieselGattCalls = empIds.map(id => this.use.getDieselGatt(formatted, id).pipe(catchError(() => of(null))));
-    forkJoin(dieselGattCalls).subscribe((results: any[]) => {
-      this.dieselgatt = results.reduce((sum, res) => sum + (res?.dieselgatt || 0), 0);
+    this.use.getDieselGatt(formatted, currentUserId).subscribe((res: any) => {
+      const item = Array.isArray(res) ? res[0] : res;
+      this.dieselgatt = item?.dieselgatt || 0;
     });
-    const xpGattCalls = empIds.map(id => this.use.getXpPetrolGatt(formatted, id).pipe(catchError(() => of(null))));
-    forkJoin(xpGattCalls).subscribe((results: any[]) => {
-      this.XpPetrolgatt = results.reduce((sum, res) => sum + (res?.xpPetrolgatt || 0), 0);
+    this.use.getXpPetrolGatt(formatted, currentUserId).subscribe((res: any) => {
+      const item = Array.isArray(res) ? res[0] : res;
+      this.XpPetrolgatt = item?.xpPetrolgatt || 0;
     });
-    const powerGattCalls = empIds.map(id => this.use.getPowerDieselGatt(formatted, id).pipe(catchError(() => of(null))));
-    forkJoin(powerGattCalls).subscribe((results: any[]) => {
-      this.PowerDieselgatt = results.reduce((sum, res) => sum + (res?.powerDieselgatt || 0), 0);
+    this.use.getPowerDieselGatt(formatted, currentUserId).subscribe((res: any) => {
+      const item = Array.isArray(res) ? res[0] : res;
+      this.PowerDieselgatt = item?.powerDieselgatt || 0;
     });
 
     // Credit Note IOCL
@@ -2479,20 +2534,17 @@ export class MainPanelComponent implements OnInit {
       this.creditNOteIOCL = results.reduce((sum, res) => sum + (res?.loclCredit || 0), 0);
     });
 
-    // Oil Purchase List
-    const oilPurCalls = empIds.map(id => this.use.getOilPurchaseiList(formatted, id).pipe(catchError(() => of([]))));
-    forkJoin(oilPurCalls).subscribe((results: any[][]) => {
+    // Oil Purchase List (Inventory Monitoring - current user ID)
+    this.use.getOilPurchaseiList(formatted, currentUserId).subscribe((data: any) => {
       this.oilQuantity = 0;
-      results.forEach(data => {
-        if (data && data.length > 0) {
-          for (const item of data) {
-            const [quantity, type] = item;
-            if (type === 'oil') {
-              this.oilQuantity += quantity || 0;
-            }
+      if (data && data.length > 0) {
+        for (const item of data) {
+          const [quantity, type] = item;
+          if (type === 'oil') {
+            this.oilQuantity += quantity || 0;
           }
         }
-      });
+      }
     });
   }
 

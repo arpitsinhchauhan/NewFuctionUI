@@ -42,7 +42,7 @@ export class AddDieselgattComponent implements OnInit {
   }
 
   onSubmit() {
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.dieselgatt?.userId || localStorage.getItem('userId');
     if (this.stockForm.invalid) return;
   
     const  payload = {

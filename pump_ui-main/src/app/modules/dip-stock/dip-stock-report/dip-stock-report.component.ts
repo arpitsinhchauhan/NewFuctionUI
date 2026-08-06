@@ -58,7 +58,7 @@ export class DipStockReportComponent implements OnInit {
     if (this.dip && this.dip.date) {
       this.purchaDipStockseDetails.date = this.dip.date;
     }
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.data?.userId || this.dip?.userId || localStorage.getItem('userId');
     this.use.selectedItems$.subscribe(items => {
       this.selectedItems = items;
       // Handle the received data here
