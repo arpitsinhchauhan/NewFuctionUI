@@ -140,7 +140,7 @@
                     [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                 <td><input type="number" class="report-input" [(ngModel)]="petrol.rate" (input)="calculatePetrol(i)"
                     [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
-                <td><span class="calc-value">{{ petrol.saleLtr | number:'1.2-2' }} L</span></td>
+                <td><span class="calc-value">{{ petrol.saleLtr | number:'1.2-2' }}</span></td>
                 <td><span class="calc-value text-primary">{{ (petrol.ltr < 0 ? petrol.ltr * -1 : petrol.ltr) |
                       number:'1.2-2' }} L</span>
                 </td>
@@ -172,7 +172,7 @@
                       [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                   <td><input type="number" class="report-input" [(ngModel)]="xp.rate" (input)="calculateXpPetrol(i)"
                       [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
-                  <td><span class="calc-value">{{ xp.saleLtr | number:'1.2-2' }} L</span></td>
+                  <td><span class="calc-value">{{ xp.saleLtr | number:'1.2-2' }}</span></td>
                   <td><span class="calc-value text-primary">{{ (xp.ltr < 0 ? xp.ltr * -1 : xp.ltr) | number:'1.2-2' }}
                         L</span>
                   </td>
@@ -205,7 +205,7 @@
                     [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                 <td><input type="number" class="report-input" [(ngModel)]="diesel.rate" (input)="calculateDiesel(i)"
                     [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
-                <td><span class="calc-value">{{ diesel.saleLtr | number:'1.2-2' }} L</span></td>
+                <td><span class="calc-value">{{ diesel.saleLtr | number:'1.2-2' }}</span></td>
                 <td><span class="calc-value text-warning">{{ (diesel.ltr < 0 ? diesel.ltr * -1 : diesel.ltr) |
                       number:'1.2-2' }} L</span>
                 </td>

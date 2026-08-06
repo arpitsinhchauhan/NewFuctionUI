@@ -298,6 +298,7 @@ export class MainPanelComponent implements OnInit {
     this.getPowerDieselGatt();
     this.getcreditNOteIOCL();
     this.getOilPurchaseList();
+    this.backPage();
     this.use.checkEodLock(formatted, this.userId).subscribe(res => {
       this.isDayLocked = res && res.locked;
     });
@@ -1788,7 +1789,7 @@ export class MainPanelComponent implements OnInit {
   }
 
   backPage() {
-    const userId = localStorage.getItem('userId');
+    const userId = this.userId || localStorage.getItem('userId');
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     const apiUrl = `${API_BACKPAGE}?date=${formattedDate}&userId=${userId}`;
 
