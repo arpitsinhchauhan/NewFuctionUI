@@ -153,7 +153,17 @@ export class SidebarComponent implements OnInit {
         {
           section: 'ADMIN PANEL',
           items: [
-            { path: '/User', title: 'User Master', icon: 'supervised_user_circle' }
+            { path: '/dashboard', title: 'Dashboard', icon: 'dashboard' },
+            { path: '/User', title: 'User Master', icon: 'supervised_user_circle' },
+            { path: '/dailyReport', title: 'Daily Reports', icon: 'assignment' },
+            { path: '/Report', title: 'Reports', icon: 'picture_as_pdf' }
+          ]
+        },
+        {
+          section: 'FINANCIALS',
+          items: [
+            { path: '/Kharch', title: 'Expend', icon: 'attach_money' },
+            { path: '/customer', title: 'Customer Ledger', icon: 'contacts_product' }
           ]
         }
       ];
@@ -185,14 +195,14 @@ export class SidebarComponent implements OnInit {
         }
       ];
 
-      if (currentRole !== 'PUMP_MANAGER' && currentRole !== 'user') {
-        sections.push({
-          section: 'FINANCIALS',
-          items: [
-            { path: '/financial-reports', title: 'Financial Suite', icon: 'account_balance_wallet' }
-          ]
-        });
-      }
+      sections.push({
+        section: 'FINANCIALS',
+        items: [
+          { path: '/Kharch', title: 'Expend', icon: 'attach_money' },
+          { path: '/customer', title: 'Customer Ledger', icon: 'contacts_product' },
+          ...(currentRole !== 'PUMP_MANAGER' && currentRole !== 'user' ? [{ path: '/financial-reports', title: 'Financial Suite', icon: 'account_balance_wallet' }] : [])
+        ]
+      });
 
       sections.push({
         section: 'INVENTORY & SALES',

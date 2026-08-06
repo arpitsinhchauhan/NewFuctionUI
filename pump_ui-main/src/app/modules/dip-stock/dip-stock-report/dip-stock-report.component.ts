@@ -15,13 +15,13 @@ import { PurchaseReportComponent } from '../../table-list/purchase-report/purcha
 })
 export class DipStockReportComponent implements OnInit {
   isReload: boolean;
-  petrolvolume: string = ''; 
+  petrolvolume: string = '';
   dielsevolume: string = '';
   pdip: string = '';
   dieseldip: string = '';
   pvalue: number | undefined;
   dvalue: number | undefined;
-    purchaDipStockseDetails: DipStock = {
+  purchaDipStockseDetails: DipStock = {
     date: new Date(),
     petroldip: '',
     pvalue: 0,
@@ -31,7 +31,7 @@ export class DipStockReportComponent implements OnInit {
   };
   userId: string;
   selectedItems: any[] = [];
-  
+
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private http: HttpClient,
     private use: UserServiceService,
@@ -39,21 +39,21 @@ export class DipStockReportComponent implements OnInit {
     public dialogRef: MatDialogRef<PurchaseReportComponent>,
     private notificationService: NotificationService
   ) {
-   if (data) {
-    this.purchaDipStockseDetails = { ...data };
-    this.pdip = data.petroldip;
-    this.pvalue = data.pvalue;
-    this.dieseldip = data.dieseldip;
-    this.dvalue = data.dvalue;
+    if (data) {
+      this.purchaDipStockseDetails = { ...data };
+      this.pdip = data.petroldip;
+      this.pvalue = data.pvalue;
+      this.dieseldip = data.dieseldip;
+      this.dvalue = data.dvalue;
 
-    if (data.petroldip === null && data.pvalue === null && data.dieseldip === null && data.dvalue === null) {
-      data.type = 'add'; 
-    } else if(data){
-      data.type = 'edit';  
+      if (data.petroldip === null && data.pvalue === null && data.dieseldip === null && data.dvalue === null) {
+        data.type = 'add';
+      } else if (data) {
+        data.type = 'edit';
+      }
     }
   }
-  }
-  
+
   ngOnInit(): void {
     if (this.dip && this.dip.date) {
       this.purchaDipStockseDetails.date = this.dip.date;
@@ -93,17 +93,26 @@ export class DipStockReportComponent implements OnInit {
     this.purchaDipStockseDetails.pvalue = this.pvalue;
     this.purchaDipStockseDetails.dieseldip = this.dieseldip;
     this.purchaDipStockseDetails.dvalue = this.dvalue;
-    this.purchaDipStockseDetails.userId = this.userId;
-    this.use.getUpdateDip(purchaDipStockseDetails).subscribe(
+    this.purchaDipStockseDetails.userId = this.userId || localStorage.getItem('userId');
+    this.use.addDipstock(this.purchaDipStockseDetails).subscribe(
       (response) => {
         this.notificationService.success('Dipstock data updated successfully');
         this.isReload = true;
         this.dialogRef.close({ 'isReload': this.isReload });
       },
       (error) => {
-        console.error('Error updating society data:', error);
-        this.isReload = false;
-        this.dialogRef.close({ 'isReload': this.isReload });
+        this.use.getUpdateDip(this.purchaDipStockseDetails).subscribe(
+          (updRes) => {
+            this.notificationService.success('Dipstock data updated successfully');
+            this.isReload = true;
+            this.dialogRef.close({ 'isReload': this.isReload });
+          },
+          (updErr) => {
+            this.notificationService.failure('Failed to save DipStock details.');
+            this.isReload = false;
+            this.dialogRef.close({ 'isReload': this.isReload });
+          }
+        );
       }
     );
   }
@@ -150,7 +159,7 @@ export class DipStockReportComponent implements OnInit {
           if (error.status === 409) {
             this.notificationService.failure("DipStock with this date already exists. Details not saved.");
             this.isReload = false;
-        this.dialogRef.close({ 'isReload': this.isReload });
+            this.dialogRef.close({ 'isReload': this.isReload });
           }
         }
       );

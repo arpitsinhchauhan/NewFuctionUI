@@ -67,8 +67,32 @@
 .report-meta {
   display: flex;
   align-items: center;
-  gap: 24px;
-  align-self: flex-end;
+  gap: 12px;
+  align-self: flex-start;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.meta-item {
+  flex-shrink: 0;
+
+  .badge,
+  .btn {
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    line-height: 1.4 !important;
+
+    mat-icon {
+      font-size: 14px !important;
+      width: 14px !important;
+      height: 14px !important;
+      line-height: 14px !important;
+      margin-right: 0 !important;
+    }
+  }
 }
 
 .time-display {
@@ -93,7 +117,8 @@
 }
 
 .modern-datepicker {
-  min-width: 220px;
+  width: 180px;
+  min-width: 150px;
 
   ::ng-deep {
     .mat-form-field-flex {
@@ -106,12 +131,13 @@
       min-height: 42px;
       display: flex;
       align-items: center;
-      border-top: none !important; /* Prevents push-down in some material configurations */
+      border-top: none !important;
+      /* Prevents push-down in some material configurations */
     }
 
     // Default label inside white input
-    .mat-form-field-label { 
-      color: #64748b !important; 
+    .mat-form-field-label {
+      color: #64748b !important;
     }
 
     // Floated label sitting on dark header background
@@ -120,55 +146,57 @@
       color: #f8fafc !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
-    
+
     // Select value and input text
-    input, 
-    .mat-input-element, 
-    .mat-select-value, 
+    input,
+    .mat-input-element,
+    .mat-select-value,
     .mat-select-value-text,
     .mat-select-value-text *,
     mat-select,
-    mat-select * { 
-      color: #0f172a !important; 
-      font-weight: 600 !important; 
+    mat-select * {
+      color: #0f172a !important;
+      font-weight: 600 !important;
     }
-    
+
     // Outline border container (where the white background sits)
-    .mat-form-field-outline { 
+    .mat-form-field-outline {
       background-color: #ffffff !important;
       border-radius: 10px !important;
-      color: #cbd5e1 !important; 
+      color: #cbd5e1 !important;
     }
-    
+
     // Align border-radii on outline segments
     .mat-form-field-outline-start {
       border-radius: 10px 0 0 10px !important;
       border-color: #cbd5e1 !important;
       border-width: 1px !important;
     }
-    
+
     .mat-form-field-outline-gap {
       border-color: #cbd5e1 !important;
       border-width: 1px !important;
     }
-    
+
     .mat-form-field-outline-end {
       border-radius: 0 10px 10px 0 !important;
       border-color: #cbd5e1 !important;
       border-width: 1px !important;
     }
-    
+
     // Hover state outline
     &:hover {
+
       .mat-form-field-outline-start,
       .mat-form-field-outline-gap,
       .mat-form-field-outline-end {
         border-color: #94a3b8 !important;
       }
     }
-    
+
     // Focused state outline
     &.mat-focused {
+
       .mat-form-field-outline-start,
       .mat-form-field-outline-gap,
       .mat-form-field-outline-end {
@@ -178,20 +206,20 @@
     }
 
     // Toggle button, calendar SVG icon, and dropdown arrow inside
-    .mat-datepicker-toggle, 
+    .mat-datepicker-toggle,
     .mat-datepicker-toggle button,
     .mat-datepicker-toggle mat-icon,
     .mat-datepicker-toggle-default-icon,
     .mat-datepicker-toggle-default-icon svg,
     .mat-select-arrow,
-    .mat-select-arrow-wrapper { 
-      color: #64748b !important; 
+    .mat-select-arrow-wrapper {
+      color: #64748b !important;
       fill: #64748b !important;
     }
-    
-    .mat-form-field-prefix mat-icon, 
-    .mat-form-field-suffix mat-icon { 
-      color: #64748b !important; 
+
+    .mat-form-field-prefix mat-icon,
+    .mat-form-field-suffix mat-icon {
+      color: #64748b !important;
     }
   }
 }
@@ -204,16 +232,16 @@
     border-radius: 8px !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
   }
-  
+
   .mat-option {
     color: #1e293b !important;
     background: #ffffff !important;
     font-weight: 500 !important;
-    
+
     &:hover:not(.mat-option-disabled) {
       background: #f1f5f9 !important;
     }
-    
+
     &.mat-selected:not(.mat-option-disabled) {
       background: #e2e8f0 !important;
       color: #0f172a !important;
@@ -316,8 +344,13 @@
   border-top: 2px solid var(--border-color);
 }
 
-.total-row-modern.petrol { color: var(--primary); }
-.total-row-modern.diesel { color: #f59e0b; }
+.total-row-modern.petrol {
+  color: var(--primary);
+}
+
+.total-row-modern.diesel {
+  color: #f59e0b;
+}
 
 .summary-list-modern {
   background: var(--bg-main);
@@ -357,8 +390,14 @@
   margin-top: 8px;
 }
 
-.grand-total .summary-label { color: rgba(255, 255, 255, 0.7); }
-.grand-total .summary-value { color: white; font-size: 20px; }
+.grand-total .summary-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.grand-total .summary-value {
+  color: white;
+  font-size: 20px;
+}
 
 .click-cell {
   cursor: pointer;
@@ -466,12 +505,14 @@
     gap: 10px;
     padding: 16px;
   }
+
   .action-group {
     width: 100%;
     flex-direction: column;
   }
+
   .action-group .btn-premium,
-  .report-footer-actions > .btn-premium {
+  .report-footer-actions>.btn-premium {
     width: 100%;
     justify-content: center;
   }
@@ -496,10 +537,21 @@
   color: white;
 }
 
-.ledger-header.jama { background: #10b981; }
-.ledger-header.baki { background: #ef4444; }
-.ledger-header.kharch { background: #f59e0b; }
-.ledger-header.atm { background: var(--primary); }
+.ledger-header.jama {
+  background: #10b981;
+}
+
+.ledger-header.baki {
+  background: #ef4444;
+}
+
+.ledger-header.kharch {
+  background: #f59e0b;
+}
+
+.ledger-header.atm {
+  background: var(--primary);
+}
 
 .no-data-msg {
   padding: 30px;
@@ -510,10 +562,24 @@
 }
 
 @media print {
-  .daily-report-wrapper { padding: 0; background: white; }
-  .report-card-modern { box-shadow: none; max-width: 100%; }
-  .report-header { background: black !important; -webkit-print-color-adjust: exact; }
-  .no-print { display: none !important; }
+  .daily-report-wrapper {
+    padding: 0;
+    background: white;
+  }
+
+  .report-card-modern {
+    box-shadow: none;
+    max-width: 100%;
+  }
+
+  .report-header {
+    background: black !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
 }
 
 /* Manager Dashboard Styles */
@@ -528,7 +594,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.01);
   border: 1px solid var(--border-color, #e2e8f0);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   &:hover {
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
   }
@@ -546,7 +612,7 @@
   display: flex;
   align-items: center;
   color: var(--primary, #0062ff);
-  
+
   mat-icon {
     font-size: 28px;
     width: 28px;
@@ -562,7 +628,7 @@
 
 .search-box-wrapper {
   position: relative;
-  
+
   .search-icon {
     position: absolute;
     left: 14px;
@@ -574,7 +640,7 @@
     width: 20px;
     height: 20px;
   }
-  
+
   .search-input-modern {
     padding-left: 44px !important;
     border-radius: 10px !important;
@@ -584,7 +650,7 @@
     transition: all 0.2s ease;
     background: var(--bg-main, #f8fafc);
     color: var(--text-main, #0f172a);
-    
+
     &:focus {
       border-color: var(--primary, #0062ff) !important;
       background: #ffffff;
@@ -602,7 +668,7 @@
 
 .hover-row {
   transition: background-color 0.2s ease;
-  
+
   &:hover {
     background-color: var(--bg-main, #f8fafc) !important;
   }
@@ -615,17 +681,17 @@
   border-radius: 30px;
   text-transform: capitalize;
   display: inline-block;
-  
+
   &.badge-success {
     background-color: rgba(16, 185, 129, 0.12) !important;
     color: #10b981 !important;
   }
-  
+
   &.badge-info {
     background-color: rgba(0, 98, 255, 0.12) !important;
     color: #0062ff !important;
   }
-  
+
   &.badge-warning {
     background-color: rgba(245, 158, 11, 0.12) !important;
     color: #f59e0b !important;
@@ -645,7 +711,7 @@
   border: 1px solid var(--border-color, #e2e8f0);
   padding: 16px;
   transition: transform 0.2s, box-shadow 0.2s;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
@@ -660,7 +726,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  
+
   mat-icon {
     font-size: 24px;
     width: 24px;
@@ -668,10 +734,21 @@
   }
 }
 
-.bg-primary-soft { background-color: rgba(0, 98, 255, 0.1) !important; }
-.bg-warning-soft { background-color: rgba(245, 158, 11, 0.1) !important; }
-.bg-danger-soft { background-color: rgba(239, 68, 68, 0.1) !important; }
-.bg-success-soft { background-color: rgba(16, 185, 129, 0.1) !important; }
+.bg-primary-soft {
+  background-color: rgba(0, 98, 255, 0.1) !important;
+}
+
+.bg-warning-soft {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.bg-danger-soft {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.bg-success-soft {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
 
 .uppercase-heading {
   font-size: 11px;
@@ -691,8 +768,10 @@
 }
 
 .manager-view {
+
   .report-content,
   &.report-card-modern .report-content {
+
     .click-cell,
     .summary-item,
     .dashboard-action-card,
@@ -702,9 +781,19 @@
       pointer-events: none !important;
       cursor: default !important;
     }
+
     .click-cell {
       text-decoration: none !important;
       color: inherit !important;
+    }
+
+    .inventory-section-table .click-cell,
+    .inventory-click-cell,
+    .click-cell.inventory-click-cell {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      color: #0d6efd !important;
+      text-decoration: underline !important;
     }
   }
 }
@@ -742,12 +831,14 @@
 
 .compact-erp-table {
   font-size: 13px;
+
   th {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 10px;
   }
+
   td {
     padding: 8px 10px;
     vertical-align: middle;

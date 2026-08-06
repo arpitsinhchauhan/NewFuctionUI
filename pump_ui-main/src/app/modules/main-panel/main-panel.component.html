@@ -46,7 +46,7 @@
           </div>
         </div>
 
-        <div class="report-meta">
+        <div class="report-meta d-flex align-items-center flex-nowrap gap-2">
           <div class="meta-item">
             <mat-form-field appearance="outline" class="modern-datepicker">
               <mat-label>Report Date</mat-label>
@@ -57,7 +57,7 @@
             </mat-form-field>
           </div>
 
-          <div class="meta-item">
+          <div class="meta-item" *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee'">
             <mat-form-field appearance="outline" class="modern-datepicker">
               <mat-label>Shift</mat-label>
               <mat-select [(ngModel)]="selectedShift" name="selectedShift" (selectionChange)="onShiftChange()">
@@ -79,27 +79,17 @@
             </mat-form-field>
           </div>
 
-          <!-- Shift Status & ERP Action Buttons -->
-          <div class="meta-item d-flex align-items-center gap-2 flex-wrap">
-            <span class="badge p-2 font-weight-bold" [ngClass]="isShiftLocked ? 'badge-danger' : 'badge-success'">
-              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">{{ isShiftLocked ? 'lock' : 'lock_open' }}</mat-icon>
-              Shift {{ currentShiftStatus }}
-            </span>
-
-            <button type="button" class="btn btn-sm btn-outline-warning" *ngIf="!isShiftLocked" (click)="onCloseShift()">
-              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">lock</mat-icon> Close Shift
+          <!-- ERP Action Buttons -->
+          <div class="meta-item d-flex align-items-center gap-2 flex-nowrap">
+            <button type="button" class="btn btn-sm btn-info text-nowrap" (click)="openShiftReportModal()">
+              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">assessment</mat-icon> Shift Sales
+              Report
             </button>
 
-            <button type="button" class="btn btn-sm btn-outline-info" *ngIf="isShiftLocked && (userRole === 'ADMIN' || userRole === 'admin' || userRole === 'SUPERADMIN' || userRole === 'superadmin')" (click)="onReopenShift()">
-              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">lock_open</mat-icon> Unlock Shift
-            </button>
-
-            <button type="button" class="btn btn-sm btn-info ml-1" (click)="openShiftReportModal()">
-              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">assessment</mat-icon> Shift Sales Report
-            </button>
-
-            <button type="button" class="btn btn-sm btn-primary ml-1" (click)="openDailyConsolidatedModal()">
-              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">donut_large</mat-icon> Daily Consolidated Report
+            <button type="button" class="btn btn-sm btn-primary text-nowrap"
+              (click)="openDailyConsolidatedModal()">
+              <mat-icon style="font-size: 14px; height: 14px; vertical-align: middle;">donut_large</mat-icon> Daily
+              Consolidated Report
             </button>
           </div>
         </div>
@@ -114,7 +104,7 @@
         <!-- Fuel Sales Section -->
         <div class="section-title-modern">
           <mat-icon>local_gas_station</mat-icon>
-          <h3>Fuel Sales Summary ({{ selectedShift }} Shift)</h3>
+          <h3>Fuel Sales Summary<span *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee'"> ({{ selectedShift }} Shift)</span></h3>
         </div>
 
         <div class="table-responsive-modern mb-4">
@@ -127,7 +117,7 @@
                 <th>Testing <span class="unit-badge">L</span></th>
                 <th>Rate <span class="unit-badge">₹/L</span></th>
                 <th>Sale <span class="unit-badge">L</span></th>
-                <th>Net Sales <span class="unit-badge">L</span></th>
+                <th>Net Sales</th>
                 <th class="text-right">Total <span class="unit-badge">₹</span></th>
               </tr>
             </thead>
@@ -136,18 +126,20 @@
               <tr *ngFor="let petrol of petrolPumps.slice(0, showPetrolPumpsCount); let i = index" class="hover-row">
                 <td><span class="fuel-name-badge petrol-badge">{{ petrol.name }}</span></td>
                 <td><input type="number" class="report-input" [(ngModel)]="petrol.closingMeter"
-                    (input)="calculatePetrol(i)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                    (input)="calculatePetrol(i)" [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                 <td>
-                  <input type="number" class="report-input" [class.border-danger]="petrol.warningMismatch" [(ngModel)]="petrol.openingMeter"
-                    (input)="calculatePetrol(i); checkOpeningMismatch(petrol)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0">
-                  <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;" *ngIf="petrol.warningMismatch">
+                  <input type="number" class="report-input" [class.border-danger]="petrol.warningMismatch"
+                    [(ngModel)]="petrol.openingMeter" (input)="calculatePetrol(i); checkOpeningMismatch(petrol)"
+                    [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                  <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
+                    *ngIf="petrol.warningMismatch">
                     ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ petrol.autoOpeningMeter }})
                   </small>
                 </td>
                 <td><input type="number" class="report-input" [(ngModel)]="petrol.testing" (input)="calculatePetrol(i)"
-                    [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                    [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                 <td><input type="number" class="report-input" [(ngModel)]="petrol.rate" (input)="calculatePetrol(i)"
-                    [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0.00"></td>
+                    [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                 <td><span class="calc-value">{{ petrol.saleLtr | number:'1.2-2' }} L</span></td>
                 <td><span class="calc-value text-primary">{{ (petrol.ltr < 0 ? petrol.ltr * -1 : petrol.ltr) |
                       number:'1.2-2' }} L</span>
@@ -157,7 +149,7 @@
               <tr class="total-row-modern petrol">
                 <td colspan="6" class="font-weight-bold"><mat-icon
                     style="font-size:14px;vertical-align:middle;">local_gas_station</mat-icon> Petrol Sub-Total</td>
-                <td><strong>{{ petrolTotalLTR | number:'1.2-2' }} L</strong></td>
+                <td><strong>{{ petrolTotalLTR | number:'1.2-2' }}</strong></td>
                 <td class="text-right"><strong>₹{{ petrolTotalRS | number:'1.2-2' }}</strong></td>
               </tr>
 
@@ -166,18 +158,20 @@
                 <tr *ngFor="let xp of xpPetrol.slice(0, showXpPetrolCount); let i = index" class="hover-row">
                   <td><span class="fuel-name-badge petrol-badge">{{ xp.name }}</span></td>
                   <td><input type="number" class="report-input" [(ngModel)]="xp.closingMeter"
-                      (input)="calculateXpPetrol(i)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                      (input)="calculateXpPetrol(i)" [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                   <td>
-                    <input type="number" class="report-input" [class.border-danger]="xp.warningMismatch" [(ngModel)]="xp.openingMeter"
-                        (input)="calculateXpPetrol(i); checkOpeningMismatch(xp)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0">
-                    <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;" *ngIf="xp.warningMismatch">
+                    <input type="number" class="report-input" [class.border-danger]="xp.warningMismatch"
+                      [(ngModel)]="xp.openingMeter" (input)="calculateXpPetrol(i); checkOpeningMismatch(xp)"
+                      [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                    <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
+                      *ngIf="xp.warningMismatch">
                       ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ xp.autoOpeningMeter }})
                     </small>
                   </td>
                   <td><input type="number" class="report-input" [(ngModel)]="xp.testing" (input)="calculateXpPetrol(i)"
-                      [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                      [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                   <td><input type="number" class="report-input" [(ngModel)]="xp.rate" (input)="calculateXpPetrol(i)"
-                      [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0.00"></td>
+                      [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                   <td><span class="calc-value">{{ xp.saleLtr | number:'1.2-2' }} L</span></td>
                   <td><span class="calc-value text-primary">{{ (xp.ltr < 0 ? xp.ltr * -1 : xp.ltr) | number:'1.2-2' }}
                         L</span>
@@ -188,7 +182,7 @@
                   <td colspan="6" class="font-weight-bold"><mat-icon
                       style="font-size:14px;vertical-align:middle;">local_gas_station</mat-icon> XP Petrol Sub-Total
                   </td>
-                  <td><strong>{{ xpPetrolTotalLTR | number:'1.2-2' }} L</strong></td>
+                  <td><strong>{{ xpPetrolTotalLTR | number:'1.2-2' }}</strong></td>
                   <td class="text-right"><strong>₹{{ xpPetrolTotalRS | number:'1.2-2' }}</strong></td>
                 </tr>
               </ng-container>
@@ -197,18 +191,20 @@
               <tr *ngFor="let diesel of dieselPumps.slice(0, showDieselPumpsCount); let i = index" class="hover-row">
                 <td><span class="fuel-name-badge diesel-badge">{{ diesel.name }}</span></td>
                 <td><input type="number" class="report-input" [(ngModel)]="diesel.closingMeter"
-                    (input)="calculateDiesel(i)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                    (input)="calculateDiesel(i)" [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                 <td>
-                  <input type="number" class="report-input" [class.border-danger]="diesel.warningMismatch" [(ngModel)]="diesel.openingMeter"
-                    (input)="calculateDiesel(i); checkOpeningMismatch(diesel)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0">
-                  <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;" *ngIf="diesel.warningMismatch">
+                  <input type="number" class="report-input" [class.border-danger]="diesel.warningMismatch"
+                    [(ngModel)]="diesel.openingMeter" (input)="calculateDiesel(i); checkOpeningMismatch(diesel)"
+                    [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                  <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
+                    *ngIf="diesel.warningMismatch">
                     ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ diesel.autoOpeningMeter }})
                   </small>
                 </td>
                 <td><input type="number" class="report-input" [(ngModel)]="diesel.testing" (input)="calculateDiesel(i)"
-                    [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                    [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                 <td><input type="number" class="report-input" [(ngModel)]="diesel.rate" (input)="calculateDiesel(i)"
-                    [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0.00"></td>
+                    [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                 <td><span class="calc-value">{{ diesel.saleLtr | number:'1.2-2' }} L</span></td>
                 <td><span class="calc-value text-warning">{{ (diesel.ltr < 0 ? diesel.ltr * -1 : diesel.ltr) |
                       number:'1.2-2' }} L</span>
@@ -218,7 +214,7 @@
               <tr class="total-row-modern diesel">
                 <td colspan="6" class="font-weight-bold"><mat-icon
                     style="font-size:14px;vertical-align:middle;">ev_station</mat-icon> Diesel Sub-Total</td>
-                <td><strong>{{ dieselTotalLTR | number:'1.2-2' }} L</strong></td>
+                <td><strong>{{ dieselTotalLTR | number:'1.2-2' }}</strong></td>
                 <td class="text-right"><strong>₹{{ dieselTotalRS | number:'1.2-2' }}</strong></td>
               </tr>
 
@@ -227,19 +223,21 @@
                 <tr *ngFor="let pd of powerDiesel.slice(0, showPowerDieselCount); let i = index" class="hover-row">
                   <td><span class="fuel-name-badge diesel-badge">{{ pd.name }}</span></td>
                   <td><input type="number" class="report-input" [(ngModel)]="pd.closingMeter"
-                      (input)="calculatepowerDiesel(i)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                      (input)="calculatepowerDiesel(i)" [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                   <td>
-                    <input type="number" class="report-input" [class.border-danger]="pd.warningMismatch" [(ngModel)]="pd.openingMeter"
-                        (input)="calculatepowerDiesel(i); checkOpeningMismatch(pd)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0">
-                    <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;" *ngIf="pd.warningMismatch">
+                    <input type="number" class="report-input" [class.border-danger]="pd.warningMismatch"
+                      [(ngModel)]="pd.openingMeter" (input)="calculatepowerDiesel(i); checkOpeningMismatch(pd)"
+                      [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                    <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
+                      *ngIf="pd.warningMismatch">
                       ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ pd.autoOpeningMeter }})
                     </small>
                   </td>
                   <td><input type="number" class="report-input" [(ngModel)]="pd.testing"
-                      (input)="calculatepowerDiesel(i)" [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0"></td>
+                      (input)="calculatepowerDiesel(i)" [readonly]="isDayLocked && !isAdmin" placeholder="0"></td>
                   <td><input type="number" class="report-input" [(ngModel)]="pd.rate" (input)="calculatepowerDiesel(i)"
-                      [readonly]="(isShiftLocked || isDayLocked) && !isAdmin" placeholder="0.00"></td>
-                  <td><span class="calc-value">{{ pd.saleLtr | number:'1.2-2' }} L</span></td>
+                      [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
+                  <td><span class="calc-value">{{ pd.saleLtr | number:'1.2-2' }}</span></td>
                   <td><span class="calc-value text-warning">{{ (pd.ltr < 0 ? pd.ltr * -1 : pd.ltr) | number:'1.2-2' }}
                         L</span>
                   </td>
@@ -248,7 +246,7 @@
                 <tr class="total-row-modern diesel">
                   <td colspan="6" class="font-weight-bold"><mat-icon
                       style="font-size:14px;vertical-align:middle;">ev_station</mat-icon> Power Diesel Sub-Total</td>
-                  <td><strong>{{ powerDieselTotalLTR | number:'1.2-2' }} L</strong></td>
+                  <td><strong>{{ powerDieselTotalLTR | number:'1.2-2' }}</strong></td>
                   <td class="text-right"><strong>₹{{ powerDieselTotalRS | number:'1.2-2' }}</strong></td>
                 </tr>
               </ng-container>
@@ -347,45 +345,53 @@
         </div>
 
         <!-- Inventory Section -->
-        <div class="section-title-modern mt-4">
-          <mat-icon>inventory_2</mat-icon>
-          <h3>Inventory Monitoring</h3>
-        </div>
-        <div class="table-responsive-modern">
-          <table class="modern-report-table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Opening Stock</th>
-                <th>Purchase (L)</th>
-                <th>Loss/Gain</th>
-                <th>Sales (L)</th>
-                <th>Closing (System)</th>
-                <th>Dip Reading</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="font-weight-bold">Petrol</td>
-                <td class="click-cell" (click)="addPetrolStock()">{{ Petrol_Ugadto_Stock | number:'1.2-2' }}</td>
-                <td>{{ petolQuantity | number:'1.2-2' }}</td>
-                <td class="click-cell" (click)="openPetrolGatt()">{{ Petrolgatt | number:'1.2-2' }}</td>
-                <td>{{ petrolTotalLTR | number:'1.2-2' }}</td>
-                <td>{{ TotalPetrolRemaining | number:'1.2-2' }}</td>
-                <td class="click-cell" (click)="dipstock()">{{ Petrol_dip }} ({{ Petrol_stock }})</td>
-              </tr>
-              <tr>
-                <td class="font-weight-bold">Diesel</td>
-                <td class="click-cell" (click)="addDieselStock()">{{ Diesel_Ugadto_Stock | number:'1.2-2' }}</td>
-                <td>{{ dieselQuantity | number:'1.2-2' }}</td>
-                <td class="click-cell" (click)="openDieselGatt()">{{ dieselgatt | number:'1.2-2' }}</td>
-                <td>{{ dieselTotalLTR | number:'1.2-2' }}</td>
-                <td>{{ TotalDieselRemaining | number:'1.2-2' }}</td>
-                <td class="click-cell" (click)="dipstock()">{{ Diesel_dip }} ({{ Diesel_stock }})</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <ng-container *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'">
+          <div class="section-title-modern mt-4">
+            <mat-icon>inventory_2</mat-icon>
+            <h3>Inventory Monitoring</h3>
+          </div>
+          <div class="table-responsive-modern inventory-section-table">
+            <table class="modern-report-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Opening Stock</th>
+                  <th>Purchase (L)</th>
+                  <th>Loss/Gain</th>
+                  <th>Sales (L)</th>
+                  <th>Closing (System)</th>
+                  <th>Dip Reading</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-weight-bold">Petrol</td>
+                  <td class="click-cell inventory-click-cell" (click)="addPetrolStock()">{{ Petrol_Ugadto_Stock |
+                    number:'1.2-2' }}</td>
+                  <td>{{ petolQuantity | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="openPetrolGatt()">{{ Petrolgatt | number:'1.2-2'
+                    }}</td>
+                  <td>{{ petrolTotalLTR | number:'1.2-2' }}</td>
+                  <td>{{ TotalPetrolRemaining | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="dipstock()">{{ Petrol_dip }} ({{ Petrol_stock }})
+                  </td>
+                </tr>
+                <tr>
+                  <td class="font-weight-bold">Diesel</td>
+                  <td class="click-cell inventory-click-cell" (click)="addDieselStock()">{{ Diesel_Ugadto_Stock |
+                    number:'1.2-2' }}</td>
+                  <td>{{ dieselQuantity | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="openDieselGatt()">{{ dieselgatt | number:'1.2-2'
+                    }}</td>
+                  <td>{{ dieselTotalLTR | number:'1.2-2' }}</td>
+                  <td>{{ TotalDieselRemaining | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="dipstock()">{{ Diesel_dip }} ({{ Diesel_stock }})
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
       </div>
 
       <div class="report-footer-actions no-print">
@@ -561,7 +567,8 @@
       <h4 class="m-0 d-flex align-items-center">
         <mat-icon class="mr-2">assessment</mat-icon> Shift Sales Report ({{ selectedShift }} Shift)
       </h4>
-      <button type="button" class="close text-white border-0 bg-transparent h3 m-0" (click)="closeShiftReportModal()">&times;</button>
+      <button type="button" class="close text-white border-0 bg-transparent h3 m-0"
+        (click)="closeShiftReportModal()">&times;</button>
     </div>
     <div class="erp-modal-body p-3">
       <div class="table-responsive">
@@ -571,12 +578,12 @@
               <th>Operator</th>
               <th>Shift</th>
               <th>Fuel / Pump</th>
-              <th>Opening M</th>
-              <th>Closing M</th>
+              <th>Opening</th>
+              <th>Closing</th>
               <th>Meter Sale</th>
-              <th>Testing (L)</th>
-              <th>Net Sale (L)</th>
-              <th>Rate (₹)</th>
+              <th>Testing</th>
+              <th>Net Sale</th>
+              <th>Rate (₹) </th>
               <th>Amount (₹)</th>
               <th>Status</th>
             </tr>
@@ -593,7 +600,8 @@
               <td class="font-weight-bold text-primary">{{ rec.netSale }} L</td>
               <td>₹{{ rec.rate }}</td>
               <td class="font-weight-bold text-success">₹{{ rec.amount }}</td>
-              <td><span class="badge" [ngClass]="rec.status === 'CLOSED' ? 'badge-danger' : 'badge-success'">{{ rec.status }}</span></td>
+              <td><span class="badge" [ngClass]="rec.status === 'CLOSED' ? 'badge-danger' : 'badge-success'">{{
+                  rec.status }}</span></td>
             </tr>
             <tr *ngIf="!shiftReportData || shiftReportData.length === 0">
               <td colspan="11" class="text-center text-muted py-3">No shift sales entries found for this selection.</td>
@@ -615,11 +623,13 @@
       <h4 class="m-0 d-flex align-items-center">
         <mat-icon class="mr-2">donut_large</mat-icon> Daily Consolidated Report (Real Opening & Real Closing)
       </h4>
-      <button type="button" class="close text-white border-0 bg-transparent h3 m-0" (click)="closeDailyConsolidatedModal()">&times;</button>
+      <button type="button" class="close text-white border-0 bg-transparent h3 m-0"
+        (click)="closeDailyConsolidatedModal()">&times;</button>
     </div>
     <div class="erp-modal-body p-3" *ngIf="dailyConsolidatedData">
       <div class="alert alert-info py-2 small mb-3">
-        ℹ️ <strong>ERP Calculation Rule:</strong> Opening and Closing meters are <strong>never summed</strong>. Real Opening = First Shift Opening Meter; Real Closing = Last Shift Closing Meter.
+        ℹ️ <strong>ERP Calculation Rule:</strong> Opening and Closing meters are <strong>never summed</strong>. Real
+        Opening = First Shift Opening Meter; Real Closing = Last Shift Closing Meter.
       </div>
       <div class="table-responsive">
         <table class="table table-bordered compact-erp-table m-0">

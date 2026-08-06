@@ -270,40 +270,38 @@ export class MainPanelComponent implements OnInit {
   ) { }
 
   showSelectedDate() {
-    if (this.reportDate) {
-      const formatted = this.use.getFormattedDate(this.reportDate);
-      this.getPetrolUgadtoStock();
-      this.getDieselUgadtoStock();
-      // this.getOnedayAgoUgadtoStock();
-      this.getPetrolStock(formatted, this.userId);
-      this.getDieselStock(formatted, this.userId);
-      this.getXPPetrol(formatted, this.userId);
-      this.getpowerDiesel(formatted, this.userId);
-      this.getoillist();
-      this.getTransactionlist();
-      this.getKharchlist();
-      this.getJamaBakilist();
-      this.getPurchaselist();
-      this.getExtraPurchaselist();
-      this.getDiplist();
-      this.getextraDiplist();
-      this.getMoneyDetailsList();
-      this.backPage();
-      this.getxpPetrolUgadtoStock();
-      this.getpowerDieselUgadtoStock();
-      this.getPetrolGatt();
-      this.getDieselGatt();
-      this.getXpPetrolGatt();
-      this.getPowerDieselGatt();
-      this.getcreditNOteIOCL();
-      this.getOilPurchaseList();
-      this.use.checkEodLock(formatted, this.userId).subscribe(res => {
-        this.isDayLocked = res && res.locked;
-      });
-      setTimeout(() => this.fetchPreviousClosingMeters(), 300);
-    } else {
-      this.notificationService.failure("Plz Select the date..");
+    if (!this.reportDate) {
+      this.reportDate = new Date();
     }
+    const formatted = this.use.getFormattedDate(this.reportDate);
+    this.getPetrolUgadtoStock();
+    this.getDieselUgadtoStock();
+    // this.getOnedayAgoUgadtoStock();
+    this.getPetrolStock(formatted, this.userId);
+    this.getDieselStock(formatted, this.userId);
+    this.getXPPetrol(formatted, this.userId);
+    this.getpowerDiesel(formatted, this.userId);
+    this.getoillist();
+    this.getTransactionlist();
+    this.getKharchlist();
+    this.getJamaBakilist();
+    this.getPurchaselist();
+    this.getExtraPurchaselist();
+    this.getDiplist();
+    this.getextraDiplist();
+    this.getMoneyDetailsList();
+    this.getxpPetrolUgadtoStock();
+    this.getpowerDieselUgadtoStock();
+    this.getPetrolGatt();
+    this.getDieselGatt();
+    this.getXpPetrolGatt();
+    this.getPowerDieselGatt();
+    this.getcreditNOteIOCL();
+    this.getOilPurchaseList();
+    this.use.checkEodLock(formatted, this.userId).subscribe(res => {
+      this.isDayLocked = res && res.locked;
+    });
+    setTimeout(() => this.fetchPreviousClosingMeters(), 300);
   }
 
 
@@ -317,6 +315,8 @@ export class MainPanelComponent implements OnInit {
       setTimeout(() => {
         this.onManagerViewChange();
       }, 500);
+    } else {
+      this.showSelectedDate();
     }
     this.getUserName();
     this.getUserPump();
@@ -930,7 +930,6 @@ export class MainPanelComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.getPetrolUgadtoStock();
-        this.backPage();
       }
     });
   }
@@ -938,10 +937,11 @@ export class MainPanelComponent implements OnInit {
 
   getPetrolUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getPetrolStock(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getPetrolStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.Petrol_Ugadto_Stock = data.petrol ?? 0;
+          this.Petrol_Ugadto_Stock = data.petrol ?? data.petrol_stock ?? (typeof data === 'number' ? data : 0);
         } else {
           this.Petrol_Ugadto_Stock = 0;
         }
@@ -964,16 +964,18 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getDieselUgadtoStock();
-      this.backPage();
+      if (result) {
+        this.getDieselUgadtoStock();
+      }
     });
   }
   getDieselUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getDieselStock(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getDieselStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.Diesel_Ugadto_Stock = data.diesel ?? 0;
+          this.Diesel_Ugadto_Stock = data.diesel ?? data.diesel_stock ?? (typeof data === 'number' ? data : 0);
         } else {
           this.Diesel_Ugadto_Stock = 0;
         }
@@ -996,17 +998,19 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getxpPetrolUgadtoStock();
-      this.backPage();
+      if (result) {
+        this.getxpPetrolUgadtoStock();
+      }
     });
   }
 
   getxpPetrolUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getXpPetrolStock(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getXpPetrolStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.XP_Petrol_Ugadto_Stock = data.Xppetrol ?? 0;
+          this.XP_Petrol_Ugadto_Stock = data.Xppetrol ?? data.xp_petrol ?? (typeof data === 'number' ? data : 0);
         } else {
           this.XP_Petrol_Ugadto_Stock = 0;
         }
@@ -1029,17 +1033,19 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getpowerDieselUgadtoStock();
-      this.backPage();
+      if (result) {
+        this.getpowerDieselUgadtoStock();
+      }
     });
   }
 
   getpowerDieselUgadtoStock() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getPowerDieselStock(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getPowerDieselStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
-          this.Power_Diesel_Ugadto_Stock = data.Powerdiesel ?? 0;
+          this.Power_Diesel_Ugadto_Stock = data.Powerdiesel ?? data.power_diesel ?? (typeof data === 'number' ? data : 0);
         } else {
           this.Power_Diesel_Ugadto_Stock = 0;
         }
@@ -1234,6 +1240,7 @@ export class MainPanelComponent implements OnInit {
   dipstock() {
     const dataToSend: any = {
       date: this.use.getFormattedDate(this.reportDate),
+      userId: this.userId || localStorage.getItem('userId')
     };
 
     if (this.Petrol_dip || this.Petrol_stock || this.Diesel_dip || this.Diesel_stock) {
@@ -1259,28 +1266,26 @@ export class MainPanelComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      this.getDiplist();
+      if (result && (result.isReload || result === true)) {
+        this.getDiplist();
+      }
     });
   }
 
   getDiplist() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getDipList(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getDipList(formattedDate, uid).subscribe(
       (data) => {
-        if (data && data.length > 0) {
-          this.Petrol_dip = data[0][2] ?? 0;
-          this.Petrol_stock = data[0][3] ?? 0;
-          this.Diesel_dip = data[0][0] ?? 0;
-          this.Diesel_stock = data[0][1] ?? 0;
-        } else {
-          this.Petrol_dip = 0;
-          this.Petrol_stock = 0;
-          this.Diesel_dip = 0;
-          this.Diesel_stock = 0;
+        if (data && data.length > 0 && Array.isArray(data[0])) {
+          this.Petrol_dip = data[0][2] ?? this.Petrol_dip ?? 0;
+          this.Petrol_stock = data[0][3] ?? this.Petrol_stock ?? 0;
+          this.Diesel_dip = data[0][0] ?? this.Diesel_dip ?? 0;
+          this.Diesel_stock = data[0][1] ?? this.Diesel_stock ?? 0;
         }
       },
       (error) => {
-        this.notificationService.failure("Failed to fetch Purchase data.");
+        console.error("Failed to fetch Dip data.", error);
       }
     );
   }
@@ -1816,13 +1821,16 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getPetrolGatt();
+      if (result) {
+        this.getPetrolGatt();
+      }
     });
   }
 
   getPetrolGatt() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getPetrolGatt(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getPetrolGatt(formattedDate, uid).subscribe(
       data => {
         if (data) {
           this.Petrolgatt = data.petrolgatt ?? 0;
@@ -1848,13 +1856,16 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getDieselGatt();
+      if (result) {
+        this.getDieselGatt();
+      }
     });
   }
 
   getDieselGatt() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getDieselGatt(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getDieselGatt(formattedDate, uid).subscribe(
       data => {
         if (data) {
           this.dieselgatt = data.dieselgatt ?? 0;
@@ -1880,13 +1891,16 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getXpPetrolGatt();
+      if (result) {
+        this.getXpPetrolGatt();
+      }
     });
   }
 
   getXpPetrolGatt() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getXpPetrolGatt(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getXpPetrolGatt(formattedDate, uid).subscribe(
       data => {
         if (data) {
           this.XpPetrolgatt = data.xpPetrolgatt ?? 0;
@@ -1912,13 +1926,16 @@ export class MainPanelComponent implements OnInit {
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getPowerDieselGatt();
+      if (result) {
+        this.getPowerDieselGatt();
+      }
     });
   }
 
   getPowerDieselGatt() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.use.getPowerDieselGatt(formattedDate, this.userId).subscribe(
+    const uid = this.userId || localStorage.getItem('userId');
+    this.use.getPowerDieselGatt(formattedDate, uid).subscribe(
       data => {
         if (data) {
           this.PowerDieselgatt = data.powerDieselgatt ?? 0;
@@ -2110,11 +2127,15 @@ export class MainPanelComponent implements OnInit {
       this.use.getEmployeesByManager(mgrId).subscribe(
         (data) => {
           this.managerEmployeeList = data || [];
+          this.onManagerViewChange();
         },
         (err) => {
           console.error("Failed to load manager's employees:", err);
+          this.onManagerViewChange();
         }
       );
+    } else {
+      this.onManagerViewChange();
     }
   }
 
@@ -2324,19 +2345,19 @@ export class MainPanelComponent implements OnInit {
     // 11. Dip list
     const dipCalls = empIds.map(id => this.use.getDipList(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(dipCalls).subscribe((results: any[][]) => {
-      this.Petrol_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
-      this.Petrol_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
-      this.Diesel_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][2]) || 0) : 0), 0);
-      this.Diesel_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][3]) || 0) : 0), 0);
+      this.Petrol_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][2]) || 0) : 0), 0);
+      this.Petrol_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][3]) || 0) : 0), 0);
+      this.Diesel_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
+      this.Diesel_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
     });
 
     // 12. Extra Dip list
     const extraDipCalls = empIds.map(id => this.use.getextraDipList(formatted, id).pipe(catchError(() => of([]))));
     forkJoin(extraDipCalls).subscribe((results: any[][]) => {
-      this.Extra_Petrol_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
-      this.Extra_Petrol_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
-      this.Extra_Diesel_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][2]) || 0) : 0), 0);
-      this.Extra_Diesel_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][3]) || 0) : 0), 0);
+      this.Extra_Petrol_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][2]) || 0) : 0), 0);
+      this.Extra_Petrol_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][3]) || 0) : 0), 0);
+      this.Extra_Diesel_dip = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][0]) || 0) : 0), 0);
+      this.Extra_Diesel_stock = results.reduce((sum, list) => sum + (list && list.length > 0 ? (Number(list[0][1]) || 0) : 0), 0);
     });
 
     // 13. Cash Details
