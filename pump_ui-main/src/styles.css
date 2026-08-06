@@ -2460,3 +2460,338 @@ body.dark-theme .mat-dialog-container .modal-footer {
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   UNIFIED ENTERPRISE ERP DESIGN SYSTEM (GLOBAL STANDARDIZATION)
+   ========================================================================== */
+
+/* 1. STANDARDIZED TABLES (All Modules & Dialogs) */
+.erp-table,
+.modern-table,
+.modern-report-table,
+.table {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  margin-bottom: 0 !important;
+}
+
+.erp-table thead th,
+.modern-table thead th,
+.modern-report-table thead th,
+.table thead th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  height: 42px !important;
+  padding: 8px 14px !important;
+  background: var(--bg-main) !important;
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 2px solid var(--border-color) !important;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+}
+
+.erp-table tbody td,
+.modern-table tbody td,
+.modern-report-table tbody td,
+.table tbody td {
+  height: 40px !important;
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  vertical-align: middle !important;
+}
+
+.erp-table tbody tr:nth-child(even),
+.modern-table tbody tr:nth-child(even),
+.modern-report-table tbody tr:nth-child(even) {
+  background-color: rgba(var(--primary-rgb), 0.015) !important;
+}
+
+.erp-table tbody tr:hover,
+.modern-table tbody tr:hover,
+.modern-report-table tbody tr:hover,
+.table tbody tr:hover {
+  background-color: rgba(var(--primary-rgb), 0.04) !important;
+  transition: background-color 0.15s ease-in-out !important;
+}
+
+.table-responsive-modern,
+.erp-table-container {
+  width: 100% !important;
+  overflow-x: auto !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* 2. STANDARDIZED TABLE TOOLBAR */
+.erp-toolbar,
+.table-toolbar-modern {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  padding: 14px 18px !important;
+  background: var(--bg-card) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.erp-toolbar-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* 3. GLOBAL STANDARDIZED BUTTONS (36px Height, 6px Border Radius) */
+.btn-erp,
+.btn-save,
+.btn-update,
+.btn-delete,
+.btn-cancel,
+.btn-print,
+.btn-pdf,
+.btn-excel,
+.btn-search,
+.btn-reset,
+.btn-refresh {
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 16px !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.btn-erp mat-icon,
+.btn-save mat-icon,
+.btn-update mat-icon,
+.btn-delete mat-icon,
+.btn-cancel mat-icon,
+.btn-print mat-icon,
+.btn-pdf mat-icon,
+.btn-excel mat-icon,
+.btn-search mat-icon,
+.btn-reset mat-icon,
+.btn-refresh mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.btn-erp:hover:not(:disabled),
+.btn-save:hover:not(:disabled),
+.btn-update:hover:not(:disabled),
+.btn-delete:hover:not(:disabled),
+.btn-cancel:hover:not(:disabled),
+.btn-print:hover:not(:disabled),
+.btn-pdf:hover:not(:disabled),
+.btn-excel:hover:not(:disabled),
+.btn-search:hover:not(:disabled),
+.btn-reset:hover:not(:disabled),
+.btn-refresh:hover:not(:disabled) {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.btn-erp:disabled,
+.btn-save:disabled,
+.btn-update:disabled,
+.btn-delete:disabled,
+.btn-cancel:disabled,
+.btn-print:disabled,
+.btn-pdf:disabled,
+.btn-excel:disabled,
+.btn-search:disabled,
+.btn-reset:disabled,
+.btn-refresh:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+/* Button Color Palette */
+.btn-save,
+.btn-update,
+.btn-search {
+  background-color: #2563eb !important; /* Blue */
+  color: #ffffff !important;
+}
+.btn-save:hover:not(:disabled),
+.btn-update:hover:not(:disabled),
+.btn-search:hover:not(:disabled) {
+  background-color: #1d4ed8 !important;
+}
+
+.btn-delete {
+  background-color: #dc2626 !important; /* Red */
+  color: #ffffff !important;
+}
+.btn-delete:hover:not(:disabled) {
+  background-color: #b91c1c !important;
+}
+
+.btn-cancel {
+  background-color: #64748b !important; /* Gray */
+  color: #ffffff !important;
+}
+.btn-cancel:hover:not(:disabled) {
+  background-color: #475569 !important;
+}
+
+.btn-print {
+  background-color: #7c3aed !important; /* Purple */
+  color: #ffffff !important;
+}
+.btn-print:hover:not(:disabled) {
+  background-color: #6d28d9 !important;
+}
+
+.btn-pdf {
+  background-color: #059669 !important; /* Green */
+  color: #ffffff !important;
+}
+.btn-pdf:hover:not(:disabled) {
+  background-color: #047857 !important;
+}
+
+.btn-excel {
+  background-color: #065f46 !important; /* Dark Green */
+  color: #ffffff !important;
+}
+.btn-excel:hover:not(:disabled) {
+  background-color: #064e3b !important;
+}
+
+.btn-reset {
+  background-color: #ea580c !important; /* Orange */
+  color: #ffffff !important;
+}
+.btn-reset:hover:not(:disabled) {
+  background-color: #c2410c !important;
+}
+
+.btn-refresh {
+  background-color: #0891b2 !important; /* Cyan */
+  color: #ffffff !important;
+}
+.btn-refresh:hover:not(:disabled) {
+  background-color: #0e7490 !important;
+}
+
+/* 4. ACTION BUTTONS IN TABLES */
+.btn-action-view,
+.btn-action-edit,
+.btn-action-delete,
+.btn-action-print,
+.btn-action-download {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-action-view mat-icon,
+.btn-action-edit mat-icon,
+.btn-action-delete mat-icon,
+.btn-action-print mat-icon,
+.btn-action-download mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.btn-action-view {
+  color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.1) !important;
+}
+.btn-action-view:hover {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+.btn-action-edit {
+  color: #2563eb !important;
+  background: rgba(37, 99, 235, 0.1) !important;
+}
+.btn-action-edit:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.btn-action-delete {
+  color: #dc2626 !important;
+  background: rgba(220, 38, 38, 0.1) !important;
+}
+.btn-action-delete:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.btn-action-print {
+  color: #7c3aed !important;
+  background: rgba(124, 58, 237, 0.1) !important;
+}
+.btn-action-print:hover {
+  background: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.btn-action-download {
+  color: #059669 !important;
+  background: rgba(5, 150, 105, 0.1) !important;
+}
+.btn-action-download:hover {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* 5. STANDARDIZED FORMS & INPUTS */
+.erp-form-control,
+.form-control-modern,
+.input-modern {
+  height: 36px !important;
+  padding: 0 12px !important;
+  background: var(--input-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 13px !important;
+  color: var(--text-main) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.erp-form-control:focus,
+.form-control-modern:focus,
+.input-modern:focus {
+  outline: none !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+}
+
