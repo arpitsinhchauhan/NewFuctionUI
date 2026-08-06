@@ -1404,7 +1404,7 @@ export class MainPanelComponent implements OnInit {
 
   Submit() {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    this.userId = localStorage.getItem('userId');
+    this.userId = this.userId || localStorage.getItem('userId');
     //   const petrolInputData = this.petrolPumps
     //   .filter(p => !(p.openingMeter === 0 && p.closingMeter === 0 && p.testing === 0 && p.rate === 0 && p.saleLtr === 0 && p.total_rs === 0 && p.ltr === 0))
     //   .map(p => ({
@@ -1560,7 +1560,7 @@ export class MainPanelComponent implements OnInit {
 
     const currentRole = localStorage.getItem('role') || '';
     const currentPumpId = localStorage.getItem('pumpId');
-    if ((currentRole === 'EMPLOYEE' || currentRole === 'user') && this.userId) {
+    if ((currentRole === 'EMPLOYEE' || currentRole === 'employee' || currentRole === 'PUMP_MANAGER' || currentRole === 'pumpmanager' || currentRole === 'user') && this.userId) {
       const stockDetailsObj = {
         petrolRemaining: this.TotalPetrolRemaining || 0,
         dieselRemaining: this.TotalDieselRemaining || 0,
