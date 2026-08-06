@@ -153,17 +153,7 @@ export class SidebarComponent implements OnInit {
         {
           section: 'ADMIN PANEL',
           items: [
-            { path: '/dashboard', title: 'Dashboard', icon: 'dashboard' },
-            { path: '/User', title: 'User Master', icon: 'supervised_user_circle' },
-            { path: '/dailyReport', title: 'Daily Reports', icon: 'assignment' },
-            { path: '/Report', title: 'Reports', icon: 'picture_as_pdf' }
-          ]
-        },
-        {
-          section: 'FINANCIALS',
-          items: [
-            { path: '/Kharch', title: 'Expend', icon: 'attach_money' },
-            { path: '/customer', title: 'Customer Ledger', icon: 'contacts_product' }
+            { path: '/User', title: 'User Master', icon: 'supervised_user_circle' }
           ]
         }
       ];

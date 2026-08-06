@@ -18,7 +18,7 @@ export class MyHeaderInterceptor implements HttpInterceptor {
   constructor(
     private loaderService: LoaderService,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Increment request count and show loading indicator
@@ -40,7 +40,7 @@ export class MyHeaderInterceptor implements HttpInterceptor {
       retry(1),
       catchError((error: HttpErrorResponse) => {
         let errorMessage = 'An error occurred while connecting to the server.';
-        
+
         if (error.error instanceof ErrorEvent) {
           // Client-side error
           errorMessage = `Client Error: ${error.error.message}`;
@@ -58,7 +58,7 @@ export class MyHeaderInterceptor implements HttpInterceptor {
             errorMessage = 'Unable to connect to the backend server. Please verify your connection.';
           }
         }
-        
+
         // Suppress global toast notifications for business error codes handled specifically by LoginComponent
         const errorCode = error.error && typeof error.error === 'object' ? error.error.code : null;
         const isBusinessError = errorCode && [
@@ -75,7 +75,7 @@ export class MyHeaderInterceptor implements HttpInterceptor {
         if (!isBusinessError) {
           this.notificationService.failure(errorMessage);
         }
-        
+
         // Propagate the original HttpErrorResponse so subscribers can check error.error.code
         return throwError(() => error);
       }),

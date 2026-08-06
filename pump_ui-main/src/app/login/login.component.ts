@@ -179,7 +179,7 @@ export class LoginComponent implements OnInit {
         if (error && error.error && error.error.code) {
           const code = error.error.code;
           const msg = error.error.message || 'Authentication failed';
-          
+
           if (code === 'USER_NOT_FOUND' || code === 'USER_DEACTIVATED' || code === 'ROLE_INACTIVE' || code === 'COMPANY_DEACTIVATED' || code === 'INVALID_CREDENTIALS') {
             this.notificationService.failure(msg);
           } else if (code === 'ACCOUNT_LOCKED') {

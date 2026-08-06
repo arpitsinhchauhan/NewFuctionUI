@@ -402,6 +402,30 @@
                   <td class="click-cell inventory-click-cell" (click)="dipstock()">{{ Diesel_dip }} ({{ Diesel_stock }})
                   </td>
                 </tr>
+                <tr *ngIf="showXpPetrolCount > 0 || XP_Petrol_Ugadto_Stock > 0 || xpPetolQuantity > 0">
+                  <td class="font-weight-bold">XP Petrol</td>
+                  <td class="click-cell inventory-click-cell" (click)="addXPPetrolStock()">{{ XP_Petrol_Ugadto_Stock |
+                    number:'1.2-2' }}</td>
+                  <td>{{ xpPetolQuantity | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="openXpPetrolGatt()">{{ XpPetrolgatt | number:'1.2-2'
+                    }}</td>
+                  <td>{{ xpPetrolTotalLTR | number:'1.2-2' }}</td>
+                  <td>{{ TotalXPPetrolRemaining | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="extraDipstock()">{{ Extra_Petrol_dip }} ({{ Extra_Petrol_stock }})
+                  </td>
+                </tr>
+                <tr *ngIf="showPowerDieselCount > 0 || Power_Diesel_Ugadto_Stock > 0 || powerDieselQuantity > 0">
+                  <td class="font-weight-bold">Power Diesel</td>
+                  <td class="click-cell inventory-click-cell" (click)="addPowerDieselStock()">{{ Power_Diesel_Ugadto_Stock |
+                    number:'1.2-2' }}</td>
+                  <td>{{ powerDieselQuantity | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="openPowerDieselGatt()">{{ PowerDieselgatt | number:'1.2-2'
+                    }}</td>
+                  <td>{{ powerDieselTotalLTR | number:'1.2-2' }}</td>
+                  <td>{{ TotalPowerDieselRemaining | number:'1.2-2' }}</td>
+                  <td class="click-cell inventory-click-cell" (click)="extraDipstock()">{{ Extra_Diesel_dip }} ({{ Extra_Diesel_stock }})
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
