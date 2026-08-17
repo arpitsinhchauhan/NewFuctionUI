@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
@@ -7,21 +7,27 @@ import { API_CUSTOMER_NAME, API_PURCHASE_LIST } from 'app/serviceult';
 import { CustomerComponent } from '../jama-baki/customer/customer.component';
 import { CustomPdfViewerComponent } from 'app/user-profile/custom-pdf-viewer/custom-pdf-viewer.component';
 import { CustomerExcelPdfComponent } from './customer-excel-pdf/customer-excel-pdf.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-customer-list',
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.scss']
 })
-export class CustomerListComponent implements OnInit {
+export class CustomerListComponent implements OnInit, OnDestroy {
 
   userId: string;
   currentPage = 1;
   searchTerm: string = "";
   itemsPerPage = 4;
   customerList: any = [];
+  originalCustomerList: any = [];
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private http: HttpClient,
@@ -31,12 +37,27 @@ export class CustomerListComponent implements OnInit {
 
   ngOnInit(): void {
     this.getcustomer();
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.executeSearch(term);
+    });
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   getcustomer() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_CUSTOMER_NAME, { params }).subscribe((data) => {
-      this.customerList = data;
+    this.http.get(API_CUSTOMER_NAME, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      this.originalCustomerList = data || [];
+      this.customerList = [...this.originalCustomerList];
     });
   }
 
@@ -78,16 +99,26 @@ export class CustomerListComponent implements OnInit {
 
 
   searchData(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  executeSearch(searchTerm: string): void {
+    const term = (searchTerm || '').toLowerCase().trim();
     if (!term) {
-      this.getcustomer();
+      this.customerList = [...this.originalCustomerList];
       return;
     }
 
-    this.customerList = this.customerList.filter((item: any) =>
+    this.customerList = this.originalCustomerList.filter((item: any) =>
       (item.name && item.name.toLowerCase().includes(term)) ||
+      (item.email && item.email.toLowerCase().includes(term)) ||
+      (item.phone && item.phone.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );
+  }
+
+  trackById(index: number, item: any): any {
+    return item.idcustomer || index;
   }
 
   clearSearch() {

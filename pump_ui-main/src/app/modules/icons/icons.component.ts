@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
@@ -7,56 +7,64 @@ import { API_DIESEL_LIST } from 'app/serviceult';
 import { DieselSellPdfExcelComponent } from './diesel-sell-pdf-excel/diesel-sell-pdf-excel.component';
 import { DieselSellReportComponent } from './diesel-sell-report/diesel-sell-report.component';
 import { EditDieselSellComponent } from './edit-diesel-sell/edit-diesel-sell.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-icons',
   templateUrl: './icons.component.html',
   styleUrls: ['./icons.component.css']
 })
-export class IconsComponent implements OnInit {
-
-  // productList: Map<String, String> | undefined;
+export class IconsComponent implements OnInit, OnDestroy {
   productList: any = [];
+  originalProductList: any = [];
   tableData: any[] = [];
   searchTerm: string = '';
   compD: any;
-  dataSource: any[] | undefined; // Your data source array
-  currentPage = 1; // Current page index
-  itemsPerPage = 10; // Number of items per page
+  dataSource: any[] | undefined;
+  currentPage = 1;
+  itemsPerPage = 10;
   userId: string;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  role: string = '';
 
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
-  // Product | undefined;
-  // { id: any; Email: any; Phone: any } | undefined
   constructor(
     private http: HttpClient,
     private use: UserServiceService,
     private dialog: MatDialog,
     private notificationService: NotificationService
-  ) {
-    // this.compD = data;
-  }
-
-  role: string = '';
+  ) {}
 
   ngOnInit(): void {
     this.role = localStorage.getItem('role') || '';
     this.getdata();
-    this.dataSource = [
-      /* Your data goes here */
-    ];
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.executeSearch(term);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getdata() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_DIESEL_LIST, { params }).subscribe((data) => {
-      this.productList = data;
+    this.http.get(API_DIESEL_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      this.originalProductList = data || [];
+      this.productList = [...this.originalProductList];
     });
   }
-
 
   openDialog(): void {
     const dialogRef = this.dialog.open(DieselSellReportComponent, {
@@ -64,33 +72,16 @@ export class IconsComponent implements OnInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.getdata();
     });
   }
+
   deleteRow(id: any) {
-    this.notificationService.success('Diesel deleted successfully');
-    this.use.deleteDieseldata(id).subscribe((result) => {
-      this.productList = result;
+    this.use.deleteDieseldata(id).pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      this.notificationService.success('Diesel deleted successfully');
       this.getdata();
     });
-  }
-
-
-  applyFilter(filterValue: string) {
-    filterValue = filterValue.trim(); // Remove whitespace
-    filterValue = filterValue.toLowerCase(); // Datasource defaults to lowercase matches
-    this.productList.filter = filterValue;
-  }
-
-
-  search(): void {
-    this.productList = this.productList.filter((item: { email: string }) =>
-      item.email.toLowerCase().includes(this.searchTerm.toLowerCase().trim())
-    );
-    if (this.searchTerm.toLowerCase() === '') {
-      location.reload();
-    }
   }
 
   openExcelPdf() {
@@ -100,34 +91,11 @@ export class IconsComponent implements OnInit {
       disableClose: true,
     });
 
-    // Subscribe to the afterClosed event to handle any actions after the dialog is closed
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.getdata();
     });
   }
 
-  // update(id: any) {
-  //   this.http.get(this.apiUrl).subscribe((data) => {
-
-
-  //     let dialogRef = this.dialog.open(UserEditComponent, {
-  //       width: '500px',
-  //       height: '400px',
-  //       data: {
-  //         data: id,// Pass the data to the dialog
-  //       }
-  //     });
-
-  //     dialogRef.afterClosed().subscribe(result => {
-  //       // Handle the result returned from the dialog here
-  //       ('Dialog result:', result);
-  //     });
-  //   });
-
-  // }
-
-
-  // Method to change the current page
   pageChanged(event: any): void {
     this.currentPage = event.page;
   }
@@ -139,34 +107,42 @@ export class IconsComponent implements OnInit {
       disableClose: true,
     });
 
-    // Subscribe to the afterClosed event to handle any actions after the dialog is closed
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result?.isReload) {
-        this.getdata(); // or any method that reloads your data
+        this.getdata();
       }
     });
   }
 
   searchData(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  executeSearch(searchTerm: string): void {
+    const term = (searchTerm || '').toLowerCase().trim();
     if (!term) {
-      this.getdata();
+      this.productList = [...this.originalProductList];
       return;
     }
 
-    this.productList = this.productList.filter((item: any) =>
+    this.productList = this.originalProductList.filter((item: any) =>
       (item.pump && item.pump.toLowerCase().includes(term)) ||
+      (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );
   }
 
+  trackById(index: number, item: any): any {
+    return item.iddiesel || item.id || index;
+  }
+
   clearSearch() {
     this.searchTerm = '';
-    this.getdata();
+    this.productList = [...this.originalProductList];
   }
+
   sortBy(column: string) {
     if (this.sortColumn === column) {
-      // toggle direction
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
@@ -186,6 +162,4 @@ export class IconsComponent implements OnInit {
       }
     });
   }
-
-
 }

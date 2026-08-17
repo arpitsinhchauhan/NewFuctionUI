@@ -14,20 +14,23 @@ import { saveAs } from 'file-saver';
 })
 export class CustomerExcelPdfComponent implements OnInit {
 
- 
    isReload: boolean;
    customerList: any = [];
    userId: string;
-   constructor(private http: HttpClient,
+   isExporting: boolean = false;
+
+   constructor(
+     private http: HttpClient,
      private use: UserServiceService,
-     private dialog: MatDialog,public dialogRef: MatDialogRef<CustomerExcelPdfComponent>,
-   private notificationService: NotificationService) { }
- 
+     private dialog: MatDialog,
+     public dialogRef: MatDialogRef<CustomerExcelPdfComponent>,
+     private notificationService: NotificationService
+   ) { }
+
    ngOnInit(): void {
      this.getcustomer();
    }
- 
- 
+
    allSelected: boolean = true;
 
    getcustomer() {
@@ -43,58 +46,72 @@ export class CustomerExcelPdfComponent implements OnInit {
 
    toggleSelectAll(event: any) {
      this.allSelected = event.target.checked;
-     this.customerList.forEach(item => item.selected = this.allSelected);
+     this.customerList.forEach((item: any) => item.selected = this.allSelected);
    }
 
    checkIfAllSelected() {
-     this.allSelected = this.customerList.length > 0 && this.customerList.every(item => item.selected);
+     this.allSelected = this.customerList.length > 0 && this.customerList.every((item: any) => item.selected);
    }
- 
+
    exportToExcel() {
-     const selectedData = this.customerList.filter(p => p.selected);
-     // Create a worksheet from the data
-     const worksheet = XLSX.utils.json_to_sheet(selectedData.map(product => ({
-       Date: product.date,
-       name:product.name,
-       email: product.email,
-       phone: product.phone,
-     })));
- 
-     // Add the total row
-     const totalRow = {
-       Date: '',
-       name: '',
-       email: '',
-       phone: '',
-     };
-     XLSX.utils.sheet_add_json(worksheet, [totalRow], { skipHeader: true, origin: -1 });
- 
-     // Create a workbook and add the worksheet
-     const workbook = XLSX.utils.book_new();
-     XLSX.utils.book_append_sheet(workbook, worksheet, 'Customer');
- 
-     // Save the file
-     const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-     const data: Blob = new Blob([excelBuffer], { type: EXCEL_TYPE });
-     saveAs(data, 'Customer.xlsx');
+     if (this.isExporting) return;
+     this.isExporting = true;
+     this.notificationService.success("Generating Excel export...");
+
+     setTimeout(() => {
+       try {
+         const selectedData = this.customerList.filter((p: any) => p.selected);
+         const worksheet = XLSX.utils.json_to_sheet(selectedData.map((product: any) => ({
+           Date: product.date,
+           name: product.name,
+           email: product.email,
+           phone: product.phone,
+         })));
+
+         const totalRow = {
+           Date: '',
+           name: '',
+           email: '',
+           phone: '',
+         };
+         XLSX.utils.sheet_add_json(worksheet, [totalRow], { skipHeader: true, origin: -1 });
+
+         const workbook = XLSX.utils.book_new();
+         XLSX.utils.book_append_sheet(workbook, worksheet, 'Customer');
+
+         const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+         const data: Blob = new Blob([excelBuffer], { type: EXCEL_TYPE });
+         saveAs(data, 'Customer.xlsx');
+         this.notificationService.success("Excel exported successfully!");
+       } catch (err) {
+         this.notificationService.failure("Export failed: " + err);
+       } finally {
+         this.isExporting = false;
+       }
+     }, 100);
    }
- 
- 
+
    printTable(): void {
-     const printContent = document.getElementById('CustomerTable')?.outerHTML;
-     const originalContent = document.body.innerHTML;
- 
-     document.body.innerHTML = printContent ?? '';
-     window.print();
-     document.body.innerHTML = originalContent;
-     window.location.reload();
+     if (this.isExporting) return;
+     this.isExporting = true;
+
+     setTimeout(() => {
+       const printContent = document.getElementById('CustomerTable')?.outerHTML;
+       const originalContent = document.body.innerHTML;
+
+       document.body.innerHTML = printContent ?? '';
+       window.print();
+       document.body.innerHTML = originalContent;
+       this.isExporting = false;
+       window.location.reload();
+     }, 100);
    }
- 
+
    cancel() {
      this.dialogRef.close({ 'isReload': this.isReload });
    }
- 
- }
- const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
- const EXCEL_EXTENSION = '.xlsx';
- 
+
+}
+
+const EXCEL_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+const EXCEL_EXTENSION = '.xlsx';

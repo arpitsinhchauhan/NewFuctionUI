@@ -5,13 +5,13 @@
       <p class="card-subtitle">Select customers for PDF/Excel export</p>
     </div>
     <div class="header-actions">
-      <button mat-flat-button class="btn-export-excel me-2" (click)="exportToExcel()">
+      <button mat-flat-button class="btn-export-excel me-2" (click)="exportToExcel()" [disabled]="isExporting">
         <mat-icon>file_download</mat-icon>
-        <span>Excel</span>
+        <span>{{ isExporting ? 'Exporting...' : 'Excel' }}</span>
       </button>
-      <button mat-flat-button class="btn-export-pdf me-2" (click)="printTable()">
+      <button mat-flat-button class="btn-export-pdf me-2" (click)="printTable()" [disabled]="isExporting">
         <mat-icon>picture_as_pdf</mat-icon>
-        <span>PDF</span>
+        <span>{{ isExporting ? 'Printing...' : 'PDF' }}</span>
       </button>
       <button mat-icon-button (click)="cancel()" color="warn">
         <mat-icon>close</mat-icon>

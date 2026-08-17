@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { UserServiceService } from 'app/services/user-service.service';
 import { API_PETROL_LIST } from 'app/serviceult';
@@ -7,56 +7,64 @@ import { EditPetrolsellComponent } from './edit-petrolsell/edit-petrolsell.compo
 import { PetrolSellPdfExcelComponent } from './petrol-sell-pdf-excel/petrol-sell-pdf-excel.component';
 import { PetrolSellReportComponent } from './petrol-sell-report/petrol-sell-report.component';
 import { NotificationService } from 'app/services/notification.service';
-import { secretmanager } from 'googleapis/build/src/apis/secretmanager';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-typography',
   templateUrl: './typography.component.html',
   styleUrls: ['./typography.component.css']
 })
-export class TypographyComponent implements OnInit {
-
-  // productList: Map<String, String> | undefined;
+export class TypographyComponent implements OnInit, OnDestroy {
   productList: any = [];
+  originalProductList: any = [];
   tableData: any[] = [];
   searchTerm: string = '';
   compD: any;
-  dataSource: any[] | undefined; // Your data source array
-  currentPage = 1; // Current page index
-  itemsPerPage = 10; // Number of items per page
+  dataSource: any[] | undefined;
+  currentPage = 1;
+  itemsPerPage = 10;
   userId: string;
-sortColumn: string = '';
-sortDirection: 'asc' | 'desc' = 'asc';
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+  role: string = '';
 
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
-  // Product | undefined;
-  // { id: any; Email: any; Phone: any } | undefined
   constructor(
     private http: HttpClient,
     private use: UserServiceService,
-    private dialog: MatDialog,private notificationService:NotificationService
-  ) {
-    // this.compD = data;
-  }
-
-  role: string = '';
+    private dialog: MatDialog,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.role = localStorage.getItem('role') || '';
     this.getdata();
-    this.dataSource = [
-      /* Your data goes here */
-    ];
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.executeSearch(term);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getdata() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_PETROL_LIST, { params }).subscribe((data) => {
-      this.productList = data;
+    this.http.get(API_PETROL_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      this.originalProductList = data || [];
+      this.productList = [...this.originalProductList];
     });
   }
-
 
   openDialog(): void {
     const dialogRef = this.dialog.open(PetrolSellReportComponent, {
@@ -64,67 +72,19 @@ sortDirection: 'asc' | 'desc' = 'asc';
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.getdata();
     });
   }
-  // deleteRow(id: number) {
-  //   // alert('Product deleted successfully');
-  //   this.use.deleteMember(id).subscribe((result) => {
-  //     this.productList = result;
-  //     this.notificationService.showNotification('Product deleted successfully');
-  //   });
-  //   this.dialogRef.close({ 'isReload': this.isReload });
-  // }
 
-
-  applyFilter(filterValue: string) {
-    filterValue = filterValue.trim(); // Remove whitespace
-    filterValue = filterValue.toLowerCase(); // Datasource defaults to lowercase matches
-    this.productList.filter = filterValue;
-  }
-
-
-  search(): void {
-    this.productList = this.productList.filter((item: { email: string }) =>
-      item.email.toLowerCase().includes(this.searchTerm.toLowerCase().trim())
-    );
-    if (this.searchTerm.toLowerCase() === '') {
-      location.reload();
-    }
-  }
-
-  // update(id: any) {
-  //   this.http.get(this.apiUrl).subscribe((data) => {
-
-
-  //     let dialogRef = this.dialog.open(UserEditComponent, {
-  //       width: '500px',
-  //       height: '400px',
-  //       data: {
-  //         data: id,// Pass the data to the dialog
-  //       }
-  //     });
-
-  //     dialogRef.afterClosed().subscribe(result => {
-  //       // Handle the result returned from the dialog here
-  //       ('Dialog result:', result);
-  //     });
-  //   });
-
-  // }
-
-
-  // Method to change the current page
   pageChanged(event: any): void {
     this.currentPage = event.page;
   }
 
   deleteRow(id: any) {
-    this.use.deletePetroldata(id).subscribe((result) => {
-      this.productList = result;
-    this.notificationService.success('PetrolData deleted successfully');
-    this.getdata();
+    this.use.deletePetroldata(id).pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      this.notificationService.success('PetrolData deleted successfully');
+      this.getdata();
     });
   }
 
@@ -134,9 +94,9 @@ sortDirection: 'asc' | 'desc' = 'asc';
       data: item,
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result?.isReload) {
-        this.getdata(); // or any method that reloads your data
+        this.getdata();
       }
     });
   }
@@ -148,51 +108,57 @@ sortDirection: 'asc' | 'desc' = 'asc';
       disableClose: true,
     });
 
-    // Subscribe to the afterClosed event to handle any actions after the dialog is closed
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.getdata();
     });
   }
 
-    searchData(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+  searchData(): void {
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  executeSearch(searchTerm: string): void {
+    const term = (searchTerm || '').toLowerCase().trim();
     if (!term) {
-      this.getdata();
+      this.productList = [...this.originalProductList];
       return;
-    }             
-  
-    this.productList = this.productList.filter((item: any) =>
+    }
+
+    this.productList = this.originalProductList.filter((item: any) =>
       (item.pump && item.pump.toLowerCase().includes(term)) ||
+      (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );
   }
 
+  trackById(index: number, item: any): any {
+    return item.idpetrol || item.id || index;
+  }
+
   clearSearch() {
     this.searchTerm = '';
-    this.getdata();
+    this.productList = [...this.originalProductList];
   }
 
   sortBy(column: string) {
-  if (this.sortColumn === column) {
-    // toggle direction
-    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    this.sortColumn = column;
-    this.sortDirection = 'asc';
-  }
-
-  this.productList.sort((a, b) => {
-    let dateA = new Date(a[column]);
-    let dateB = new Date(b[column]);
-
-    if (dateA < dateB) {
-      return this.sortDirection === 'asc' ? -1 : 1;
-    } else if (dateA > dateB) {
-      return this.sortDirection === 'asc' ? 1 : -1;
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
-      return 0;
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
     }
-  });
-}
 
+    this.productList.sort((a, b) => {
+      let dateA = new Date(a[column]);
+      let dateB = new Date(b[column]);
+
+      if (dateA < dateB) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      } else if (dateA > dateB) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      } else {
+        return 0;
+      }
+    });
+  }
 }

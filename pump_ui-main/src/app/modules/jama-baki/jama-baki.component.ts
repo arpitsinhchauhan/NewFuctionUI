@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NotificationService } from "app/services/notification.service";
 import { UserServiceService } from "app/services/user-service.service";
@@ -8,21 +8,28 @@ import { CustomerComponent } from "./customer/customer.component";
 import { EditjamabakiComponent } from "./editjamabaki/editjamabaki.component";
 import { JamaBakiReportComponent } from "./jama-baki-report/jama-baki-report.component";
 import { JamabakiPdfExcelComponent } from "./jamabaki-pdf-excel/jamabaki-pdf-excel.component";
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: "app-jama-baki",
   templateUrl: "./jama-baki.component.html",
   styleUrls: ["./jama-baki.component.css"],
 })
-export class JamaBakiComponent implements OnInit {
+export class JamaBakiComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   jamabakiList: any = [];
+  originalJamabakiList: any = [];
   currentPage = 1;
   itemsPerPage = 4;
   searchText: string = "";
   userId: string;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  role: string = '';
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private http: HttpClient,
@@ -30,18 +37,31 @@ export class JamaBakiComponent implements OnInit {
     private dialog: MatDialog,
     private notificationService: NotificationService
   ) { }
-  role: string = '';
 
   ngOnInit(): void {
     this.role = localStorage.getItem('role') || '';
     this.getJamaBakiList();
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.executeSearch(term);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getJamaBakiList() {
     this.userId = localStorage.getItem("userId");
     const params = { userId: this.userId };
-    this.http.get(API_JAMABAKI_LIST, { params }).subscribe((data) => {
-      this.jamabakiList = data;
+    this.http.get(API_JAMABAKI_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      this.originalJamabakiList = data || [];
+      this.jamabakiList = [...this.originalJamabakiList];
     });
   }
 
@@ -50,9 +70,8 @@ export class JamaBakiComponent implements OnInit {
   }
 
   deleteRow(id: any) {
-    this.use.deletejamabakidata(id).subscribe((result) => {
+    this.use.deletejamabakidata(id).pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.notificationService.success("JamaBakidata deleted successfully");
-      this.jamabakiList = result;
       this.getJamaBakiList();
     });
   }
@@ -67,7 +86,7 @@ export class JamaBakiComponent implements OnInit {
       panelClass: 'dialog-modern-wrapper'
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.getJamaBakiList();
     });
   }
@@ -81,7 +100,7 @@ export class JamaBakiComponent implements OnInit {
       panelClass: 'dialog-modern-wrapper'
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.getJamaBakiList();
     });
   }
@@ -95,28 +114,38 @@ export class JamaBakiComponent implements OnInit {
       panelClass: 'dialog-modern-wrapper'
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.getJamaBakiList();
     });
   }
 
-
   searchData(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  executeSearch(searchTerm: string): void {
+    const term = (searchTerm || '').toLowerCase().trim();
     if (!term) {
-      this.getJamaBakiList();
+      this.jamabakiList = [...this.originalJamabakiList];
       return;
     }
 
-    this.jamabakiList = this.jamabakiList.filter((item: any) =>
+    this.jamabakiList = this.originalJamabakiList.filter((item: any) =>
       (item.name && item.name.toLowerCase().includes(term)) ||
+      (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
+      (item.jamaNote && item.jamaNote.toLowerCase().includes(term)) ||
+      (item.bakiNote && item.bakiNote.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );
   }
 
+  trackById(index: number, item: any): any {
+    return item.idjamabaki || item.id || index;
+  }
+
   clearSearch() {
     this.searchTerm = '';
-    this.getJamaBakiList();
+    this.jamabakiList = [...this.originalJamabakiList];
   }
 
   openJamaBakiPdfExcel() {
@@ -128,14 +157,13 @@ export class JamaBakiComponent implements OnInit {
       panelClass: 'dialog-modern-wrapper'
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.getJamaBakiList();
     });
   }
 
   sortBy(column: string) {
     if (this.sortColumn === column) {
-      // toggle direction
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
@@ -155,5 +183,4 @@ export class JamaBakiComponent implements OnInit {
       }
     });
   }
-
 }

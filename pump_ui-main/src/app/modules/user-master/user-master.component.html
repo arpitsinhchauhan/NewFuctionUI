@@ -35,7 +35,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of userList | paginate: { itemsPerPage: 4, currentPage: currentPage }">
+          <tr *ngFor="let item of userList | paginate: { itemsPerPage: 4, currentPage: currentPage }; trackBy: trackById">
             <td>
               <div class="user-cell">
                 <div class="user-avatar">{{ item.username.charAt(0) | uppercase }}</div>

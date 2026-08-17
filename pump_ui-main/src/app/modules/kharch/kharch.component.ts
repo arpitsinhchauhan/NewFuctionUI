@@ -1,29 +1,35 @@
 import { HttpClient } from "@angular/common/http";
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { NotificationService } from "app/services/notification.service";
 import { UserServiceService } from "app/services/user-service.service";
 import { API_KHARCH_LIST } from "app/serviceult";
 import { KharchReportComponent } from "./kharch-report/kharch-report.component";
 import { KharchSellPdfExcelComponent } from "./kharch-sell-pdf-excel/kharch-sell-pdf-excel.component";
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: "app-kharch",
   templateUrl: "./kharch.component.html",
   styleUrls: ["./kharch.component.css"],
 })
-export class KharchComponent implements OnInit {
-  // productList: Map<String, String> | undefined;
+export class KharchComponent implements OnInit, OnDestroy {
   productList: any = [];
+  originalProductList: any = [];
   transaction: any = [];
   tableData: any[] = [];
   searchTerm: string = "";
-  dataSource: any[] | undefined; // Your data source array
-  currentPage = 1; // Current page index
+  dataSource: any[] | undefined;
+  currentPage = 1;
   itemsPerPage = 4;
   userId: string;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  role: string = '';
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private http: HttpClient,
@@ -32,19 +38,30 @@ export class KharchComponent implements OnInit {
     private notificationService: NotificationService
   ) { }
 
-  role: string = '';
-
   ngOnInit(): void {
     this.role = localStorage.getItem('role') || '';
     this.getdata();
-    this.dataSource = [];
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.executeSearch(term);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getdata() {
     this.userId = localStorage.getItem("userId");
     const params = { userId: this.userId };
-    this.http.get(API_KHARCH_LIST, { params }).subscribe((data) => {
-      this.productList = data;
+    this.http.get(API_KHARCH_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      this.originalProductList = data || [];
+      this.productList = [...this.originalProductList];
     });
   }
 
@@ -58,15 +75,14 @@ export class KharchComponent implements OnInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.getdata();
     });
   }
 
   deleteRow(idkharch: any) {
-    this.use.deleteKharchdata(idkharch).subscribe((result) => {
+    this.use.deleteKharchdata(idkharch).pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.notificationService.success("kharchdata deleted successfully");
-      this.productList = result;
       this.getdata();
     });
   }
@@ -78,34 +94,41 @@ export class KharchComponent implements OnInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.getdata();
     });
   }
 
-
-
   searchData(): void {
-    const term = this.searchTerm.toLowerCase().trim();
+    this.searchSubject.next(this.searchTerm);
+  }
+
+  executeSearch(searchTerm: string): void {
+    const term = (searchTerm || '').toLowerCase().trim();
     if (!term) {
-      this.getdata();
+      this.productList = [...this.originalProductList];
       return;
     }
 
-    this.productList = this.productList.filter((item: any) =>
+    this.productList = this.originalProductList.filter((item: any) =>
       (item.expenses && item.expenses.toLowerCase().includes(term)) ||
+      (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
+      (item.notes && item.notes.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );
   }
 
+  trackById(index: number, item: any): any {
+    return item.idkharch || item.id || index;
+  }
+
   clearSearch() {
     this.searchTerm = '';
-    this.getdata();
+    this.productList = [...this.originalProductList];
   }
 
   sortBy(column: string) {
     if (this.sortColumn === column) {
-      // toggle direction
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
@@ -125,5 +148,4 @@ export class KharchComponent implements OnInit {
       }
     });
   }
-
 }

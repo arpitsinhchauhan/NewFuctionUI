@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
@@ -8,48 +8,65 @@ import { EditPurchaseComponent } from './edit-purchase/edit-purchase.component';
 import { PuchasePdfExcelComponent } from './puchase-pdf-excel/puchase-pdf-excel.component';
 import { PurchaseReportComponent } from './purchase-report/purchase-report.component';
 import { formatDate } from '@angular/common';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-table-list',
   templateUrl: './table-list.component.html',
   styleUrls: ['./table-list.component.css']
 })
-export class TableListComponent implements OnInit {
+export class TableListComponent implements OnInit, OnDestroy {
   isReload: boolean;
   productList: any = [];
+  originalProductList: any = [];
   tableData: any[] = [];
   searchTerm: string = '';
   compD: any;
   dataSource: any[] | undefined;
   currentPage = 1;
-  itemsPerPage = 2;
+  itemsPerPage = 4;
   userId: string;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
+  role: string = '';
+
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private http: HttpClient,
     private use: UserServiceService,
-    private dialog: MatDialog, private notificationService: NotificationService) {
-  }
-
-  role: string = '';
+    private dialog: MatDialog,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.role = localStorage.getItem('role') || '';
     this.getdata();
-    this.dataSource = [
-    ];
+
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(term => {
+      this.executeSearch(term);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   getdata() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_PURCHASE_LIST, { params }).subscribe((data) => {
-      this.productList = data;
+    this.http.get(API_PURCHASE_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
+      this.originalProductList = data || [];
+      this.productList = [...this.originalProductList];
     });
   }
-
 
   openDialog(): void {
     const dialogRef = this.dialog.open(PurchaseReportComponent, {
@@ -58,34 +75,30 @@ export class TableListComponent implements OnInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.getdata();
     });
   }
 
-
-  applyFilter(filterValue: string) {
-    filterValue = filterValue.trim();
-    filterValue = filterValue.toLowerCase();
-    this.productList.filter = filterValue;
+  searchData(): void {
+    this.searchSubject.next(this.searchTerm);
   }
 
-
-  search(): void {
-    const term = this.searchTerm.toLowerCase().trim();
-
-    this.productList = this.productList.filter((item: any) => {
-      const formattedDate = formatDate(item.date, 'dd-MM-yyyy', 'en-US');
-      return (
-        formattedDate.includes(term) ||
-        item.type?.toLowerCase().includes(term) ||
-        item.email?.toLowerCase().includes(term)
-      );
-    });
-
+  executeSearch(searchTerm: string): void {
+    const term = (searchTerm || '').toLowerCase().trim();
     if (!term) {
-      this.productList = [...this.productList];
+      this.productList = [...this.originalProductList];
+      return;
     }
+    this.productList = this.originalProductList.filter((item: any) =>
+      (item.type && item.type.toLowerCase().includes(term)) ||
+      (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
+      (item.date && item.date.toLowerCase().includes(term))
+    );
+  }
+
+  trackById(index: number, item: any): any {
+    return item.idpurchase || item.id || index;
   }
 
   openEditDialog(item: any): void {
@@ -94,13 +107,12 @@ export class TableListComponent implements OnInit {
       data: item,
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       if (result?.isReload) {
         this.getdata();
       }
     });
   }
-
 
   pageChanged(event: any): void {
     this.currentPage = event.page;
@@ -112,41 +124,25 @@ export class TableListComponent implements OnInit {
       height: '70%',
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
       this.getdata();
     });
   }
 
   deleteRow(id: any) {
-    this.use.deletePurchasedata(id).subscribe((result) => {
-      this.productList = result;
+    this.use.deletePurchasedata(id).pipe(takeUntil(this.destroy$)).subscribe((result) => {
       this.notificationService.success('Product deleted successfully');
       this.getdata();
     });
   }
 
-
-  searchData(): void {
-    const term = this.searchTerm.toLowerCase().trim();
-    if (!term) {
-      this.getdata();
-      return;
-    }
-    this.productList = this.productList.filter((item: any) =>
-      (item.type && item.type.toLowerCase().includes(term)) ||
-      (item.date && item.date.toLowerCase().includes(term))
-    );
-  }
-
   clearSearch() {
     this.searchTerm = '';
-    this.getdata();
+    this.productList = [...this.originalProductList];
   }
-
 
   sortBy(column: string) {
     if (this.sortColumn === column) {
-      // toggle direction
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
@@ -166,6 +162,4 @@ export class TableListComponent implements OnInit {
       }
     });
   }
-
-
 }
