@@ -3,7 +3,15 @@
     <div class="card-header-modern">
       <div class="header-main">
         <h4 class="card-title-modern">Database Management</h4>
-        <p class="text-muted small mb-0">Monitor connection health, databases, backups, and sizes</p>
+        <!-- <p class="text-muted small mb-0">Monitor connection health, databases, backups, and sizes</p> -->
+      </div>
+      <div class="header-actions">
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium" placeholder="Search databases...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </div>
       </div>
     </div>
 

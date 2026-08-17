@@ -3,14 +3,14 @@
     <div class="card-header-modern">
       <div class="header-main">
         <h4 class="card-title-modern">XP Petrol Sales Registry</h4>
-        <p class="text-muted small mb-0">Track daily extra-premium petrol meter readings and sales metrics</p>
+        <!-- <p class="text-muted small mb-0">Track daily extra-premium petrol meter readings and sales metrics</p> -->
       </div>
       <div class="header-actions">
-        <div class="search-box-modern mr-3">
-          <mat-icon>search</mat-icon>
-          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by pump or date...">
-          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
-            <mat-icon>close</mat-icon>
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium"
+            placeholder="Search by pump or date...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
           </button>
         </div>
         <button mat-flat-button class="btn-premium btn-premium-primary me-2" (click)="openDialog()">
@@ -69,7 +69,8 @@
             <td class="font-weight-bold text-primary">₹{{ item.total_sell | number:'1.2-2' }}</td>
             <td class="text-center">
               <div class="action-buttons justify-content-center">
-                <button class="action-btn-circle action-btn-edit me-2" (click)="openEditDialog(item)" title="Edit Record">
+                <button class="action-btn-circle action-btn-edit me-2" (click)="openEditDialog(item)"
+                  title="Edit Record">
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button class="action-btn-circle action-btn-delete" (click)="deleteRow(item.id)" title="Delete Record">

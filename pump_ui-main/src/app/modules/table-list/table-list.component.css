@@ -57,7 +57,7 @@
 }
 
 .modern-table th {
-  background: #fcfdfe;
+  background: var(--bg-main);
   padding: 16px 20px;
   text-align: left;
   font-size: 11px;
@@ -101,7 +101,7 @@
 
 .card-footer-modern {
   padding: 20px 24px;
-  background: #fcfdfe;
+  background: var(--bg-card);
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -121,6 +121,7 @@
 
 ::ng-deep .modern-pagination .ngx-pagination .current {
   background: var(--primary) !important;
+  color: #ffffff !important;
   border-radius: 6px;
 }
 

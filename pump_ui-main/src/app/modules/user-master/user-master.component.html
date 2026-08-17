@@ -2,13 +2,22 @@
   <div class="card-modern">
     <div class="card-header-modern">
       <div class="header-main">
-        <h4 class="card-title-modern">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'User Management Master' : 'Employee Management Master' }}</h4>
-        <p class="text-muted small mb-0">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Manage system users, roles, and permissions' : 'Manage your pump employees' }}</p>
+        <h4 class="card-title-modern">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'User Management
+          Master' : 'Employee Management Master' }}</h4>
+        <!-- <p class="text-muted small mb-0">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Manage system users, roles, and permissions' : 'Manage your pump employees' }}</p> -->
       </div>
       <div class="header-actions">
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter(searchTerm)" class="search-box-premium"
+            placeholder="Search users...">
+          <button class="search-btn-premium" (click)="applyFilter(searchTerm)">
+            <mat-icon>search</mat-icon>
+          </button>
+        </div>
         <button mat-flat-button color="primary" class="premium-btn-primary" (click)="addUser()">
           <mat-icon>person_add</mat-icon>
-          <span>{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Add New User' : 'Add New Employee' }}</span>
+          <span>{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Add New User' : 'Add New Employee'
+            }}</span>
         </button>
       </div>
     </div>
@@ -58,7 +67,8 @@
 
     <div class="card-footer-modern">
       <div class="pagination-info">
-        Displaying {{ userList.length }} total {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'users' : 'employees' }}
+        Displaying {{ userList.length }} total {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'users' :
+        'employees' }}
       </div>
       <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
     </div>

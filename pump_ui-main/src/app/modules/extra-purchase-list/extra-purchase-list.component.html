@@ -3,14 +3,14 @@
     <div class="card-header-modern">
       <div class="header-main">
         <h4 class="card-title-modern">Premium Purchase Registry</h4>
-        <p class="text-muted small mb-0">Detailed tracking of XP Petrol and Power Diesel procurement records</p>
+        <!-- <p class="text-muted small mb-0">Detailed tracking of XP Petrol and Power Diesel procurement records</p> -->
       </div>
       <div class="header-actions">
-        <div class="search-box-modern mr-3">
-          <mat-icon>search</mat-icon>
-          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by type or date...">
-          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
-            <mat-icon>close</mat-icon>
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium"
+            placeholder="Search by type or date...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
           </button>
         </div>
         <button mat-flat-button class="btn-premium btn-premium-primary me-2" (click)="openDialog()">

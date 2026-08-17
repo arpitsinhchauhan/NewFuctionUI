@@ -59,7 +59,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fcfdfe;
+  background: var(--bg-card);
   border-top: 1px solid var(--border-color);
 }
 
@@ -74,5 +74,6 @@
 
 ::ng-deep .modern-pagination .ngx-pagination .current {
   background: var(--primary) !important;
+  color: #ffffff !important;
   border-radius: 4px;
 }

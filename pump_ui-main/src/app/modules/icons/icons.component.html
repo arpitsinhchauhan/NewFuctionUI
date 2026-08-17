@@ -5,11 +5,10 @@
         <h4 class="card-title-modern">Diesel Sales Inventory</h4>
       </div>
       <div class="header-actions">
-        <div class="search-box-modern mr-3">
-          <mat-icon>search</mat-icon>
-          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by pump or date...">
-          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
-            <mat-icon>close</mat-icon>
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium" placeholder="Search by pump or date...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
           </button>
         </div>
         <!-- <button mat-flat-button class="btn-premium btn-premium-primary me-2" (click)="openDialog()">

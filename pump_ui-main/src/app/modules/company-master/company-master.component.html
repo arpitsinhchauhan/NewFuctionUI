@@ -3,9 +3,16 @@
     <div class="card-header-modern">
       <div class="header-main">
         <h4 class="card-title-modern">Company Master</h4>
-        <p class="text-muted small mb-0">Manage registered pump companies, tenant databases, and managers</p>
+        <!-- <p class="text-muted small mb-0">Manage registered pump companies, tenant databases, and managers</p> -->
       </div>
       <div class="header-actions">
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium"
+            placeholder="Search companies...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </div>
         <button mat-flat-button color="primary" class="premium-btn-primary" (click)="addCompany()">
           <mat-icon>business</mat-icon>
           <span>Register New Company</span>
@@ -35,7 +42,8 @@
               </div>
             </td>
             <td>
-              <code style="background: rgba(15, 23, 42, 0.05); padding: 4px 8px; border-radius: 4px; color: #0f172a; font-family: monospace;">
+              <code
+                style="background: rgba(15, 23, 42, 0.05); padding: 4px 8px; border-radius: 4px; color: #0f172a; font-family: monospace;">
                 {{ item.database }}
               </code>
             </td>
@@ -43,7 +51,8 @@
             <td>{{ item.email }}</td>
             <td>{{ item.phone }}</td>
             <td>
-              <span class="status-pill" [class.success]="item.status === 'Active'" [class.info]="item.status !== 'Active'">
+              <span class="status-pill" [class.success]="item.status === 'Active'"
+                [class.info]="item.status !== 'Active'">
                 {{ item.status }}
               </span>
             </td>

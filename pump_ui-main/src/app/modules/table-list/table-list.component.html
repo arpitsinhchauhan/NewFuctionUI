@@ -5,11 +5,11 @@
         <h4 class="card-title-modern">Purchase History</h4>
       </div>
       <div class="header-actions">
-        <div class="search-box-modern mr-3">
-          <mat-icon>search</mat-icon>
-          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" placeholder="Search by type or date...">
-          <button mat-icon-button *ngIf="searchTerm" (click)="clearSearch()">
-            <mat-icon>close</mat-icon>
+        <div class="search-container-modern">
+          <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium"
+            placeholder="Search by type or date...">
+          <button class="search-btn-premium" (click)="searchData()">
+            <mat-icon>search</mat-icon>
           </button>
         </div>
         <button mat-stroked-button color="primary" (click)="openExcelPdf()">
