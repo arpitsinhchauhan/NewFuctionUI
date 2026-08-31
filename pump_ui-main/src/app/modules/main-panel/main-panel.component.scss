@@ -782,6 +782,11 @@
       cursor: default !important;
     }
 
+    .purchase-summary-item {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+
     .click-cell {
       text-decoration: none !important;
       color: inherit !important;

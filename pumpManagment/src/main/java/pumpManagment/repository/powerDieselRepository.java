@@ -38,7 +38,7 @@ public interface powerDieselRepository extends JpaRepository<powerDiesel, Intege
 
      List<powerDiesel> findByDateAndShift(String date, String shift);
 
-     @Query(value = "SELECT close_meter FROM powerdiesel WHERE pump = :pump AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, id DESC LIMIT 1", nativeQuery = true)
+     @Query(value = "SELECT close_meter FROM powerdiesel WHERE (pump = :pump OR pump = REPLACE(:pump, 'powerDiesel nozzle', 'powerDiesel Pump') OR pump = REPLACE(:pump, 'powerDiesel Pump', 'powerDiesel nozzle')) AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, id DESC LIMIT 1", nativeQuery = true)
      Optional<String> findPreviousClosingMeter(@Param("pump") String pump, @Param("date") String date, @Param("currentId") Integer currentId);
 
     @Query(value = "SELECT COALESCE(SUM(total_sell), 0) FROM powerdiesel WHERE date BETWEEN :startDate AND :endDate AND user_id = :userId", nativeQuery = true)

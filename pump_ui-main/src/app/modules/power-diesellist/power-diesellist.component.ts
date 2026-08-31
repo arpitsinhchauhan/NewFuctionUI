@@ -47,8 +47,19 @@ export class PowerDiesellistComponent implements OnInit {
   getpowerDiesel() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_POWER_DIESEL_LIST, { params }).subscribe((data) => {
-      this.powerDieselList = data;
+    this.http.get(API_POWER_DIESEL_LIST, { params }).subscribe((data: any) => {
+      const raw = data || [];
+      this.powerDieselList = raw.map((item: any) => {
+        let emp = item.username || item.employeeName || '';
+        if (emp.includes(' ')) {
+          const parts = emp.trim().split(/\s+/);
+          emp = item.username || parts[parts.length - 1];
+        }
+        return {
+          ...item,
+          employeeName: emp || 'N/A'
+        };
+      });
     });
   }
 

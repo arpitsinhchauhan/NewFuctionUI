@@ -51,8 +51,19 @@ export class DipStockComponent implements OnInit {
   getdata() {
     this.userId = localStorage.getItem("userId");
     const params = { userId: this.userId };
-    this.http.get(API_PD_DIP_LIST, { params }).subscribe((data) => {
-      this.productList = data;
+    this.http.get(API_PD_DIP_LIST, { params }).subscribe((data: any) => {
+      const raw = data || [];
+      this.productList = raw.map((item: any) => {
+        let emp = item.username || item.employeeName || '';
+        if (emp.includes(' ')) {
+          const parts = emp.trim().split(/\s+/);
+          emp = item.username || parts[parts.length - 1];
+        }
+        return {
+          ...item,
+          employeeName: emp || 'N/A'
+        };
+      });
     });
   }
 

@@ -46,8 +46,19 @@ export class OilPurchaseTableComponent implements OnInit {
   getdata() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_OIL_PURCHASE_LIST, { params }).subscribe((data) => {
-      this.oilProductList = data;
+    this.http.get(API_OIL_PURCHASE_LIST, { params }).subscribe((data: any) => {
+      const raw = data || [];
+      this.oilProductList = raw.map((item: any) => {
+        let emp = item.username || item.employeeName || '';
+        if (emp.includes(' ')) {
+          const parts = emp.trim().split(/\s+/);
+          emp = item.username || parts[parts.length - 1];
+        }
+        return {
+          ...item,
+          employeeName: emp || 'N/A'
+        };
+      });
     });
   }
 

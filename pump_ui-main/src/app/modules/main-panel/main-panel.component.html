@@ -112,11 +112,11 @@
             <thead>
               <tr>
                 <th>Nozzle Name</th>
-                <th>Closing <span class="unit-badge">M</span></th>
-                <th>Opening <span class="unit-badge">M</span></th>
-                <th>Testing <span class="unit-badge">L</span></th>
-                <th>Rate <span class="unit-badge">₹/L</span></th>
-                <th>Sale <span class="unit-badge">L</span></th>
+                <th>Closing </th>
+                <th>Opening </th>
+                <th>Testing </th>
+                <th>Rate <span class="unit-badge">₹</span></th>
+                <th>Sale </th>
                 <th>Net Sales</th>
                 <th class="text-right">Total <span class="unit-badge">₹</span></th>
               </tr>
@@ -142,7 +142,7 @@
                     [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                 <td><span class="calc-value">{{ petrol.saleLtr | number:'1.2-2' }}</span></td>
                 <td><span class="calc-value text-primary">{{ (petrol.ltr < 0 ? petrol.ltr * -1 : petrol.ltr) |
-                      number:'1.2-2' }} L</span>
+                      number:'1.2-2' }}</span>
                 </td>
                 <td class="text-right"><span class="amount-value">₹{{ petrol.total_rs | number:'1.2-2' }}</span></td>
               </tr>
@@ -174,7 +174,7 @@
                       [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                   <td><span class="calc-value">{{ xp.saleLtr | number:'1.2-2' }}</span></td>
                   <td><span class="calc-value text-primary">{{ (xp.ltr < 0 ? xp.ltr * -1 : xp.ltr) | number:'1.2-2' }}
-                        L</span>
+                        </span>
                   </td>
                   <td class="text-right"><span class="amount-value">₹{{ xp.total_rs | number:'1.2-2' }}</span></td>
                 </tr>
@@ -207,7 +207,7 @@
                     [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                 <td><span class="calc-value">{{ diesel.saleLtr | number:'1.2-2' }}</span></td>
                 <td><span class="calc-value text-warning">{{ (diesel.ltr < 0 ? diesel.ltr * -1 : diesel.ltr) |
-                      number:'1.2-2' }} L</span>
+                      number:'1.2-2' }} </span>
                 </td>
                 <td class="text-right"><span class="amount-value">₹{{ diesel.total_rs | number:'1.2-2' }}</span></td>
               </tr>
@@ -239,7 +239,7 @@
                       [readonly]="isDayLocked && !isAdmin" placeholder="0.00"></td>
                   <td><span class="calc-value">{{ pd.saleLtr | number:'1.2-2' }}</span></td>
                   <td><span class="calc-value text-warning">{{ (pd.ltr < 0 ? pd.ltr * -1 : pd.ltr) | number:'1.2-2' }}
-                        L</span>
+                        </span>
                   </td>
                   <td class="text-right"><span class="amount-value">₹{{ pd.total_rs | number:'1.2-2' }}</span></td>
                 </tr>
@@ -310,23 +310,23 @@
                 <span class="summary-value text-warning">₹{{ kharchTotal | number:'1.2-2' }}</span>
               </div>
               <div class="summary-item" (click)="openJamaComponent()">
-                <span class="summary-label">Customer Deposits</span>
+                <span class="summary-label">Customer Deposits (Jama)</span>
                 <span class="summary-value text-success">₹{{ jamaTotal | number:'1.2-2' }}</span>
               </div>
-              <div class="summary-item" (click)="openPurchase()">
+              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="openPurchase()">
                 <span class="summary-label">Fuel Purchase (Petrol/Diesel)</span>
                 <span class="summary-value text-info">{{ ((petolQuantity || 0) + (dieselQuantity || 0)) | number:'1.2-2'
-                  }} L</span>
+                  }} </span>
               </div>
-              <div class="summary-item" *ngIf="showXpPetrolCount > 0 || showPowerDieselCount > 0"
+              <div class="summary-item purchase-summary-item" *ngIf="(userRole !== 'EMPLOYEE' && userRole !== 'employee') && (showXpPetrolCount > 0 || showPowerDieselCount > 0)"
                 (click)="openExtraPurchase()">
                 <span class="summary-label">Extra Fuel Purchase (XP/Power)</span>
                 <span class="summary-value text-info">{{ ((xpPetolQuantity || 0) + (powerDieselQuantity || 0)) |
-                  number:'1.2-2' }} L</span>
+                  number:'1.2-2' }} </span>
               </div>
-              <div class="summary-item" (click)="openOilPurchase()">
+              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="openOilPurchase()">
                 <span class="summary-label">Lube Oil Purchase</span>
-                <span class="summary-value text-info">{{ (oilQuantity || 0) | number:'1.2-2' }} L</span>
+                <span class="summary-value text-info">{{ (oilQuantity || 0) | number:'1.2-2' }} </span>
               </div>
               <!-- <div class="summary-item">
                 <span class="summary-label">Total Revenue (Fuel Sales)</span>
@@ -371,9 +371,9 @@
                 <tr>
                   <th>Product</th>
                   <th>Opening Stock</th>
-                  <th>Purchase (L)</th>
+                  <th>Purchase </th>
                   <th>Loss/Gain</th>
-                  <th>Sales (L)</th>
+                  <th>Sales </th>
                   <th>Closing (System)</th>
                   <th>Dip Reading</th>
                 </tr>
@@ -461,7 +461,7 @@
       <div class="report-content">
         <div class="section-title-modern">
           <mat-icon>menu_book</mat-icon>
-          <h3>Back Page Ledger Details</h3>
+          <!-- <h3>Back Page Ledger Details</h3> -->
         </div>
 
         <div class="row">
@@ -518,7 +518,7 @@
                   <tbody>
                     <tr *ngFor="let item of secondTableData">
                       <td>{{ item[0] }}</td>
-                      <td class="text-muted small">{{ item[3] }} ({{ item[5] }}L)</td>
+                      <td class="text-muted small">{{ item[3] }} ({{ item[5] }})</td>
                       <td class="text-muted small">{{ item[2] }}</td>
                       <td class="text-right text-danger font-weight-bold">₹{{ item[1] | number:'1.2-2' }}</td>
                     </tr>
@@ -641,7 +641,7 @@
               <td>{{ rec.closeMeter }}</td>
               <td>{{ rec.meterSale }}</td>
               <td>{{ rec.testing }}</td>
-              <td class="font-weight-bold text-primary">{{ rec.netSale }} L</td>
+              <td class="font-weight-bold text-primary">{{ rec.netSale }} </td>
               <td>₹{{ rec.rate }}</td>
               <td class="font-weight-bold text-success">₹{{ rec.amount }}</td>
               <td><span class="badge" [ngClass]="rec.status === 'CLOSED' ? 'badge-danger' : 'badge-success'">{{
@@ -682,11 +682,11 @@
               <th>Fuel Type</th>
               <th>Pump / Nozzle</th>
               <th>Shifts</th>
-              <th>Real Opening M</th>
-              <th>Real Closing M</th>
+              <th>Real Opening </th>
+              <th>Real Closing </th>
               <th>Total Meter Sale</th>
-              <th>Total Testing (L)</th>
-              <th>Net Sale (L)</th>
+              <th>Total Testing </th>
+              <th>Net Sale </th>
               <th>Total Amount (₹)</th>
             </tr>
           </thead>
@@ -697,16 +697,16 @@
               <td><span class="badge badge-secondary">{{ item.shiftCount }} shift(s)</span></td>
               <td><span class="font-weight-bold text-dark">{{ item.realOpeningMeter | number:'1.2-2' }}</span></td>
               <td><span class="font-weight-bold text-dark">{{ item.realClosingMeter | number:'1.2-2' }}</span></td>
-              <td><strong>{{ item.totalMeterSale | number:'1.2-2' }} L</strong></td>
-              <td>{{ item.totalTesting | number:'1.2-2' }} L</td>
-              <td class="font-weight-bold text-primary">{{ item.netSale | number:'1.2-2' }} L</td>
+              <td><strong>{{ item.totalMeterSale | number:'1.2-2' }} </strong></td>
+              <td>{{ item.totalTesting | number:'1.2-2' }} </td>
+              <td class="font-weight-bold text-primary">{{ item.netSale | number:'1.2-2' }} </td>
               <td class="font-weight-bold text-success">₹{{ item.totalAmount | number:'1.2-2' }}</td>
             </tr>
             <tr class="table-dark font-weight-bold">
               <td colspan="5" class="text-right">GRAND TOTALS FOR TODAY:</td>
-              <td>{{ dailyConsolidatedData.grandMeterSale | number:'1.2-2' }} L</td>
-              <td>{{ dailyConsolidatedData.grandTesting | number:'1.2-2' }} L</td>
-              <td class="text-primary">{{ dailyConsolidatedData.grandNetSale | number:'1.2-2' }} L</td>
+              <td>{{ dailyConsolidatedData.grandMeterSale | number:'1.2-2' }} </td>
+              <td>{{ dailyConsolidatedData.grandTesting | number:'1.2-2' }} </td>
+              <td class="text-primary">{{ dailyConsolidatedData.grandNetSale | number:'1.2-2' }} </td>
               <td class="text-success">₹{{ dailyConsolidatedData.grandTotalAmount | number:'1.2-2' }}</td>
             </tr>
           </tbody>

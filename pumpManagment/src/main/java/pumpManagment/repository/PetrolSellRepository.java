@@ -76,7 +76,7 @@ public interface PetrolSellRepository extends JpaRepository<PetrolSell, Integer>
 
         List<PetrolSell> findByDateAndShift(String date, String shift);
 
-        @Query(value = "SELECT close_meter FROM petrolsell WHERE pump = :pump AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, id DESC LIMIT 1", nativeQuery = true)
+        @Query(value = "SELECT close_meter FROM petrolsell WHERE (pump = :pump OR pump = REPLACE(:pump, 'Petrol nozzle', 'Petrol Pump') OR pump = REPLACE(:pump, 'Petrol Pump', 'Petrol nozzle')) AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, id DESC LIMIT 1", nativeQuery = true)
         Optional<String> findPreviousClosingMeter(@Param("pump") String pump, @Param("date") String date, @Param("currentId") Integer currentId);
 
         @Query(value = "SELECT CONVERT(SUM(total_sell), CHAR) FROM petrolsell WHERE date BETWEEN :startDate AND :endDate AND user_id = :userId", nativeQuery = true)

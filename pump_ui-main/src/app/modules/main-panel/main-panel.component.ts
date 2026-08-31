@@ -322,29 +322,29 @@ export class MainPanelComponent implements OnInit {
     this.getUserName();
     this.getUserPump();
     this.petrolPumps = [
-      { name: 'Petrol Pump 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Petrol Pump 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Petrol Pump 3', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Petrol Pump 4', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Petrol Pump 5', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 }
+      { name: 'Petrol nozzle 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Petrol nozzle 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Petrol nozzle 3', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Petrol nozzle 4', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Petrol nozzle 5', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 }
     ];
 
     this.dieselPumps = [
-      { name: 'Diesel Pump 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Diesel Pump 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Diesel Pump 3', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Diesel Pump 4', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'Diesel Pump 5', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 }
+      { name: 'Diesel nozzle 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Diesel nozzle 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Diesel nozzle 3', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Diesel nozzle 4', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'Diesel nozzle 5', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 }
     ];
 
     this.xpPetrol = [
-      { name: 'xpPetrol Pump 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'xpPetrol Pump 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'xpPetrol nozzle 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'xpPetrol nozzle 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
     ];
 
     this.powerDiesel = [
-      { name: 'powerDiesel Pump 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
-      { name: 'powerDiesel Pump 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'powerDiesel nozzle 1', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
+      { name: 'powerDiesel nozzle 2', openingMeter: null, closingMeter: null, saleLtr: 0, testing: null, ltr: 0, rate: null, total_rs: 0 },
     ];
 
     this.updateTime();
@@ -405,7 +405,8 @@ export class MainPanelComponent implements OnInit {
     });
 
     pumpGroupMap.forEach((items, pumpName) => {
-      const pump = pumps.find(p => p.name === pumpName);
+      const normalizedPumpName = pumpName.replace(/Pump/gi, 'nozzle');
+      const pump = pumps.find(p => p.name === pumpName || p.name === normalizedPumpName);
       if (pump && items.length > 0) {
         // Sort by id ascending (chronological shift order)
         items.sort((a, b) => (a.id || 0) - (b.id || 0));
@@ -1088,8 +1089,18 @@ export class MainPanelComponent implements OnInit {
   // }
 
   openPurchase(data?: any): void {
+    if (this.userRole === 'EMPLOYEE' || this.userRole === 'employee') {
+      this.notificationService.failure("Only Pump Managers can add/view fuel purchases.");
+      return;
+    }
+    let dateStr = '';
+    try {
+      dateStr = this.use.getFormattedDate(this.reportDate || new Date());
+    } catch (e) {
+      dateStr = this.use.getFormattedDate(new Date());
+    }
     const dialogRef = this.dialog.open(PurchaseReportComponent, {
-      data: { date: this.use.getFormattedDate(this.reportDate) },
+      data: { date: dateStr },
       hasBackdrop: true,
       panelClass: 'dialog-lg'
     });
@@ -1124,8 +1135,18 @@ export class MainPanelComponent implements OnInit {
   }
 
   openOilPurchase(data?: any): void {
+    if (this.userRole === 'EMPLOYEE' || this.userRole === 'employee') {
+      this.notificationService.failure("Only Pump Managers can add/view lube oil purchases.");
+      return;
+    }
+    let dateStr = '';
+    try {
+      dateStr = this.use.getFormattedDate(this.reportDate || new Date());
+    } catch (e) {
+      dateStr = this.use.getFormattedDate(new Date());
+    }
     const dialogRef = this.dialog.open(OilpurchaseComponent, {
-      data: { date: this.use.getFormattedDate(this.reportDate) },
+      data: { date: dateStr },
       hasBackdrop: true,
       panelClass: 'dialog-lg'
     });
@@ -1157,8 +1178,18 @@ export class MainPanelComponent implements OnInit {
   }
 
   openExtraPurchase(data?: any): void {
+    if (this.userRole === 'EMPLOYEE' || this.userRole === 'employee') {
+      this.notificationService.failure("Only Pump Managers can add/view extra fuel purchases.");
+      return;
+    }
+    let dateStr = '';
+    try {
+      dateStr = this.use.getFormattedDate(this.reportDate || new Date());
+    } catch (e) {
+      dateStr = this.use.getFormattedDate(new Date());
+    }
     const dialogRef = this.dialog.open(AddExtraPurchaseComponent, {
-      data: { date: this.use.getFormattedDate(this.reportDate) },
+      data: { date: dateStr },
       hasBackdrop: true,
       panelClass: 'dialog-lg'
     });

@@ -1647,7 +1647,15 @@ public class PurchaseController {
                             Optional<DAOUser> uOpt = userRepository.findById(uid);
                             if (uOpt.isPresent()) {
                                 DAOUser u = uOpt.get();
-                                empName = u.getFirstName() + (u.getLastName() != null ? " " + u.getLastName() : "");
+                                if (u.getUsername() != null && !u.getUsername().trim().isEmpty()) {
+                                    empName = u.getUsername();
+                                } else {
+                                    empName = u.getFirstName() + (u.getLastName() != null ? " " + u.getLastName() : "");
+                                }
+                                if (empName.contains(" ")) {
+                                    String[] parts = empName.trim().split("\\s+");
+                                    empName = parts[parts.length - 1];
+                                }
                             } else {
                                 empName = "User " + uid;
                             }
@@ -2621,7 +2629,7 @@ public class PurchaseController {
                 + "AND user_id = '" + userId + "' " // Filter by userId
                 + "GROUP BY "
                 + "date) p "
-                + "JOIN "
+                + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(close_meter) AS total_close_meter, "
@@ -3362,9 +3370,12 @@ public class PurchaseController {
                             String userId = (String) data.get("user_id");
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
-                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
+                            String employeeName = data.get("employee_name") != null
+                                    ? String.valueOf(data.get("employee_name"))
+                                    : "";
 
-                            Optional<PetrolSell> existingPetrol = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            Optional<PetrolSell> existingPetrol = petrolSellRepository
+                                    .findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
                             if (!existingPetrol.isPresent()) {
                                 existingPetrol = petrolSellRepository.findByDateAndPumpAndUserId(date, pump, userId);
                             }
@@ -3380,7 +3391,8 @@ public class PurchaseController {
                                 petrol.setTotal_sell((String) data.get("total_sell"));
                                 petrol.setPetrol_ltr((String) data.get("petrol_ltr"));
                                 petrol.setShift(shift);
-                                if (employeeName != null && !employeeName.isEmpty()) petrol.setEmployeeName(employeeName);
+                                if (employeeName != null && !employeeName.isEmpty())
+                                    petrol.setEmployeeName(employeeName);
                             } else {
                                 petrol = new PetrolSell();
                                 petrol.setDate(date);
@@ -3411,9 +3423,12 @@ public class PurchaseController {
                             String userId = (String) data.get("user_id");
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
-                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
+                            String employeeName = data.get("employee_name") != null
+                                    ? String.valueOf(data.get("employee_name"))
+                                    : "";
 
-                            Optional<Dieselsell> existingDiesel = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            Optional<Dieselsell> existingDiesel = dieselSellRepository
+                                    .findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
                             if (!existingDiesel.isPresent()) {
                                 existingDiesel = dieselSellRepository.findByDateAndPumpAndUserId(date, pump, userId);
                             }
@@ -3429,7 +3444,8 @@ public class PurchaseController {
                                 diesel.setTotal_sell((String) data.get("total_sell"));
                                 diesel.setDiesel_ltr((String) data.get("diesel_ltr"));
                                 diesel.setShift(shift);
-                                if (employeeName != null && !employeeName.isEmpty()) diesel.setEmployeeName(employeeName);
+                                if (employeeName != null && !employeeName.isEmpty())
+                                    diesel.setEmployeeName(employeeName);
                             } else {
                                 diesel = new Dieselsell();
                                 diesel.setDate(date);
@@ -3478,9 +3494,12 @@ public class PurchaseController {
                             String userId = (String) data.get("user_id");
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
-                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
+                            String employeeName = data.get("employee_name") != null
+                                    ? String.valueOf(data.get("employee_name"))
+                                    : "";
 
-                            Optional<xpPetrol> existingPetrol = xpPetorlRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            Optional<xpPetrol> existingPetrol = xpPetorlRepository
+                                    .findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
                             if (!existingPetrol.isPresent()) {
                                 existingPetrol = xpPetorlRepository.findByDateAndPumpAndUserId(date, pump, userId);
                             }
@@ -3496,7 +3515,8 @@ public class PurchaseController {
                                 xp.setTotal_sell((String) data.get("total_sell"));
                                 xp.setXppetrol_ltr((String) data.get("xppetrol_ltr"));
                                 xp.setShift(shift);
-                                if (employeeName != null && !employeeName.isEmpty()) xp.setEmployeeName(employeeName);
+                                if (employeeName != null && !employeeName.isEmpty())
+                                    xp.setEmployeeName(employeeName);
                             } else {
                                 xp = new xpPetrol();
                                 xp.setDate(date);
@@ -3526,9 +3546,12 @@ public class PurchaseController {
                             String userId = (String) data.get("user_id");
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
-                            String employeeName = data.get("employee_name") != null ? String.valueOf(data.get("employee_name")) : "";
+                            String employeeName = data.get("employee_name") != null
+                                    ? String.valueOf(data.get("employee_name"))
+                                    : "";
 
-                            Optional<powerDiesel> existingDiesel = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+                            Optional<powerDiesel> existingDiesel = powerDieselRepository
+                                    .findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
                             if (!existingDiesel.isPresent()) {
                                 existingDiesel = powerDieselRepository.findByDateAndPumpAndUserId(date, pump, userId);
                             }
@@ -3544,7 +3567,8 @@ public class PurchaseController {
                                 power.setTotal_sell((String) data.get("total_sell"));
                                 power.setPowerdiesel_ltr((String) data.get("powerdiesel_ltr"));
                                 power.setShift(shift);
-                                if (employeeName != null && !employeeName.isEmpty()) power.setEmployeeName(employeeName);
+                                if (employeeName != null && !employeeName.isEmpty())
+                                    power.setEmployeeName(employeeName);
                             } else {
                                 power = new powerDiesel();
                                 power.setDate(date);
@@ -4413,7 +4437,8 @@ public class PurchaseController {
         String closeTime = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
 
         if ("petrol".equalsIgnoreCase(fuelType)) {
-            Optional<PetrolSell> ps = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            Optional<PetrolSell> ps = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift,
+                    userId);
             if (ps.isPresent()) {
                 PetrolSell p = ps.get();
                 p.setShiftStatus("CLOSED");
@@ -4422,7 +4447,8 @@ public class PurchaseController {
                 petrolSellRepository.save(p);
             }
         } else if ("diesel".equalsIgnoreCase(fuelType)) {
-            Optional<Dieselsell> ds = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            Optional<Dieselsell> ds = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift,
+                    userId);
             if (ds.isPresent()) {
                 Dieselsell d = ds.get();
                 d.setShiftStatus("CLOSED");
@@ -4431,7 +4457,8 @@ public class PurchaseController {
                 dieselSellRepository.save(d);
             }
         } else if ("powerdiesel".equalsIgnoreCase(fuelType)) {
-            Optional<powerDiesel> pd = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            Optional<powerDiesel> pd = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift,
+                    userId);
             if (pd.isPresent()) {
                 powerDiesel p = pd.get();
                 p.setShiftStatus("CLOSED");
@@ -4461,21 +4488,24 @@ public class PurchaseController {
         String userId = String.valueOf(payload.get("userId"));
 
         if ("petrol".equalsIgnoreCase(fuelType)) {
-            Optional<PetrolSell> ps = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            Optional<PetrolSell> ps = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift,
+                    userId);
             if (ps.isPresent()) {
                 PetrolSell p = ps.get();
                 p.setShiftStatus("OPEN");
                 petrolSellRepository.save(p);
             }
         } else if ("diesel".equalsIgnoreCase(fuelType)) {
-            Optional<Dieselsell> ds = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            Optional<Dieselsell> ds = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift,
+                    userId);
             if (ds.isPresent()) {
                 Dieselsell d = ds.get();
                 d.setShiftStatus("OPEN");
                 dieselSellRepository.save(d);
             }
         } else if ("powerdiesel".equalsIgnoreCase(fuelType)) {
-            Optional<powerDiesel> pd = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, userId);
+            Optional<powerDiesel> pd = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift,
+                    userId);
             if (pd.isPresent()) {
                 powerDiesel p = pd.get();
                 p.setShiftStatus("OPEN");
@@ -4628,7 +4658,8 @@ public class PurchaseController {
         // Process Petrol Pumps
         for (Map.Entry<String, List<PetrolSell>> entry : petrolByPump.entrySet()) {
             List<PetrolSell> list = entry.getValue();
-            if (list.isEmpty()) continue;
+            if (list.isEmpty())
+                continue;
             list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
             PetrolSell first = list.get(0);
             PetrolSell last = list.get(list.size() - 1);
@@ -4662,7 +4693,8 @@ public class PurchaseController {
         // Process Diesel Pumps
         for (Map.Entry<String, List<Dieselsell>> entry : dieselByPump.entrySet()) {
             List<Dieselsell> list = entry.getValue();
-            if (list.isEmpty()) continue;
+            if (list.isEmpty())
+                continue;
             list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
             Dieselsell first = list.get(0);
             Dieselsell last = list.get(list.size() - 1);
@@ -4696,7 +4728,8 @@ public class PurchaseController {
         // Process XP Petrol Pumps
         for (Map.Entry<String, List<xpPetrol>> entry : xpByPump.entrySet()) {
             List<xpPetrol> list = entry.getValue();
-            if (list.isEmpty()) continue;
+            if (list.isEmpty())
+                continue;
             list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
             xpPetrol first = list.get(0);
             xpPetrol last = list.get(list.size() - 1);
@@ -4730,7 +4763,8 @@ public class PurchaseController {
         // Process Power Diesel Pumps
         for (Map.Entry<String, List<powerDiesel>> entry : powerByPump.entrySet()) {
             List<powerDiesel> list = entry.getValue();
-            if (list.isEmpty()) continue;
+            if (list.isEmpty())
+                continue;
             list.sort((a, b) -> Integer.compare(a.getId() != null ? a.getId() : 0, b.getId() != null ? b.getId() : 0));
             powerDiesel first = list.get(0);
             powerDiesel last = list.get(list.size() - 1);
@@ -4773,7 +4807,8 @@ public class PurchaseController {
     }
 
     private double parseDoubleSafely(String val) {
-        if (val == null || val.trim().isEmpty()) return 0.0;
+        if (val == null || val.trim().isEmpty())
+            return 0.0;
         try {
             return Double.parseDouble(val.trim());
         } catch (Exception e) {

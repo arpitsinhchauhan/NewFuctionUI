@@ -58,7 +58,18 @@ export class AtmTransactionComponent implements OnInit, OnDestroy {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
     this.http.get(API_ATMSELL_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
-      this.originalTransaction = data || [];
+      const raw = data || [];
+      this.originalTransaction = raw.map((item: any) => {
+        let emp = item.username || item.employeeName || '';
+        if (emp.includes(' ')) {
+          const parts = emp.trim().split(/\s+/);
+          emp = item.username || parts[parts.length - 1];
+        }
+        return {
+          ...item,
+          employeeName: emp || 'N/A'
+        };
+      });
       this.transaction = [...this.originalTransaction];
     });
   }

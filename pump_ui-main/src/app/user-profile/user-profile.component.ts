@@ -570,12 +570,20 @@ export class UserProfileComponent implements OnInit {
 
 
   expensesExcel(event: any): void {
+    if (!this.startDateExpen || !this.endDateExpen) {
+      this.notificationService.failure(
+        "Please select both start date and end date for Expenses Report"
+      );
+      return;
+    }
     const dialogRef = this.dialog.open(ExpensesExcelComponent, {
       panelClass: ['dialog-modern-wrapper', 'dialog-md'],
       data: {
         expense: this.selectedExpense,
         startDate: this.startDateExpen,
         endDate: this.endDateExpen,
+        managerId: this.isManager ? this.userId : null,
+        employeeIds: this.isManager ? this.managerEmployeeIds : null,
       },
     });
     dialogRef.afterClosed().subscribe((result) => {
@@ -661,8 +669,9 @@ export class UserProfileComponent implements OnInit {
       data: {
         startDate: this.startDateBaki,
         endDate: this.endDateBaki,
-        // Pass managerId so BakiDetailsComponent fetches data scoped to this pump
+        // Pass managerId and employeeIds so BakiDetailsComponent fetches data scoped to this pump
         managerId: this.isManager ? this.userId : null,
+        employeeIds: this.isManager ? this.managerEmployeeIds : null,
       },
     });
 
@@ -683,8 +692,9 @@ export class UserProfileComponent implements OnInit {
       data: {
         startDate: this.startDateCustomerBaki,
         endDate: this.endDateCustomerBaki,
-        // Pass managerId so PumpTotalBakiDetailsComponent shows data for THIS pump only
+        // Pass managerId and employeeIds so PumpTotalBakiDetailsComponent shows data for THIS pump only
         managerId: this.isManager ? this.userId : null,
+        employeeIds: this.isManager ? this.managerEmployeeIds : null,
       },
     });
 

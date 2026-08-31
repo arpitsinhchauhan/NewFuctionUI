@@ -63,7 +63,18 @@ export class TableListComponent implements OnInit, OnDestroy {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
     this.http.get(API_PURCHASE_LIST, { params }).pipe(takeUntil(this.destroy$)).subscribe((data: any) => {
-      this.originalProductList = data || [];
+      const raw = data || [];
+      this.originalProductList = raw.map((item: any) => {
+        let emp = item.username || item.employeeName || '';
+        if (emp.includes(' ')) {
+          const parts = emp.trim().split(/\s+/);
+          emp = item.username || parts[parts.length - 1];
+        }
+        return {
+          ...item,
+          employeeName: emp || 'N/A'
+        };
+      });
       this.productList = [...this.originalProductList];
     });
   }

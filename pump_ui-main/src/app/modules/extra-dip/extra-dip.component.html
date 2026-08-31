@@ -30,7 +30,7 @@
                 {{ sortDirection === 'asc' ? 'expand_less' : 'expand_more' }}
               </mat-icon>
             </th>
-            <th *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">Employee</th>
+            <th *ngIf="role !== 'EMPLOYEE' && role !== 'employee'">Employee</th>
             <th>XP Petrol Dip</th>
             <th>XP Petrol Vol (L)</th>
             <th>Power Diesel Dip</th>
@@ -41,7 +41,7 @@
         <tbody>
           <tr *ngFor="let item of extraList | paginate: { itemsPerPage: 4, currentPage: currentPage }">
             <td class="font-weight-medium">{{ item.date | date: 'dd MMM, yyyy' }}</td>
-            <td *ngIf="role === 'PUMP_MANAGER' || role === 'Owner'">
+            <td *ngIf="role !== 'EMPLOYEE' && role !== 'employee'">
               <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
             </td>
             <td>

@@ -45,8 +45,19 @@ export class ExtraPurchaseListComponent implements OnInit {
   getExtraPurchase() {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    this.http.get(API_EXTRA_PURCHASE_LIST, { params }).subscribe((data) => {
-      this.extraPurchaseList = data;
+    this.http.get(API_EXTRA_PURCHASE_LIST, { params }).subscribe((data: any) => {
+      const raw = data || [];
+      this.extraPurchaseList = raw.map((item: any) => {
+        let emp = item.username || item.employeeName || '';
+        if (emp.includes(' ')) {
+          const parts = emp.trim().split(/\s+/);
+          emp = item.username || parts[parts.length - 1];
+        }
+        return {
+          ...item,
+          employeeName: emp || 'N/A'
+        };
+      });
     });
   }
 

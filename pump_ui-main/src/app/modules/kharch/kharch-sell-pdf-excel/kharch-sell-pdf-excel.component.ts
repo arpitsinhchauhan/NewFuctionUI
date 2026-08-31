@@ -84,11 +84,11 @@ export class KharchSellPdfExcelComponent implements OnInit {
     this.exportService.printElement('kharchlistTable', 'Kharch Report');
   }
   getKharch(): number {
-      return this.kharchlist
-        .filter(p => p.selected)
-        .reduce((total, product) => 
-          total + (parseFloat(product.price) || 0), 0
-        );
+    return this.kharchlist
+      .filter(p => p.selected)
+      .reduce((total, product) =>
+        total + (parseFloat(product.price) || 0), 0
+      );
   }
 
   cancel() {

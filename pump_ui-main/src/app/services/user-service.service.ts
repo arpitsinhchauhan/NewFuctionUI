@@ -699,11 +699,12 @@ export class UserServiceService {
   getExpenses(
     expense: string,
     startDate: string,
-    endDate: string
+    endDate: string,
+    userIdOverride?: string
   ): Observable<any[]> {
-    const userId = localStorage.getItem("userId");
+    const userId = userIdOverride || localStorage.getItem("userId");
     let params = new HttpParams()
-      .set("expense", expense)
+      .set("expense", expense || '')
       .set("startDate", startDate)
       .set("endDate", endDate)
       .set("userId", userId);

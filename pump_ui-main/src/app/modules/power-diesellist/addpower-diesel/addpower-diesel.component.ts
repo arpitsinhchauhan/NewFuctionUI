@@ -44,11 +44,11 @@ export class AddpowerDieselComponent implements OnInit {
   }
 
   row = [
-    { pump: 'powerDiesel Pump 1', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel Pump 2', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel Pump 3', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel Pump 4', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel Pump 5', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'powerDiesel nozzle 1', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'powerDiesel nozzle 2', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'powerDiesel nozzle 3', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'powerDiesel nozzle 4', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'powerDiesel nozzle 5', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
   ];
 
   calculateTotals(item) {
@@ -99,7 +99,7 @@ export class AddpowerDieselComponent implements OnInit {
       }
 
       if (!item.pump) {
-        this.notificationService.failure('powerDiesel Pump field is required.');
+        this.notificationService.failure('powerDiesel nozzle field is required.');
         return false;
       }
     }

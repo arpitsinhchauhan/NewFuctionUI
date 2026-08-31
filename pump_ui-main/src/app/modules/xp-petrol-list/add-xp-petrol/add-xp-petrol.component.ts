@@ -50,12 +50,12 @@ export class AddXpPetrolComponent implements OnInit {
   }
 
   row = [
-    { pump: 'xpPetrol Pump 1', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol Pump 2', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol Pump 3', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol Pump 4', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol Pump 5', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol Pump 6', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'xpPetrol nozzle 1', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'xpPetrol nozzle 2', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'xpPetrol nozzle 3', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'xpPetrol nozzle 4', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'xpPetrol nozzle 5', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'xpPetrol nozzle 6', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
   ];
 
 

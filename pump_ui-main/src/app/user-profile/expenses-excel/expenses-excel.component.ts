@@ -3,6 +3,8 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { UserServiceService } from 'app/services/user-service.service';
 import * as XLSX from 'xlsx';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-expenses-excel',
@@ -25,9 +27,14 @@ export class ExpensesExcelComponent implements OnInit {
   allSelected: boolean = true;
 
   fetchExpence(): void {
-    this.user.getExpenses(this.data.expense, this.data.startDate, this.data.endDate).subscribe((data: any[]) => {
-      if (Array.isArray(data)) {
-        this.expenseList = data.map(item => ({
+    if (this.data.managerId && this.data.employeeIds && this.data.employeeIds.length > 0) {
+      const requests = this.data.employeeIds.map((empId: number) =>
+        this.user.getExpenses(this.data.expense, this.data.startDate, this.data.endDate, empId.toString())
+          .pipe(catchError(() => of([] as any[])))
+      );
+      forkJoin(requests).subscribe((results: any[][]) => {
+        const flat = results.flat();
+        this.expenseList = flat.map(item => ({
           date: item.date,
           expenses: item.expenses,
           price: item.price,
@@ -35,8 +42,21 @@ export class ExpensesExcelComponent implements OnInit {
           selected: true
         }));
         this.allSelected = true;
-      }
-    });
+      });
+    } else {
+      this.user.getExpenses(this.data.expense, this.data.startDate, this.data.endDate).subscribe((data: any[]) => {
+        if (Array.isArray(data)) {
+          this.expenseList = data.map(item => ({
+            date: item.date,
+            expenses: item.expenses,
+            price: item.price,
+            note: item.notes,
+            selected: true
+          }));
+          this.allSelected = true;
+        }
+      });
+    }
   }
 
   toggleSelectAll(event: any) {

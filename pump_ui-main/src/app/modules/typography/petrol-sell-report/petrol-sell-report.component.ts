@@ -49,16 +49,16 @@ export class PetrolSellReportComponent implements OnInit {
   }
 
   row = [
-    { pump: 'Petrol Pump 1', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 2', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 3', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 4', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 5', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 6', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 7', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 8', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 9', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Petrol Pump 10', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' }
+    { pump: 'Petrol nozzle 1', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 2', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 3', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 4', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 5', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 6', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 7', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 8', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 9', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' },
+    { pump: 'Petrol nozzle 10', close_meter: '', open_meter: '', total: '', testing: '', petrol_ltr: '', rate: '', total_sell: '', date: '' }
   ];
 
 
@@ -114,7 +114,7 @@ export class PetrolSellReportComponent implements OnInit {
       }
   
       if (!item.pump) {
-        this.notificationService.failure('Petrol Pump field is required.');
+        this.notificationService.failure('Petrol nozzle field is required.');
         return false;
       }
     }

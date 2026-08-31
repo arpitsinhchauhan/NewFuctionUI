@@ -381,16 +381,16 @@ export class DashboardComponent implements OnInit {
     };
 
     const pumpInfo = results.pumpData?.data || {};
-    addSkeleton(Number(pumpInfo.petrol_nozzle), 'Petrol', 'Petrol Pump');
-    addSkeleton(Number(pumpInfo.diesel_nozzle), 'Diesel', 'Diesel Pump');
-    addSkeleton(Number(pumpInfo.xp_petrol_nozzle), 'XP Petrol', 'xpPetrol Pump');
-    addSkeleton(Number(pumpInfo.powe_diesel_nozzle), 'Power Diesel', 'powerDiesel Pump');
+    addSkeleton(Number(pumpInfo.petrol_nozzle), 'Petrol', 'Petrol nozzle');
+    addSkeleton(Number(pumpInfo.diesel_nozzle), 'Diesel', 'Diesel nozzle');
+    addSkeleton(Number(pumpInfo.xp_petrol_nozzle), 'XP Petrol', 'xpPetrol nozzle');
+    addSkeleton(Number(pumpInfo.powe_diesel_nozzle), 'Power Diesel', 'powerDiesel nozzle');
 
     const merge = (list: any[], fuelType: string, ltrField: string) => {
       if (!list || !Array.isArray(list)) return;
       list.forEach(item => {
         const rawName = item.pump || 'Unknown';
-        const name = rawName.trim();
+        const name = rawName.replace(/Pump/gi, 'nozzle').trim();
         const key = `${name.toLowerCase()}|${fuelType.toLowerCase()}`;
 
         if (!nozzleSalesMap.has(key)) {

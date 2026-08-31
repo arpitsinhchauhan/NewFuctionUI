@@ -12,7 +12,7 @@ import { UserServiceService } from 'app/services/user-service.service';
 })
 export class EditDieselSellComponent implements OnInit {
   isReload: boolean;
-  pumpList: string[] = ['Diesel Pump 1', 'Diesel Pump 2', 'Diesel Pump 3', 'Diesel Pump 4', 'Diesel Pump 5'];
+  pumpList: string[] = ['Diesel nozzle 1', 'Diesel nozzle 2', 'Diesel nozzle 3', 'Diesel nozzle 4', 'Diesel nozzle 5'];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,
