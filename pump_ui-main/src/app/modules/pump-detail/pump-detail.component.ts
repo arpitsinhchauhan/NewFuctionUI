@@ -155,65 +155,73 @@ export class PumpDetailComponent implements OnInit {
       } else {
         const g = grouped[date];
         // ── Petrol Sell ──
-        g.petrolTotalSum       = (g.petrolTotalSum || 0)       + (item.petrolTotalSum || 0);
+        g.petrolTotalOpenMeter = (g.petrolTotalOpenMeter || 0) + ((item as any).petrolTotalOpenMeter || 0);
+        g.petrolTotalCloseMeter = (g.petrolTotalCloseMeter || 0) + ((item as any).petrolTotalCloseMeter || 0);
+        g.petrolTotalSum = (g.petrolTotalSum || 0) + (item.petrolTotalSum || 0);
         g.petrolTotalTotalSell = (g.petrolTotalTotalSell || 0) + (item.petrolTotalTotalSell || 0);
-        g.petrolRate           = (g.petrolRate || 0)           + (item.petrolRate || 0);
-        g.petrolgatt_Total     = (g.petrolgatt_Total || 0)     + ((item as any).petrolgatt_Total || 0);
+        g.petrolRate = (g.petrolRate || 0) + (item.petrolRate || 0);
+        g.petrolgatt_Total = (g.petrolgatt_Total || 0) + ((item as any).petrolgatt_Total || 0);
         // ── Diesel Sell ──
-        g.dieselTotalSum       = (g.dieselTotalSum || 0)       + (item.dieselTotalSum || 0);
+        g.dieselTotalOpenMeter = (g.dieselTotalOpenMeter || 0) + ((item as any).dieselTotalOpenMeter || 0);
+        g.dieselTotalCloseMeter = (g.dieselTotalCloseMeter || 0) + ((item as any).dieselTotalCloseMeter || 0);
+        g.dieselTotalSum = (g.dieselTotalSum || 0) + (item.dieselTotalSum || 0);
         g.dieselTotalTotalSell = (g.dieselTotalTotalSell || 0) + (item.dieselTotalTotalSell || 0);
-        g.dieselRate           = (g.dieselRate || 0)           + (item.dieselRate || 0);
-        g.dieselgatt_Total     = (g.dieselgatt_Total || 0)     + ((item as any).dieselgatt_Total || 0);
+        g.dieselRate = (g.dieselRate || 0) + (item.dieselRate || 0);
+        g.dieselgatt_Total = (g.dieselgatt_Total || 0) + ((item as any).dieselgatt_Total || 0);
         // ── XP Petrol ──
-        g.xppetrolTotalSum     = (g.xppetrolTotalSum || 0)     + (item.xppetrolTotalSum || 0);
-        g.xppetrolTotalSell    = (g.xppetrolTotalSell || 0)    + (item.xppetrolTotalSell || 0);
-        g.xppetrolQuantity     = (g.xppetrolQuantity || 0)     + (item.xppetrolQuantity || 0);
-        g.xppetrolTotal        = (g.xppetrolTotal || 0)        + (item.xppetrolTotal || 0);
-        g.xppetrolVat          = (g.xppetrolVat || 0)          + (item.xppetrolVat || 0);
-        g.xppetrolCess         = (g.xppetrolCess || 0)         + (item.xppetrolCess || 0);
-        g.xppetrolJtcpercentage= (g.xppetrolJtcpercentage || 0)+ (item.xppetrolJtcpercentage || 0);
-        g.xppetrolTotalPurchase= (g.xppetrolTotalPurchase || 0)+ (item.xppetrolTotalPurchase || 0);
+        g.xppetrolOpenMeter = (g.xppetrolOpenMeter || 0) + ((item as any).xppetrolOpenMeter || 0);
+        g.xppetrolCloseMeter = (g.xppetrolCloseMeter || 0) + ((item as any).xppetrolCloseMeter || 0);
+        g.xppetrolTotalSum = (g.xppetrolTotalSum || 0) + (item.xppetrolTotalSum || 0);
+        g.xppetrolTotalSell = (g.xppetrolTotalSell || 0) + (item.xppetrolTotalSell || 0);
+        g.xppetrolQuantity = (g.xppetrolQuantity || 0) + (item.xppetrolQuantity || 0);
+        g.xppetrolTotal = (g.xppetrolTotal || 0) + (item.xppetrolTotal || 0);
+        g.xppetrolVat = (g.xppetrolVat || 0) + (item.xppetrolVat || 0);
+        g.xppetrolCess = (g.xppetrolCess || 0) + (item.xppetrolCess || 0);
+        g.xppetrolJtcpercentage = (g.xppetrolJtcpercentage || 0) + (item.xppetrolJtcpercentage || 0);
+        g.xppetrolTotalPurchase = (g.xppetrolTotalPurchase || 0) + (item.xppetrolTotalPurchase || 0);
         // ── Power Diesel ──
-        g.powerdieselTotalSum  = (g.powerdieselTotalSum || 0)  + (item.powerdieselTotalSum || 0);
+        g.powerdieselOpenMeter = (g.powerdieselOpenMeter || 0) + ((item as any).powerdieselOpenMeter || 0);
+        g.powerdieselCloseMeter = (g.powerdieselCloseMeter || 0) + ((item as any).powerdieselCloseMeter || 0);
+        g.powerdieselTotalSum = (g.powerdieselTotalSum || 0) + (item.powerdieselTotalSum || 0);
         g.powerdieselTotalSell = (g.powerdieselTotalSell || 0) + (item.powerdieselTotalSell || 0);
-        g.powerdieselQuantity  = (g.powerdieselQuantity || 0)  + (item.powerdieselQuantity || 0);
-        g.powerdieselTotal     = (g.powerdieselTotal || 0)     + (item.powerdieselTotal || 0);
-        g.powerdieselVat       = (g.powerdieselVat || 0)       + (item.powerdieselVat || 0);
-        g.powerdieselCess      = (g.powerdieselCess || 0)      + (item.powerdieselCess || 0);
-        g.powerdieselJtcpercentage=(g.powerdieselJtcpercentage||0)+(item.powerdieselJtcpercentage||0);
-        g.powerdieselTotalPurchase=(g.powerdieselTotalPurchase||0)+(item.powerdieselTotalPurchase||0);
+        g.powerdieselQuantity = (g.powerdieselQuantity || 0) + (item.powerdieselQuantity || 0);
+        g.powerdieselTotal = (g.powerdieselTotal || 0) + (item.powerdieselTotal || 0);
+        g.powerdieselVat = (g.powerdieselVat || 0) + (item.powerdieselVat || 0);
+        g.powerdieselCess = (g.powerdieselCess || 0) + (item.powerdieselCess || 0);
+        g.powerdieselJtcpercentage = (g.powerdieselJtcpercentage || 0) + (item.powerdieselJtcpercentage || 0);
+        g.powerdieselTotalPurchase = (g.powerdieselTotalPurchase || 0) + (item.powerdieselTotalPurchase || 0);
         // ── Oil Sell ──
-        g.oilTotalPrice        = (g.oilTotalPrice || 0)        + (item.oilTotalPrice || 0);
-        g.oilQuantity          = (g.oilQuantity || 0)          + (item.oilQuantity || 0);
-        g.oilNetTotal          = (g.oilNetTotal || 0)          + (item.oilNetTotal || 0);
-        g.oilGstAmount         = (g.oilGstAmount || 0)         + (item.oilGstAmount || 0);
-        g.oilCessAmount        = (g.oilCessAmount || 0)        + (item.oilCessAmount || 0);
-        g.oilNetAmount         = (g.oilNetAmount || 0)         + (item.oilNetAmount || 0);
-        g.oilMrp               = (g.oilMrp || 0)               + (item.oilMrp || 0);
-        g.oilQtyLtrOrKg        = (g.oilQtyLtrOrKg || 0)        + (item.oilQtyLtrOrKg || 0);
-        g.oilRate              = (g.oilRate || 0)               + (item.oilRate || 0);
-        g.oilTaxableValue      = (g.oilTaxableValue || 0)      + (item.oilTaxableValue || 0);
-        g.oilDiscount          = (g.oilDiscount || 0)          + (item.oilDiscount || 0);
+        g.oilTotalPrice = (g.oilTotalPrice || 0) + (item.oilTotalPrice || 0);
+        g.oilQuantity = (g.oilQuantity || 0) + (item.oilQuantity || 0);
+        g.oilNetTotal = (g.oilNetTotal || 0) + (item.oilNetTotal || 0);
+        g.oilGstAmount = (g.oilGstAmount || 0) + (item.oilGstAmount || 0);
+        g.oilCessAmount = (g.oilCessAmount || 0) + (item.oilCessAmount || 0);
+        g.oilNetAmount = (g.oilNetAmount || 0) + (item.oilNetAmount || 0);
+        g.oilMrp = (g.oilMrp || 0) + (item.oilMrp || 0);
+        g.oilQtyLtrOrKg = (g.oilQtyLtrOrKg || 0) + (item.oilQtyLtrOrKg || 0);
+        g.oilRate = (g.oilRate || 0) + (item.oilRate || 0);
+        g.oilTaxableValue = (g.oilTaxableValue || 0) + (item.oilTaxableValue || 0);
+        g.oilDiscount = (g.oilDiscount || 0) + (item.oilDiscount || 0);
         // ── Petrol Purchase ──
-        g.petrolQuantity       = (g.petrolQuantity || 0)       + (item.petrolQuantity || 0);
-        g.petrolTotal          = (g.petrolTotal || 0)          + (item.petrolTotal || 0);
-        g.petrolVat            = (g.petrolVat || 0)            + (item.petrolVat || 0);
-        g.petrolCess           = (g.petrolCess || 0)           + (item.petrolCess || 0);
-        g.petrolJtcpercentage  = (g.petrolJtcpercentage || 0)  + (item.petrolJtcpercentage || 0);
-        g.petrolTotalPurchase  = (g.petrolTotalPurchase || 0)  + (item.petrolTotalPurchase || 0);
+        g.petrolQuantity = (g.petrolQuantity || 0) + (item.petrolQuantity || 0);
+        g.petrolTotal = (g.petrolTotal || 0) + (item.petrolTotal || 0);
+        g.petrolVat = (g.petrolVat || 0) + (item.petrolVat || 0);
+        g.petrolCess = (g.petrolCess || 0) + (item.petrolCess || 0);
+        g.petrolJtcpercentage = (g.petrolJtcpercentage || 0) + (item.petrolJtcpercentage || 0);
+        g.petrolTotalPurchase = (g.petrolTotalPurchase || 0) + (item.petrolTotalPurchase || 0);
         // ── Diesel Purchase ──
-        g.dieselQuantity       = (g.dieselQuantity || 0)       + (item.dieselQuantity || 0);
-        g.dieselTotal          = (g.dieselTotal || 0)          + (item.dieselTotal || 0);
-        g.dieselVat            = (g.dieselVat || 0)            + (item.dieselVat || 0);
-        g.dieselCess           = (g.dieselCess || 0)           + (item.dieselCess || 0);
-        g.dieselJtcpercentage  = (g.dieselJtcpercentage || 0)  + (item.dieselJtcpercentage || 0);
-        g.dieselTotalPurchase  = (g.dieselTotalPurchase || 0)  + (item.dieselTotalPurchase || 0);
+        g.dieselQuantity = (g.dieselQuantity || 0) + (item.dieselQuantity || 0);
+        g.dieselTotal = (g.dieselTotal || 0) + (item.dieselTotal || 0);
+        g.dieselVat = (g.dieselVat || 0) + (item.dieselVat || 0);
+        g.dieselCess = (g.dieselCess || 0) + (item.dieselCess || 0);
+        g.dieselJtcpercentage = (g.dieselJtcpercentage || 0) + (item.dieselJtcpercentage || 0);
+        g.dieselTotalPurchase = (g.dieselTotalPurchase || 0) + (item.dieselTotalPurchase || 0);
         // ── Financials ──
-        g.kharchTotal          = (g.kharchTotal || 0)          + (item.kharchTotal || 0);
-        g.amountTotal          = (g.amountTotal || 0)          + (item.amountTotal || 0);
-        g.jamaTotal            = (g.jamaTotal || 0)            + (item.jamaTotal || 0);
-        g.bakiTotal            = (g.bakiTotal || 0)            + (item.bakiTotal || 0);
-        g.locl_balance_Total   = (g.locl_balance_Total || 0)   + (item.locl_balance_Total || 0);
+        g.kharchTotal = (g.kharchTotal || 0) + (item.kharchTotal || 0);
+        g.amountTotal = (g.amountTotal || 0) + (item.amountTotal || 0);
+        g.jamaTotal = (g.jamaTotal || 0) + (item.jamaTotal || 0);
+        g.bakiTotal = (g.bakiTotal || 0) + (item.bakiTotal || 0);
+        g.locl_balance_Total = (g.locl_balance_Total || 0) + (item.locl_balance_Total || 0);
         // ── Merge Expenses Lists ──
         if (Array.isArray(item.expensesList) && item.expensesList.length > 0) {
           if (!Array.isArray(g.expensesList)) g.expensesList = [];
@@ -497,8 +505,12 @@ export class PumpDetailComponent implements OnInit {
 
     const totalsRow: any = {
       date: "Total",
-      petrolTotalSum: this.totalPetrolQuantity,
+      petrolTotalOpenMeter: this.productList.reduce((sum, item) => sum + (item.petrolTotalOpenMeter || 0), 0),
+      petrolTotalCloseMeter: this.productList.reduce((sum, item) => sum + (item.petrolTotalCloseMeter || 0), 0),
+      petrolTotalSum: this.totalPetrolSum,
       petrolTotalTotalSell: this.totalPetroltotalsum,
+      dieselTotalOpenMeter: this.productList.reduce((sum, item) => sum + (item.dieselTotalOpenMeter || 0), 0),
+      dieselTotalCloseMeter: this.productList.reduce((sum, item) => sum + (item.dieselTotalCloseMeter || 0), 0),
       dieselTotalSum: this.totalDieselsum,
       dieselTotalTotalSell: this.totalDieseltotalSum,
       oilTotalPrice: this.totalOilTotalPrice,
@@ -539,6 +551,26 @@ export class PumpDetailComponent implements OnInit {
       jamaTotal: this.totalJamaTotal,
       bakiTotal: this.totalBakiTotal,
       locl_balance_Total: this.totalloclTotal,
+      xppetrolOpenMeter: this.productList.reduce((sum, item) => sum + (item.xppetrolOpenMeter || 0), 0),
+      xppetrolCloseMeter: this.productList.reduce((sum, item) => sum + (item.xppetrolCloseMeter || 0), 0),
+      xppetrolTotalSum: this.totalXpPetrolTotalSum,
+      xppetrolTotalSell: this.totalXpPetrolTotalSell,
+      xppetrolQuantity: this.totalXpPetrolQuantity,
+      xppetrolTotal: this.totalXpPetrolTotal,
+      xppetrolVat: this.totalXpPetrolVat,
+      xppetrolCess: this.totalXpPetrolCess,
+      xppetrolJtcpercentage: this.totalXpPetrolJtcpercentage,
+      xppetrolTotalPurchase: this.totalXpPetrolTotalPurchase,
+      powerdieselOpenMeter: this.productList.reduce((sum, item) => sum + (item.powerdieselOpenMeter || 0), 0),
+      powerdieselCloseMeter: this.productList.reduce((sum, item) => sum + (item.powerdieselCloseMeter || 0), 0),
+      powerdieselTotalSum: this.totalPowerDieselTotalSum,
+      powerdieselTotalSell: this.totalPowerDieselTotalSell,
+      powerdieselQuantity: this.totalPowerDieselQuantity,
+      powerdieselTotal: this.totalPowerDieselTotal,
+      powerdieselVat: this.totalPowerDieselVat,
+      powerdieselCess: this.totalPowerDieselCess,
+      powerdieselJtcpercentage: this.totalPowerDieselJtcpercentage,
+      powerdieselTotalPurchase: this.totalPowerDieselTotalPurchase,
       totalValue: this.totalTotalValue
     };
 
@@ -553,8 +585,8 @@ export class PumpDetailComponent implements OnInit {
 
     const headerOrder = [
       "date",
-      "petrolTotalSum", "petrolRate", "petrolTotalTotalSell", "petrolgatt_Total",
-      "dieselTotalSum", "dieselRate", "dieselTotalTotalSell", "dieselgatt_Total",
+      "petrolTotalOpenMeter", "petrolTotalCloseMeter", "petrolTotalSum", "petrolRate", "petrolTotalTotalSell", "petrolgatt_Total",
+      "dieselTotalOpenMeter", "dieselTotalCloseMeter", "dieselTotalSum", "dieselRate", "dieselTotalTotalSell", "dieselgatt_Total",
       "oilTotalPrice", "kharchTotal",
       "petrolQuantity", "petrolTotal", "petrolVat", "petrolCess", "petrolJtcpercentage",
       "petrolTotalPurchase",
@@ -564,16 +596,25 @@ export class PumpDetailComponent implements OnInit {
       "oilHsn", "oilMrp", "oilNetAmount", "oilNetTotal", "oilQtyLtrOrKg", "oilRate",
       "oilSkuName", "oilSkuNumber", "oilTaxableValue", "oilUnit", "oilVendorName",
       "oilCessAmount", "oilCessPercentage", "oilDiscount", "oilGstAmount",
-      "amountTotal", "jamaTotal", "bakiTotal", "locl_balance_Total", "totalValue",
+      "amountTotal", "jamaTotal", "bakiTotal", "locl_balance_Total",
+      "xppetrolOpenMeter", "xppetrolCloseMeter", "xppetrolTotalSum", "xppetrolRate", "xppetrolTotalSell", "xppetrolgatt_Total",
+      "xppetrolQuantity", "xppetrolTotal", "xppetrolVat", "xppetrolCess", "xppetrolJtcpercentage", "xppetrolTotalPurchase",
+      "powerdieselOpenMeter", "powerdieselCloseMeter", "powerdieselTotalSum", "powerdieselRate", "powerdieselTotalSell", "power_dieselgatt_Total",
+      "powerdieselQuantity", "powerdieselTotal", "powerdieselVat", "powerdieselCess", "powerdieselJtcpercentage", "powerdieselTotalPurchase",
+      "totalValue",
       ...this.expenseHeaders
     ];
 
     const headerDisplayMap: any = {
       date: "Date",
+      petrolTotalOpenMeter: "Petrol Open Meter",
+      petrolTotalCloseMeter: "Petrol Close Meter",
       petrolTotalSum: "Petrol Sale LTR",
       petrolRate: "Petrol Sale Rate",
       petrolTotalTotalSell: "Petrol Sale Rs",
       petrolgatt_Total: "Petrol Gatt LTR",
+      dieselTotalOpenMeter: "Diesel Open Meter",
+      dieselTotalCloseMeter: "Diesel Close Meter",
       dieselTotalSum: "Diesel Sale LTR",
       dieselRate: "Diesel Sale Rate",
       dieselTotalTotalSell: "Diesel Sale Rs",
@@ -614,6 +655,30 @@ export class PumpDetailComponent implements OnInit {
       jamaTotal: "Customer Credit Bill",
       bakiTotal: "Customer Outstanding Bill",
       locl_balance_Total: "Credit Total",
+      xppetrolOpenMeter: "XP Petrol Open Meter",
+      xppetrolCloseMeter: "XP Petrol Close Meter",
+      xppetrolTotalSum: "XP Petrol Sale LTR",
+      xppetrolRate: "XP Petrol Sale Rate",
+      xppetrolTotalSell: "XP Petrol Sale Rs",
+      xppetrolgatt_Total: "XP Petrol Gatt LTR",
+      xppetrolQuantity: "XP Petrol Purchase Ltr",
+      xppetrolTotal: "XP Petrol Purchase Rs",
+      xppetrolVat: "XP Petrol Purchase Vat",
+      xppetrolCess: "XP Petrol Purchase Cess",
+      xppetrolJtcpercentage: "XP Petrol Purchase JTC",
+      xppetrolTotalPurchase: "XP Petrol Purchase Total Rs",
+      powerdieselOpenMeter: "Power Diesel Open Meter",
+      powerdieselCloseMeter: "Power Diesel Close Meter",
+      powerdieselTotalSum: "Power Diesel Sale LTR",
+      powerdieselRate: "Power Diesel Sale Rate",
+      powerdieselTotalSell: "Power Diesel Sale Rs",
+      power_dieselgatt_Total: "Power Diesel Gatt LTR",
+      powerdieselQuantity: "Power Diesel Purchase Ltr",
+      powerdieselTotal: "Power Diesel Purchase Rs",
+      powerdieselVat: "Power Diesel Purchase Vat",
+      powerdieselCess: "Power Diesel Purchase Cess",
+      powerdieselJtcpercentage: "Power Diesel Purchase JTC",
+      powerdieselTotalPurchase: "Power Diesel Purchase Total Rs",
       totalValue: "Total Value"
     };
 

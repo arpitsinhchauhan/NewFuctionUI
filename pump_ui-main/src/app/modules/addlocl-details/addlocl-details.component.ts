@@ -154,9 +154,9 @@ export class AddloclDetailsComponent implements OnInit {
 
   creditType() {
     const dialogRef = this.dialog.open(CreditTypeComponent, {
-      width: "40%",
-      height: "30%",
+      width: "420px",
       disableClose: true,
+      panelClass: ['dialog-modern-wrapper', 'dialog-sm']
     });
 
     dialogRef.afterClosed().subscribe(() => {

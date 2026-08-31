@@ -72,8 +72,9 @@
                 <input type="date" [(ngModel)]="endDate" class="modern-input">
               </div>
             </div>
-            <button mat-flat-button color="primary" class="premium-btn-primary mt-3 w-100" (click)="exportToExcel()">
-              <mat-icon>download</mat-icon> Generate Excel Sheet
+            <button class="pill-btn pill-btn-blue mt-3 w-100" (click)="exportToExcel()">
+              <span class="btn-icon-badge"><mat-icon>download</mat-icon></span>
+              <span>Generate Excel Sheet</span>
             </button>
           </div>
         </div>
@@ -96,8 +97,9 @@
                 <input type="date" [(ngModel)]="endDatePdf" class="modern-input">
               </div>
             </div>
-            <button mat-flat-button color="warn" class="mt-3 w-100" (click)="pdf()">
-              <mat-icon>picture_as_pdf</mat-icon> Generate PDF Report
+            <button class="pill-btn pill-btn-danger mt-3 w-100" (click)="pdf()">
+              <span class="btn-icon-badge"><mat-icon>picture_as_pdf</mat-icon></span>
+              <span>Generate PDF Report</span>
             </button>
           </div>
         </div>
@@ -120,8 +122,9 @@
                 <input type="date" [(ngModel)]="endDateCredit" class="modern-input">
               </div>
             </div>
-            <button mat-stroked-button color="primary" class="mt-3 w-100" (click)="creditDetails()">
-              <mat-icon>receipt_long</mat-icon> Income Summary PDF
+            <button class="pill-btn pill-btn-warning mt-3 w-100" (click)="creditDetails()">
+              <span class="btn-icon-badge"><mat-icon>receipt_long</mat-icon></span>
+              <span>Income Summary PDF</span>
             </button>
           </div>
         </div>
@@ -153,8 +156,9 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <button mat-flat-button color="warn" class="w-100" (click)="expensesExcel($event)">
-              <mat-icon>file_download</mat-icon> Generate Expenses Report
+            <button class="pill-btn pill-btn-danger w-100" (click)="expensesExcel($event)">
+              <span class="btn-icon-badge"><mat-icon>file_download</mat-icon></span>
+              <span>Generate Expenses Report</span>
             </button>
           </div>
         </div>
@@ -177,8 +181,9 @@
                 <input type="date" [(ngModel)]="endDateCustomerBaki" class="modern-input">
               </div>
             </div>
-            <button mat-flat-button color="primary" class="premium-btn-primary mt-3 w-100" (click)="getBakiDetails()">
-              <mat-icon>summarize</mat-icon> View Outstanding Summary
+            <button class="pill-btn pill-btn-blue mt-3 w-100" (click)="getBakiDetails()">
+              <span class="btn-icon-badge"><mat-icon>summarize</mat-icon></span>
+              <span>View Outstanding Summary</span>
             </button>
           </div>
         </div>
@@ -201,8 +206,9 @@
                 <input type="date" [(ngModel)]="endDateBaki" class="modern-input">
               </div>
             </div>
-            <button mat-stroked-button color="primary" class="mt-3 w-100" (click)="bakiDetails()">
-              <mat-icon>assignment</mat-icon> View Baki Details Log
+            <button class="pill-btn pill-btn-info mt-3 w-100" (click)="bakiDetails()">
+              <span class="btn-icon-badge"><mat-icon>assignment</mat-icon></span>
+              <span>View Baki Details Log</span>
             </button>
           </div>
         </div>
@@ -218,8 +224,8 @@
         <p class="text-muted small mb-0">Manage staff profiles, bank accounts, and employment IDs</p>
       </div>
       <div class="header-actions">
-        <button mat-flat-button color="primary" class="premium-btn-primary" (click)="EmployeeDetails()">
-          <mat-icon>person_add</mat-icon>
+        <button class="pill-btn pill-btn-blue" (click)="EmployeeDetails()">
+          <span class="btn-icon-badge"><mat-icon>person_add</mat-icon></span>
           <span>Register Staff</span>
         </button>
       </div>
@@ -238,7 +244,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of productList; let i = index" (click)="openDetails(item)" class="clickable-row">
+          <tr *ngFor="let item of productList | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage, id: 'employeeMasterPagination' }; let i = index" (click)="openDetails(item)" class="clickable-row">
             <td>
               <div class="employee-avatar-wrapper">
                 <img [src]="thumbnails[i]" class="employee-thumb" *ngIf="thumbnails[i]">
@@ -255,6 +261,17 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card-footer-modern" *ngIf="productList && productList.length > 0">
+      <div class="pagination-info">
+        Showing staff page {{ currentPage }}
+      </div>
+      <pagination-controls 
+        id="employeeMasterPagination"
+        (pageChange)="currentPage = $event" 
+        class="modern-pagination">
+      </pagination-controls>
     </div>
   </div>
 
@@ -290,7 +307,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let report of dailyReports" class="hover-row">
+          <tr *ngFor="let report of dailyReports | paginate: { itemsPerPage: itemsPerPageReports, currentPage: currentPageReports, id: 'dailyReportsPagination' }" class="hover-row">
             <td><span class="id-badge">#{{ report.reportId }}</span></td>
             <td>
               <div class="d-flex flex-column">
@@ -340,6 +357,17 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="card-footer-modern" *ngIf="dailyReports.length > 0">
+      <div class="pagination-info">
+        Showing reports page {{ currentPageReports }}
+      </div>
+      <pagination-controls 
+        id="dailyReportsPagination"
+        (pageChange)="currentPageReports = $event" 
+        class="modern-pagination">
+      </pagination-controls>
     </div>
   </div>
 </div>

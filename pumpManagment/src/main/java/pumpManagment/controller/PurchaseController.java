@@ -2381,6 +2381,8 @@ public class PurchaseController {
                 }
             }
 
+            dto.setPetrolTotalOpenMeter(convertToDouble(map.get("petrolTotalOpenMeter")));
+            dto.setPetrolTotalCloseMeter(convertToDouble(map.get("petrolTotalCloseMeter")));
             dto.setPetrolTotalSum(convertToDouble(map.get("petrol_total_sum")));
             // dto.setPetrolTotalTesting(convertToDouble(map.get("petrol_total_testing")));
             // dto.setPetrolLtr(convertToDouble(map.get("petrol_ltr")));
@@ -2388,6 +2390,8 @@ public class PurchaseController {
             dto.setPetrolTotalTotalSell(convertToDouble(map.get("petrol_total_total_sell")));
             dto.setPetrolgatt_Total(convertToDouble(map.get("petrolgatt_Total")));
 
+            dto.setDieselTotalOpenMeter(convertToDouble(map.get("dieselTotalOpenMeter")));
+            dto.setDieselTotalCloseMeter(convertToDouble(map.get("dieselTotalCloseMeter")));
             dto.setDieselTotalSum(convertToDouble(map.get("diesel_total_sum")));
             // dto.setDieselTotalTesting(convertToDouble(map.get("diesel_total_testing")));
             // dto.setDieselLtr(convertToDouble(map.get("diesel_ltr")));
@@ -2436,6 +2440,8 @@ public class PurchaseController {
             dto.setLocl_balance_Total(convertToDouble(map.get("locl_balance_Total")));
             // dto.setUser_id((String) map.get("user_id"));
             if (includeXpPetrol) {
+                dto.setXppetrolOpenMeter(convertToDouble(map.get("xppetrolOpenMeter")));
+                dto.setXppetrolCloseMeter(convertToDouble(map.get("xppetrolCloseMeter")));
                 // dto.setXppetrolLtr(convertToDouble(map.get("xppetrol_ltr")));
                 dto.setXppetrolTotalSum(convertToDouble(map.get("xppetrol_total_sum")));
                 dto.setXppetrolRate(convertToDouble(map.get("xppetrol_rate")));
@@ -2453,11 +2459,12 @@ public class PurchaseController {
             }
 
             if (includePowerDiesel) {
+                dto.setPowerdieselOpenMeter(convertToDouble(map.get("powerdieselOpenMeter")));
+                dto.setPowerdieselCloseMeter(convertToDouble(map.get("powerdieselCloseMeter")));
                 // dto.setPowerdieselLtr(convertToDouble(map.get("powerdiesel_ltr")));
                 dto.setPowerdieselTotalSum(convertToDouble(map.get("powerdiesel_total_sum")));
                 dto.setPowerdieselRate(convertToDouble(map.get("powerdiesel_rate")));
                 // dto.setPowerdieselTotalTesting(convertToDouble(map.get("powerdiesel_total_testing")));
-                dto.setPowerdieselTotalSell(convertToDouble(map.get("powerdiesel_total_sell")));
                 dto.setPowerdieselTotalSell(convertToDouble(map.get("powerdiesel_total_sell")));
                 dto.setPower_dieselgatt_Total(convertToDouble(map.get("power_dieselgatt_Total")));
                 // Power Diesel Purchase fields
@@ -2533,11 +2540,15 @@ public class PurchaseController {
     private List<Map<String, Object>> queryThis(String startDate, String endDate, String userId) {
         String sql = "SELECT "
                 + "p.date, "
+                + "COALESCE(p.total_open_meter, 0) AS petrolTotalOpenMeter, "
+                + "COALESCE(p.total_close_meter, 0) AS petrolTotalCloseMeter, "
                 + "COALESCE(p.total_sum, 0) AS petrol_total_sum, "
                 + "COALESCE(p.total_testing, 0) AS petrol_total_testing, "
                 + "COALESCE(p.petrol_ltr, 0) AS petrol_ltr, "
                 + "COALESCE(p.rate, 0) AS petrol_rate, "
                 + "COALESCE(p.total_total_sell, 0) AS petrol_total_total_sell, "
+                + "COALESCE(d.total_open_meter, 0) AS dieselTotalOpenMeter, "
+                + "COALESCE(d.total_close_meter, 0) AS dieselTotalCloseMeter, "
                 + "COALESCE(d.total_sum, 0) AS diesel_total_sum, "
                 + "COALESCE(d.total_testing, 0) AS diesel_total_testing, "
                 + "COALESCE(d.diesel_ltr, 0) AS diesel_ltr, "
@@ -2547,6 +2558,8 @@ public class PurchaseController {
                 + "COALESCE(dg.dieselgatt_Total, 0) AS dieselgatt_Total, "
 
                 // xppetrol
+                + "COALESCE(xp.total_open_meter, 0) AS xppetrolOpenMeter, "
+                + "COALESCE(xp.total_close_meter, 0) AS xppetrolCloseMeter, "
                 + "COALESCE(xp.xppetrol_ltr, 0) AS xppetrol_ltr, "
                 + "COALESCE(xp.total_sum, 0) AS xppetrol_total_sum, "
                 + "COALESCE(xp.rate, 0) AS xppetrol_rate, "
@@ -2554,6 +2567,8 @@ public class PurchaseController {
                 + "COALESCE(xp.total_sell, 0) AS xppetrol_total_sell, "
                 + "COALESCE(xpg.xppetrolgatt_Total, 0) AS xppetrolgatt_Total, "
                 // powerdiesel
+                + "COALESCE(pd.total_open_meter, 0) AS powerdieselOpenMeter, "
+                + "COALESCE(pd.total_close_meter, 0) AS powerdieselCloseMeter, "
                 + "COALESCE(pd.powerdiesel_ltr, 0) AS powerdiesel_ltr, "
                 + "COALESCE(pd.total_sum, 0) AS powerdiesel_total_sum, "
                 + "COALESCE(pd.rate, 0) AS powerdiesel_rate, "

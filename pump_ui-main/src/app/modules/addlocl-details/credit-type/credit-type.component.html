@@ -1,16 +1,29 @@
-<div class="row">
-    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-        <div class="card">
-            <div class="card-header card-header-danger">
-                <h4 class="card-title">Credit List Add :-</h4>
-            </div>
-            <div class="card-body">
-                <div class="input-container">
-                    <input [(ngModel)]="inputValue" placeholder="Enter text Credit Type" />
-                    <button (click)="logInput()">Add</button>
-                    <button (click)="cancel()">Cancel</button>
-                </div>
-            </div>
-        </div>
+<div class="credit-type-container">
+  <div class="credit-type-header">
+    <div class="d-flex align-items-center gap-2">
+      <div class="badge-icon">
+        <mat-icon>add_circle_outline</mat-icon>
+      </div>
+      <h4 class="m-0 font-weight-bold fs-6">Add New Credit Type</h4>
     </div>
+    <button mat-icon-button (click)="cancel()" class="close-btn" matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="credit-type-body">
+    <label class="form-label-modern">Credit Type Name</label>
+    <div class="input-wrapper">
+      <mat-icon class="input-icon">category</mat-icon>
+      <input type="text" [(ngModel)]="inputValue" class="custom-input" placeholder="e.g. BPCL, HPCL, Reliance" (keyup.enter)="logInput()" autofocus />
+    </div>
+  </div>
+
+  <div class="credit-type-footer">
+    <button mat-stroked-button (click)="cancel()" class="btn-cancel">Cancel</button>
+    <button mat-flat-button color="primary" (click)="logInput()" [disabled]="!inputValue.trim()" class="btn-add">
+      <mat-icon class="btn-icon">add</mat-icon>
+      <span>Add Credit Type</span>
+    </button>
+  </div>
 </div>

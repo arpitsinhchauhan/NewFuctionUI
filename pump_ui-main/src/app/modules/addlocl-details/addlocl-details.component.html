@@ -1,99 +1,119 @@
-<div class="card-premium dialog-modern-card">
-  <div class="card-header-modern">
-    <div class="header-text">
-      <h4 class="card-title">
-        <mat-icon class="me-2 text-primary">account_balance_wallet</mat-icon>
-        LOCL Credit Details
-      </h4>
-      <p class="card-subtitle">Manage local credit balances and remarks</p>
+<div class="locl-dialog-container">
+  <!-- Header -->
+  <div class="locl-header">
+    <div class="header-title-group">
+      <div class="header-icon-badge">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <div>
+        <h3 class="dialog-title">LOCL Credit Details</h3>
+        <p class="dialog-subtitle">Manage local credit balances and remarks</p>
+      </div>
     </div>
     <div class="header-actions">
-      <button mat-flat-button color="accent" (click)="creditType()" class="me-2">
-        <mat-icon class="me-1">add_circle</mat-icon> Credit Type
+      <button mat-stroked-button color="primary" class="btn-credit-type" (click)="creditType()">
+        <mat-icon class="btn-icon">add_circle_outline</mat-icon>
+        <span>Credit Type</span>
       </button>
-      <button mat-icon-button (click)="cancel()" class="close-btn" color="warn">
+      <button mat-icon-button class="btn-close-dialog" (click)="cancel()" matTooltip="Close">
         <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>
 
-  <div class="card-body p-4">
-    <div class="row g-3 align-items-end mb-4">
-      <div class="col-md-6">
-        <div class="form-group-modern mb-0">
-          <label class="label-modern">Transaction Date</label>
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput [(ngModel)]="purchaDipStockseDetails.date" type="Date">
-          </mat-form-field>
+  <!-- Body -->
+  <div class="locl-body">
+    <!-- Filter / Action Row -->
+    <div class="control-bar">
+      <div class="date-field-container">
+        <label class="field-label">
+          <mat-icon class="label-icon">event</mat-icon>
+          Transaction Date
+        </label>
+        <div class="input-date-wrapper">
+          <input type="date" class="custom-date-input" [(ngModel)]="purchaDipStockseDetails.date" (change)="getloclDetails()" />
         </div>
       </div>
-      <div class="col-md-6 text-end">
-        <button mat-flat-button color="primary" (click)="addTable()" class="px-4 py-2">
-          <mat-icon class="me-2">add</mat-icon> Add New Row
-        </button>
-      </div>
+
+      <button mat-flat-button color="primary" class="btn-add-row" (click)="addTable()">
+        <mat-icon class="btn-icon">add</mat-icon>
+        <span>Add New Row</span>
+      </button>
     </div>
 
-    <div class="table-responsive-modern border rounded-3">
-      <table class="modern-report-table">
+    <!-- Table Container -->
+    <div class="table-wrapper">
+      <table class="locl-table">
         <thead>
           <tr>
-            <th style="width: 35%;">Credit Type</th>
-            <th style="width: 25%;">Balance (₹)</th>
-            <th style="width: 30%;">Remark</th>
-            <th style="width: 10%;" class="text-center">Action</th>
+            <th style="width: 32%;">CREDIT TYPE</th>
+            <th style="width: 25%;" class="text-right">BALANCE (₹)</th>
+            <th style="width: 33%;">REMARK</th>
+            <th style="width: 10%;" class="text-center">ACTION</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of row; let i = index" class="align-middle">
+          <tr *ngFor="let item of row; let i = index" class="table-row">
             <td>
-              <mat-form-field appearance="outline" class="w-100 hide-subscript">
-                <mat-select placeholder="Select Type" [(ngModel)]="item.credit" name="creditType{{ i }}">
+              <mat-form-field appearance="outline" class="cell-form-field">
+                <mat-select placeholder="Select Credit Type" [(ngModel)]="item.credit" name="creditType{{ i }}">
                   <mat-option *ngFor="let type of creditTypeList" [value]="type">{{ type }}</mat-option>
                 </mat-select>
               </mat-form-field>
             </td>
             <td>
-              <mat-form-field appearance="outline" class="w-100 hide-subscript">
-                <input matInput type="number" [(ngModel)]="item.balance" placeholder="0.00" class="text-right">
+              <mat-form-field appearance="outline" class="cell-form-field">
+                <input matInput type="number" [(ngModel)]="item.balance" placeholder="0.00" class="text-right font-weight-semibold">
               </mat-form-field>
             </td>
             <td>
-              <mat-form-field appearance="outline" class="w-100 hide-subscript">
-                <input matInput type="text" [(ngModel)]="item.remark" placeholder="Note...">
+              <mat-form-field appearance="outline" class="cell-form-field">
+                <input matInput type="text" [(ngModel)]="item.remark" placeholder="Enter remark...">
               </mat-form-field>
             </td>
             <td class="text-center">
-              <button mat-icon-button color="warn" (click)="deleteRow(i)" matTooltip="Remove Row">
+              <button mat-icon-button color="warn" class="btn-delete-row" (click)="deleteRow(i)" matTooltip="Remove Row">
                 <mat-icon>delete_outline</mat-icon>
               </button>
             </td>
           </tr>
+
+          <!-- Empty State -->
           <tr *ngIf="row.length === 0">
-            <td colspan="4" class="no-data-msg">
-              <mat-icon>post_add</mat-icon>
-              <p>No rows added. Click "Add New Row" to start.</p>
+            <td colspan="4">
+              <div class="empty-state">
+                <div class="empty-icon-wrapper">
+                  <mat-icon>post_add</mat-icon>
+                </div>
+                <h5 class="empty-title">No rows added yet</h5>
+                <p class="empty-desc">Click "Add New Row" to start adding credit entries for this date.</p>
+                <button mat-stroked-button color="primary" class="btn-empty-add" (click)="addTable()">
+                  <mat-icon>add</mat-icon> Add Row
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
         <tfoot *ngIf="row.length > 0">
-          <tr class="bg-light font-weight-bold">
-            <td colspan="2" class="text-right py-3">Grand Total:</td>
-            <td colspan="2" class="text-primary py-3 fs-5">
-               ₹ {{ totalPrice() | number:'1.2-2' }}
+          <tr class="footer-summary-row">
+            <td colspan="2" class="text-right summary-label">Grand Total Balance:</td>
+            <td colspan="2" class="summary-amount text-primary">
+              ₹ {{ totalPrice() | number:'1.2-2' }}
             </td>
           </tr>
         </tfoot>
       </table>
     </div>
+  </div>
 
-    <div class="dialog-actions-modern mt-4">
-      <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-3">
-        Cancel
-      </button>
-      <button mat-flat-button color="primary" (click)="order()" class="px-5 py-2">
-        <mat-icon class="me-2">save</mat-icon> Save Credit Details
-      </button>
-    </div>
+  <!-- Footer Actions -->
+  <div class="locl-footer">
+    <button mat-stroked-button (click)="cancel()" class="btn-cancel">
+      Cancel
+    </button>
+    <button mat-flat-button color="primary" (click)="order()" class="btn-save">
+      <mat-icon class="btn-icon">save</mat-icon>
+      <span>Save Credit Details</span>
+    </button>
   </div>
 </div>

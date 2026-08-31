@@ -1089,18 +1089,8 @@ export class MainPanelComponent implements OnInit {
   // }
 
   openPurchase(data?: any): void {
-    if (this.userRole === 'EMPLOYEE' || this.userRole === 'employee') {
-      this.notificationService.failure("Only Pump Managers can add/view fuel purchases.");
-      return;
-    }
-    let dateStr = '';
-    try {
-      dateStr = this.use.getFormattedDate(this.reportDate || new Date());
-    } catch (e) {
-      dateStr = this.use.getFormattedDate(new Date());
-    }
     const dialogRef = this.dialog.open(PurchaseReportComponent, {
-      data: { date: dateStr },
+      data: { date: this.use.getFormattedDate(this.reportDate) },
       hasBackdrop: true,
       panelClass: 'dialog-lg'
     });
@@ -1139,14 +1129,8 @@ export class MainPanelComponent implements OnInit {
       this.notificationService.failure("Only Pump Managers can add/view lube oil purchases.");
       return;
     }
-    let dateStr = '';
-    try {
-      dateStr = this.use.getFormattedDate(this.reportDate || new Date());
-    } catch (e) {
-      dateStr = this.use.getFormattedDate(new Date());
-    }
     const dialogRef = this.dialog.open(OilpurchaseComponent, {
-      data: { date: dateStr },
+      data: { date: this.use.getFormattedDate(this.reportDate) },
       hasBackdrop: true,
       panelClass: 'dialog-lg'
     });
@@ -1182,14 +1166,8 @@ export class MainPanelComponent implements OnInit {
       this.notificationService.failure("Only Pump Managers can add/view extra fuel purchases.");
       return;
     }
-    let dateStr = '';
-    try {
-      dateStr = this.use.getFormattedDate(this.reportDate || new Date());
-    } catch (e) {
-      dateStr = this.use.getFormattedDate(new Date());
-    }
     const dialogRef = this.dialog.open(AddExtraPurchaseComponent, {
-      data: { date: dateStr },
+      data: { date: this.use.getFormattedDate(this.reportDate) },
       hasBackdrop: true,
       panelClass: 'dialog-lg'
     });

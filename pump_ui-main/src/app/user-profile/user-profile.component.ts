@@ -49,6 +49,8 @@ export class UserProfileComponent implements OnInit {
   CurrentyearTotal: number = 0;
   currentPage = 1;
   itemsPerPage = 2;
+  currentPageReports: number = 1;
+  itemsPerPageReports: number = 5;
   selectedCustomer: string = "";
   name: string = "";
   names: string = "";

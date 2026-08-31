@@ -11,10 +11,14 @@
                <table>
                   <tr>
                      <th>Date</th>
+                     <th>Petrol Open Meter</th>
+                     <th>Petrol Close Meter</th>
                      <th>Petrol Total Sum</th>
                      <th>Petrol Rate</th>
                      <th>Petrol Total Sell</th>
                      <th>Petrol Gatt</th>
+                     <th>Diesel Open Meter</th>
+                     <th>Diesel Close Meter</th>
                      <th>Diesel Total Sum</th>
                      <th>Diesel Rate</th>
                      <th>Diesel Total Sell</th>
@@ -56,10 +60,14 @@
                      <th>Baki Total</th>
                      <th>Credit Total</th>
                      <th *ngFor="let header of expenseHeaders">{{ header }}</th>
+                     <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">XP Petrol Open Meter</th>
+                     <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">XP Petrol Close Meter</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">XP Petrol Total Sum</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">XP Petrol Rate</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">XP Petrol Total Sell</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">XP Petrol Gatt</th>
+                     <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">Power Diesel Open Meter</th>
+                     <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">Power Diesel Close Meter</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">Power Diesel Total Sum</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">Power Diesel Rate</th>
                      <th *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">Power Diesel Total Sell</th>
@@ -82,10 +90,14 @@
                   </tr>
                   <tr *ngFor="let item of productList">
                      <td>{{ item.date }}</td>
+                     <td>{{ item.petrolTotalOpenMeter || 0 }}</td>
+                     <td>{{ item.petrolTotalCloseMeter || 0 }}</td>
                      <td>{{ item.petrolTotalSum }}</td>
                      <td>{{ item.petrolRate }}</td>
                      <td>{{ item.petrolTotalTotalSell }}</td>
                      <td>{{ item.petrolgatt_Total }}</td>
+                     <td>{{ item.dieselTotalOpenMeter || 0 }}</td>
+                     <td>{{ item.dieselTotalCloseMeter || 0 }}</td>
                      <td>{{ item.dieselTotalSum }}</td>
                      <td>{{ item.dieselRate }}</td>
                      <td>{{ item.dieselTotalTotalSell }}</td>
@@ -129,10 +141,14 @@
                      <td *ngFor="let header of expenseHeaders">
                         {{ item.expenseMap[header] || 0 }}
                      </td>
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.xppetrolOpenMeter || 0 }}</td>
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.xppetrolCloseMeter || 0 }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.xppetrolTotalSum }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.xppetrolRate }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.xppetrolTotalSell }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.xppetrolgatt_Total }}</td>
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.powerdieselOpenMeter || 0 }}</td>
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.powerdieselCloseMeter || 0 }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.powerdieselTotalSum }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.powerdieselRate }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ item.powerdieselTotalSell }}</td>
@@ -154,10 +170,14 @@
                      <td>{{ item.totalValue }}</td>
                   </tr>
                   <tr>
+                     <td>Total</td>
+                     <td></td>
                      <td></td>
                      <td>{{ totalPetrolSum }}</td>
                      <td></td>
                      <td>{{ totalPetroltotalsum }}</td>
+                     <td></td>
+                     <td></td>
                      <td></td>
                      <td>{{ totalDieselsum }}</td>
                      <td></td>
@@ -200,11 +220,15 @@
                      <td>{{ totalBakiTotal }}</td>
                      <td>{{ totalloclTotal }}</td>
                      <!-- XP Petrol Totals -->
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0"></td>
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0"></td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ totalXpPetrolTotalSum }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0"></td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ totalXpPetrolTotalSell }}</td>
                      <td></td>
                      <!-- Power Diesel Totals -->
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0"></td>
+                     <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0"></td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ totalPowerDieselTotalSum }}</td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0"></td>
                      <td *ngIf="xp_petrol_nozzle > 0 || powe_diesel_nozzle > 0">{{ totalPowerDieselTotalSell }}</td>

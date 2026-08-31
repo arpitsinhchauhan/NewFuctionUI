@@ -1,16 +1,24 @@
 export interface AggregatedDataDTO {
   expensesList: any[]; // or a proper typed array if you know the structure
   date: string;
+  petrolTotalOpenMeter?: number;
+  petrolTotalCloseMeter?: number;
   petrolTotalSum: number;
   petrolTotalTesting: number;
   petrolLtr: number;
   petrolRate: number;
   petrolTotalTotalSell: number;
+  dieselTotalOpenMeter?: number;
+  dieselTotalCloseMeter?: number;
   dieselTotalSum: number;
   dieselTotalTesting: number;
   dieselLtr: number;
   dieselRate: number;
   dieselTotalTotalSell: number;
+  xppetrolOpenMeter?: number;
+  xppetrolCloseMeter?: number;
+  powerdieselOpenMeter?: number;
+  powerdieselCloseMeter?: number;
   oilTotalPrice: number;
   kharchTotal: number;
   petrolQuantity: number;
