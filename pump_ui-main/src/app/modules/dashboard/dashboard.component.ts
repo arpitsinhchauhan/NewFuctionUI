@@ -94,7 +94,7 @@ export class DashboardComponent implements OnInit {
 
 
   chartOptions2: any;
-  
+
   // Properties for standard Chart.js Fuel Distribution pie/doughnut chart
   public pieChartType: ChartType = 'doughnut';
   public pieChartDetails: any[] = [];
@@ -203,7 +203,7 @@ export class DashboardComponent implements OnInit {
 
 
   constructor(private use: UserServiceService, private http: HttpClient, private dialog: MatDialog,
-    private sanitizer: DomSanitizer, private loaderService: LoaderService, 
+    private sanitizer: DomSanitizer, private loaderService: LoaderService,
     private notificationService: NotificationService, private themeService: ThemeService
   ) { }
 
@@ -720,7 +720,7 @@ export class DashboardComponent implements OnInit {
     // Most reliable theme detection
     const currentTheme = theme || this.themeService.getCurrentTheme() || (document.body.classList.contains('dark-theme') ? 'dark' : 'light');
     const isDark = currentTheme === 'dark';
-    
+
     // Explicit colors to avoid theme overrides
     const textColor = isDark ? "#ffffff" : "#1e293b";
     const borderColor = isDark ? "#1e293b" : "#ffffff";
@@ -734,16 +734,16 @@ export class DashboardComponent implements OnInit {
     const bakiVal = this.parseChartValue(this.jamabakilabel);
 
     // Calculate sum of active fields for percentage distribution
-    const totalSum = petrolVal + dieselVal + 
-      (this.showXpPetrolCount > 0 ? xpVal : 0) + 
-      (this.showPowerDieselCount > 0 ? powerVal : 0) + 
-      (oilVal > 0 ? oilVal : 0) + 
+    const totalSum = petrolVal + dieselVal +
+      (this.showXpPetrolCount > 0 ? xpVal : 0) +
+      (this.showPowerDieselCount > 0 ? powerVal : 0) +
+      (oilVal > 0 ? oilVal : 0) +
       bakiVal;
 
     const labels: string[] = [];
     const data: number[] = [];
     const colors: string[] = [];
-    
+
     // Details array for rendering the gorgeous infographic legend in HTML
     this.pieChartDetails = [];
 
@@ -873,20 +873,20 @@ export class DashboardComponent implements OnInit {
 
   aggregateReports(reports: any[]): any[] {
     const grouped: { [key: string]: any } = {};
-    
+
     reports.forEach(r => {
       const date = r.reportDate || (r.createdDatetime ? r.createdDatetime.split('T')[0] : '');
       const shift = r.shift || 'Unknown';
       const key = `${date}_${shift}`;
-      
+
       const sales = Number(r.salesAmount) || 0;
       const creator = r.createdBy || 'Unknown';
-      
+
       let petrol = 0;
       let diesel = 0;
       let xpPetrol = 0;
       let powerDiesel = 0;
-      
+
       let stocks: any = null;
       if (typeof r.stockDetails === 'string') {
         try {
@@ -897,7 +897,7 @@ export class DashboardComponent implements OnInit {
       } else if (r.stockDetails && typeof r.stockDetails === 'object') {
         stocks = r.stockDetails;
       }
-      
+
       if (stocks) {
         if (Array.isArray(stocks)) {
           stocks.forEach((s: any) => {
@@ -914,7 +914,7 @@ export class DashboardComponent implements OnInit {
           powerDiesel = Number(stocks.powerDieselRemaining) || Number(stocks.powerDiesel) || 0;
         }
       }
-      
+
       if (!grouped[key]) {
         grouped[key] = {
           reportId: r.reportId,
@@ -935,11 +935,11 @@ export class DashboardComponent implements OnInit {
         grouped[key].dieselRemaining += diesel;
         grouped[key].xpPetrolRemaining += xpPetrol;
         grouped[key].powerDieselRemaining += powerDiesel;
-        
+
         if (!grouped[key].createdByList.includes(creator)) {
           grouped[key].createdByList.push(creator);
         }
-        
+
         if (r.reportTime && (!grouped[key].reportTime || r.reportTime > grouped[key].reportTime)) {
           grouped[key].reportTime = r.reportTime;
         }
@@ -948,7 +948,7 @@ export class DashboardComponent implements OnInit {
         }
       }
     });
-    
+
     return Object.values(grouped).map(g => {
       const stockObj = {
         petrolRemaining: g.petrolRemaining,
@@ -956,7 +956,7 @@ export class DashboardComponent implements OnInit {
         xpPetrolRemaining: g.xpPetrolRemaining,
         powerDieselRemaining: g.powerDieselRemaining
       };
-      
+
       return {
         reportId: g.reportId,
         reportDate: g.reportDate,
@@ -972,14 +972,14 @@ export class DashboardComponent implements OnInit {
 
   calculateDailyReportsTotal(): void {
     this.totalDailyReportsSales = this.dailyReports.reduce((sum, r) => sum + (r.salesAmount || 0), 0);
-    
+
     const todayStr = this.use.getFormattedDate(new Date());
     const todayReports = this.dailyReports.filter(r => {
       if (!r.createdDatetime) return false;
       const rDate = r.createdDatetime.split('T')[0];
       return rDate === todayStr;
     });
-    
+
     const uniqueShifts = new Set(todayReports.map(r => r.shift).filter(Boolean));
     this.shiftReportsCount = uniqueShifts.size;
     this.pendingReportsCount = Math.max(0, 3 - this.shiftReportsCount);

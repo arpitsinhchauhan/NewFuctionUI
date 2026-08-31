@@ -94,7 +94,7 @@ export class PurchaseReportComponent implements OnInit {
     const total = Number(item.total) || 0;
     const vat = Number(item.vat) || 0;
     const cess = Number(item.cess) || 0;
-    item.total_purchase = total + vat + cess;
+    item.total_purchase = parseFloat((total + vat + cess).toFixed(2));
   }
 
   addTable() {
@@ -118,10 +118,11 @@ export class PurchaseReportComponent implements OnInit {
   }
 
   totalPrice(): number {
-    return this.row.reduce(
+    const total = this.row.reduce(
       (acc, item) => acc + (Number(item.total_purchase) || 0),
       0
     );
+    return parseFloat(total.toFixed(2));
   }
 
   validateData(): boolean {
@@ -225,6 +226,22 @@ export class PurchaseReportComponent implements OnInit {
       };
 
       this.row = [petrolRow, dieselRow, ...filteredData.filter(item => item.type !== 'Petrol' && item.type !== 'Diesel')];
+      this.row.forEach(r => {
+        if (r.total !== null && r.total !== undefined && r.total !== '') {
+          r.total = parseFloat(Number(r.total).toFixed(2));
+        }
+        if (r.vat !== null && r.vat !== undefined && r.vat !== '') {
+          r.vat = parseFloat(Number(r.vat).toFixed(2));
+        }
+        if (r.cess !== null && r.cess !== undefined && r.cess !== '') {
+          r.cess = parseFloat(Number(r.cess).toFixed(2));
+        }
+        if (r.total_purchase !== null && r.total_purchase !== undefined && r.total_purchase !== '') {
+          r.total_purchase = parseFloat(Number(r.total_purchase).toFixed(2));
+        } else if (r.total || r.vat || r.cess) {
+          this.calculateRow(r);
+        }
+      });
     });
   }
 

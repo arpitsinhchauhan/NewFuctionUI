@@ -319,14 +319,12 @@
               </div>
               <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="openPurchase()">
                 <span class="summary-label">Fuel Purchase (Petrol/Diesel)</span>
-                <span class="summary-value text-info">{{ ((petolQuantity || 0) + (dieselQuantity || 0)) | number:'1.2-2'
-                  }} </span>
+                <span class="summary-value text-info font-weight-bold"><u>{{ (petolQuantity || 0) | number:'1.2-2' }} / {{ (dieselQuantity || 0) | number:'1.2-2' }}</u></span>
               </div>
               <div class="summary-item purchase-summary-item" *ngIf="(userRole !== 'EMPLOYEE' && userRole !== 'employee') && (showXpPetrolCount > 0 || showPowerDieselCount > 0)"
                 (click)="openExtraPurchase()">
                 <span class="summary-label">Extra Fuel Purchase (XP/Power)</span>
-                <span class="summary-value text-info">{{ ((xpPetolQuantity || 0) + (powerDieselQuantity || 0)) |
-                  number:'1.2-2' }} </span>
+                <span class="summary-value text-info font-weight-bold"><u>{{ (xpPetolQuantity || 0) | number:'1.2-2' }} / {{ (powerDieselQuantity || 0) | number:'1.2-2' }}</u></span>
               </div>
               <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="openOilPurchase()">
                 <span class="summary-label">Lube Oil Purchase</span>

@@ -1101,25 +1101,35 @@ export class MainPanelComponent implements OnInit {
   }
 
   getPurchaselist() {
+    this.petolQuantity = 0;
+    this.dieselQuantity = 0;
+    this.petrolPurchaseLTR = 0;
+    this.dieselPurchaseLTR = 0;
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     this.use.getPurchaseiList(formattedDate, this.userId).subscribe(
       (data) => {
+        this.petolQuantity = 0;
+        this.dieselQuantity = 0;
+        this.petrolPurchaseLTR = 0;
+        this.dieselPurchaseLTR = 0;
         if (data && data.length > 0) {
           for (const item of data) {
             const [quantity, type] = item;
             if (type === 'Petrol') {
-              this.petolQuantity = quantity;
+              this.petolQuantity = Number(quantity) || 0;
+              this.petrolPurchaseLTR = Number(quantity) || 0;
             } else if (type === 'Diesel') {
-              this.dieselQuantity = quantity;
+              this.dieselQuantity = Number(quantity) || 0;
+              this.dieselPurchaseLTR = Number(quantity) || 0;
             }
           }
-        } else {
-          this.petolQuantity = 0;
-          this.dieselQuantity = 0;
         }
       },
       (error) => {
-        this.notificationService.failure("Failed to fetch Purchase data.");
+        this.petolQuantity = 0;
+        this.dieselQuantity = 0;
+        this.petrolPurchaseLTR = 0;
+        this.dieselPurchaseLTR = 0;
       }
     );
   }
@@ -1141,22 +1151,22 @@ export class MainPanelComponent implements OnInit {
   }
 
   getOilPurchaseList() {
+    this.oilQuantity = 0;
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     this.use.getOilPurchaseiList(formattedDate, this.userId).subscribe(
       (data) => {
+        this.oilQuantity = 0;
         if (data && data.length > 0) {
           for (const item of data) {
             const [quantity, type] = item;
             if (type === 'oil') {
-              this.oilQuantity = quantity;
+              this.oilQuantity = Number(quantity) || 0;
             }
           }
-        } else {
-          this.oilQuantity = 0;
         }
       },
       (error) => {
-        this.notificationService.failure("Failed to fetch Purchase data.");
+        this.oilQuantity = 0;
       }
     );
   }
@@ -1178,25 +1188,27 @@ export class MainPanelComponent implements OnInit {
   }
 
   getExtraPurchaselist() {
+    this.xpPetolQuantity = 0;
+    this.powerDieselQuantity = 0;
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     this.use.getExtraPurchaseiList(formattedDate, this.userId).subscribe(
       (data) => {
+        this.xpPetolQuantity = 0;
+        this.powerDieselQuantity = 0;
         if (data && data.length > 0) {
           for (const item of data) {
             const [quantity, type] = item;
             if (type === 'XP Petrol') {
-              this.xpPetolQuantity = quantity;
+              this.xpPetolQuantity = Number(quantity) || 0;
             } else if (type === 'Power Diesel') {
-              this.powerDieselQuantity = quantity;
+              this.powerDieselQuantity = Number(quantity) || 0;
             }
           }
-        } else {
-          this.xpPetolQuantity = 0;
-          this.powerDieselQuantity = 0;
         }
       },
       (error) => {
-        this.notificationService.failure("Failed to fetch Purchase data.");
+        this.xpPetolQuantity = 0;
+        this.powerDieselQuantity = 0;
       }
     );
   }
@@ -2238,6 +2250,8 @@ export class MainPanelComponent implements OnInit {
     this.bakiTotal = 0;
     this.petrolPurchaseLTR = 0;
     this.dieselPurchaseLTR = 0;
+    this.petolQuantity = 0;
+    this.dieselQuantity = 0;
     this.xpPetolQuantity = 0;
     this.powerDieselQuantity = 0;
     this.oilQuantity = 0;
@@ -2355,13 +2369,20 @@ export class MainPanelComponent implements OnInit {
     // 9. Purchases list (Inventory Monitoring - current user ID)
     const currentUserId = localStorage.getItem('userId') || this.userId;
     this.use.getPurchaseiList(formatted, currentUserId).subscribe(list => {
+      this.petolQuantity = 0;
+      this.dieselQuantity = 0;
       this.petrolPurchaseLTR = 0;
       this.dieselPurchaseLTR = 0;
       if (list && list.length > 0) {
         for (const item of list) {
           const [quantity, type] = item;
-          if (type === 'Petrol') this.petrolPurchaseLTR = quantity || 0;
-          else if (type === 'Diesel') this.dieselPurchaseLTR = quantity || 0;
+          if (type === 'Petrol') {
+            this.petolQuantity = Number(quantity) || 0;
+            this.petrolPurchaseLTR = Number(quantity) || 0;
+          } else if (type === 'Diesel') {
+            this.dieselQuantity = Number(quantity) || 0;
+            this.dieselPurchaseLTR = Number(quantity) || 0;
+          }
         }
       }
     });
@@ -2373,8 +2394,19 @@ export class MainPanelComponent implements OnInit {
       if (list && list.length > 0) {
         for (const item of list) {
           const [quantity, type] = item;
-          if (type === 'XP Petrol') this.xpPetolQuantity = quantity || 0;
-          else if (type === 'Power Diesel') this.powerDieselQuantity = quantity || 0;
+          if (type === 'XP Petrol') this.xpPetolQuantity = Number(quantity) || 0;
+          else if (type === 'Power Diesel') this.powerDieselQuantity = Number(quantity) || 0;
+        }
+      }
+    });
+
+    // 10.5 Oil Purchase list (Inventory Monitoring - current user ID)
+    this.use.getOilPurchaseiList(formatted, currentUserId).subscribe(list => {
+      this.oilQuantity = 0;
+      if (list && list.length > 0) {
+        for (const item of list) {
+          const [quantity, type] = item;
+          if (type === 'oil') this.oilQuantity = Number(quantity) || 0;
         }
       }
     });

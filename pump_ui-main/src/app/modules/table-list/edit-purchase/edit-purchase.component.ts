@@ -60,7 +60,7 @@ export class EditPurchaseComponent implements OnInit {
 
     // Ensure that all fields are numeric before calculating the sum
     if (!isNaN(total) && !isNaN(vat) && !isNaN(cess) && !isNaN(jtcpercentage)) {
-      this.purchaseDetails.total_purchase = (total + vat + cess + jtcpercentage).toString();
+      this.purchaseDetails.total_purchase = parseFloat((total + vat + cess + jtcpercentage).toFixed(2)).toString();
     } else {
       // Handle the case where one or more fields are not numeric
       this.purchaseDetails.total_purchase = '';

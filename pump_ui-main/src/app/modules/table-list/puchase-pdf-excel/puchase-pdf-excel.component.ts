@@ -37,7 +37,14 @@ export class PuchasePdfExcelComponent implements OnInit {
     const params = { userId: this.userId };
     this.http.get(API_PURCHASE_LIST, { params }).subscribe((data: any) => {
       if (Array.isArray(data)) {
-        this.productList = data.map(item => ({ ...item, selected: true }));
+        this.productList = data.map(item => ({
+          ...item,
+          total: item.total != null ? parseFloat(Number(item.total).toFixed(2)) : item.total,
+          vat: item.vat != null ? parseFloat(Number(item.vat).toFixed(2)) : item.vat,
+          cess: item.cess != null ? parseFloat(Number(item.cess).toFixed(2)) : item.cess,
+          total_purchase: item.total_purchase != null ? parseFloat(Number(item.total_purchase).toFixed(2)) : item.total_purchase,
+          selected: true
+        }));
         this.allSelected = true;
       }
     });
@@ -85,9 +92,10 @@ export class PuchasePdfExcelComponent implements OnInit {
     this.exportService.printElement('PurchaseTable', 'Purchase Report');
   }
   getTotalPurchase(): number {
-    return this.productList
+    const total = this.productList
       .filter(p => p.selected)
-      .reduce((sum, product) => sum + product.total_purchase, 0);
+      .reduce((sum, product) => sum + (Number(product.total_purchase) || 0), 0);
+    return parseFloat(total.toFixed(2));
   }
 
   cancel() {

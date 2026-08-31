@@ -2,7 +2,8 @@
   <div class="tank-header">
     <div class="header-main">
       <div class="label-with-icon">
-        <mat-icon [style.color]="liquidColor">{{ fuelType === 'petrol' || fuelType === 'xp' ? 'local_gas_station' : 'ev_station' }}</mat-icon>
+        <mat-icon [style.color]="liquidColor">{{ fuelType === 'petrol' || fuelType === 'xp' ? 'local_gas_station' :
+          'ev_station' }}</mat-icon>
         <span class="tank-label">{{ label }}</span>
       </div>
       <span class="fuel-badge" [style.background-color]="liquidColor">{{ fuelType | uppercase }}</span>
@@ -15,23 +16,20 @@
 
   <div class="tank-visual">
     <div class="tank-container-modern">
-      <div class="tank-fill-modern" 
-           [style.height.%]="percentage" 
-           [style.background]="'linear-gradient(180deg, ' + liquidColor + ' 0%, ' + borderColor + ' 100%)'"
-           [class.warning]="percentage < 25"
-           [class.danger]="percentage < 10">
+      <div class="tank-fill-modern" [style.height.%]="percentage"
+        [style.background]="'linear-gradient(180deg, ' + liquidColor + ' 0%, ' + borderColor + ' 100%)'"
+        [class.warning]="percentage < 25" [class.danger]="percentage < 10">
         <div class="wave"></div>
       </div>
       <div class="tank-glass-effect"></div>
       <div class="percentage-overlay">{{ percentage | number:'1.0-0' }}%</div>
     </div>
-    
+
     <div class="tank-metrics">
       <div class="metric-item">
         <span class="metric-label">Status</span>
         <span class="metric-value" [style.color]="liquidColor">
-          {{ percentage < 10 ? 'Critical' : (percentage < 25 ? 'Low' : 'Stable') }}
-        </span>
+          {{ percentage < 10 ? 'Critical' : (percentage < 25 ? 'Low' : 'Stable' ) }} </span>
       </div>
       <div class="metric-item">
         <span class="metric-label">Remaining</span>
@@ -39,4 +37,4 @@
       </div>
     </div>
   </div>
-</mat-card>
+</mat-card>

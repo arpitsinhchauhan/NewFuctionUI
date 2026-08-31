@@ -1,6 +1,7 @@
 .dashboard-wrapper {
   padding: 10px 0;
-  overflow: visible; /* Prevent clipping during transitions */
+  overflow: visible;
+  /* Prevent clipping during transitions */
   background: var(--bg-main);
 }
 
@@ -55,8 +56,15 @@
   margin-top: 8px;
 }
 
-.card-trend.up { color: #10b981; }
-.card-trend mat-icon { font-size: 14px; width: 14px; height: 14px; }
+.card-trend.up {
+  color: #10b981;
+}
+
+.card-trend mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
 
 /* Section Header */
 .section-header {
@@ -78,7 +86,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  min-height: 400px; /* Stabilize height */
+  min-height: 400px;
+  /* Stabilize height */
 }
 
 .chart-container {
@@ -192,10 +201,12 @@
 .hover-row:hover {
   background: rgba(var(--primary-rgb), 0.015) !important;
 }
+
 .stock-tags {
   display: flex;
   gap: 8px;
 }
+
 .badge {
   display: inline-block;
   padding: 4px 8px;
@@ -203,21 +214,25 @@
   font-weight: 500;
   border-radius: 4px;
 }
+
 .badge-outline-petrol {
   border: 1px solid rgba(27, 103, 111, 0.3);
   background: rgba(27, 103, 111, 0.05);
   color: #1b676f;
 }
+
 .badge-outline-diesel {
   border: 1px solid rgba(79, 82, 236, 0.3);
   background: rgba(79, 82, 236, 0.05);
   color: #4f52ec;
 }
+
 .badge-outline-xp {
   border: 1px solid rgba(239, 124, 143, 0.3);
   background: rgba(239, 124, 143, 0.05);
   color: #ef7c8f;
 }
+
 .badge-outline-power {
   border: 1px solid rgba(0, 163, 108, 0.3);
   background: rgba(0, 163, 108, 0.05);
