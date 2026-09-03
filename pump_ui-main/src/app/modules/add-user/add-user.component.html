@@ -233,22 +233,22 @@
 
       <!-- Footer Actions -->
       <div class="dialog-actions-modern mt-4">
-        <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-auto no-print">
+        <button mat-stroked-button (click)="cancel()" class="px-4 py-2 me-auto no-print btn-cancel-user">
           Cancel
         </button>
 
         <button mat-stroked-button color="primary" *ngIf="data" 
-                (click)="openChangePassword()" class="px-3 py-2 me-3">
+                (click)="openChangePassword()" class="px-3 py-2 me-3 btn-change-pwd">
           <mat-icon class="me-2">key</mat-icon> Change Password
         </button>
 
         <button mat-flat-button color="primary" *ngIf="!data" 
-                (click)="addUser()" class="px-5 py-2">
+                (click)="addUser()" class="px-5 py-2 btn-submit-user">
           <mat-icon class="me-2">person_add</mat-icon> Create User
         </button>
 
         <button mat-flat-button color="primary" *ngIf="data" 
-                (click)="editUser()" class="px-5 py-2">
+                (click)="editUser()" class="px-5 py-2 btn-submit-user">
           <mat-icon class="me-2">save</mat-icon> Update User
         </button>
       </div>
