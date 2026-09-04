@@ -839,18 +839,21 @@ export class MainPanelComponent implements OnInit {
 
   openKharchComponent() {
     const dialogRef = this.dialog.open(KharchReportComponent, {
-      data: { date: this.use.getFormattedDate(this.reportDate) },
+      data: {
+        date: this.use.getFormattedDate(this.reportDate),
+        userId: this.userId || localStorage.getItem('userId'),
+        userRole: this.userRole
+      },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-lg']
     });
     dialogRef.afterClosed().subscribe(result => {
-      this.getKharchlist();
-      this.backPage();
-      // this.use.getKharchList(this.use.getFormattedDate(this.reportDate), this.userId).subscribe(
-      //   data => {
-      //     this.kharchTotal=data[0];
-      //   }
-      // );
+      if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee') {
+        this.loadAggregatedDailyReportData();
+      } else {
+        this.getKharchlist();
+        this.backPage();
+      }
     });
   }
 
@@ -1328,20 +1331,16 @@ export class MainPanelComponent implements OnInit {
       userId: this.userId || localStorage.getItem('userId')
     };
 
-    if (this.Petrol_dip || this.Petrol_stock || this.Diesel_dip || this.Diesel_stock) {
-      dataToSend.type = 'edit';
-      dataToSend.petroldip = this.Extra_Petrol_dip || null;
-      dataToSend.pvalue = this.Extra_Petrol_stock || null;
-      dataToSend.dieseldip = this.Extra_Diesel_dip || null;
-      dataToSend.dvalue = this.Extra_Diesel_stock || null;
-    } else {
-      // If all data values are null, send 'add' type only with date
-      dataToSend.type = 'add';
-      dataToSend.petroldip = this.Extra_Petrol_dip || null;
-      dataToSend.pvalue = this.Extra_Petrol_stock || null;
-      dataToSend.dieseldip = this.Extra_Diesel_dip || null;
-      dataToSend.dvalue = this.Extra_Diesel_stock || null;
-    }
+    const hasExtraDip = this.Extra_Petrol_dip || this.Extra_Petrol_stock || this.Extra_Diesel_dip || this.Extra_Diesel_stock;
+    dataToSend.type = hasExtraDip ? 'edit' : 'add';
+    dataToSend.extra_petroldip = this.Extra_Petrol_dip || null;
+    dataToSend.extra_pvalue = this.Extra_Petrol_stock || null;
+    dataToSend.extra_dieseldip = this.Extra_Diesel_dip || null;
+    dataToSend.extra_dvalue = this.Extra_Diesel_stock || null;
+    dataToSend.petroldip = this.Extra_Petrol_dip || null;
+    dataToSend.pvalue = this.Extra_Petrol_stock || null;
+    dataToSend.dieseldip = this.Extra_Diesel_dip || null;
+    dataToSend.dvalue = this.Extra_Diesel_stock || null;
 
     // Open the dialog with the prepared data
     const dialogRef = this.dialog.open(ExtraDipAddEditComponent, {

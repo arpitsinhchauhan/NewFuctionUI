@@ -1004,27 +1004,101 @@ public class PurchaseController {
 
     @PostMapping("/addPDDipsell")
     public ResponseEntity<ApiResponse> addDipsell(@RequestBody DipStock dipStock) {
-        dipStockRepository.save(dipStock);
+        if (dipStock.getDate() == null || dipStock.getDate().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Date is required"));
+        }
+
+        String rawUserId = dipStock.getUserId() != null ? dipStock.getUserId().trim() : "";
+        String effectiveUserId = rawUserId.isEmpty() ? "" : getEffectiveUserId(rawUserId);
+
+        List<DipStock> existingList = new ArrayList<>();
+        if (!effectiveUserId.isEmpty()) {
+            existingList = dipStockRepository.findByUserIdAndDate(effectiveUserId, dipStock.getDate().trim());
+            if (existingList.isEmpty() && !effectiveUserId.equals(rawUserId)) {
+                existingList = dipStockRepository.findByUserIdAndDate(rawUserId, dipStock.getDate().trim());
+            }
+        }
+
+        DipStock toSave;
+        if (!existingList.isEmpty()) {
+            toSave = existingList.get(0);
+            toSave.setPetroldip(dipStock.getPetroldip());
+            toSave.setPvalue(dipStock.getPvalue());
+            toSave.setDieseldip(dipStock.getDieseldip());
+            toSave.setDvalue(dipStock.getDvalue());
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    try {
+                        dipStockRepository.delete(existingList.get(i));
+                    } catch (Exception e) {
+                        // Ignore duplicate cleanup error
+                    }
+                }
+            }
+        } else {
+            toSave = dipStock;
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+        }
+
+        dipStockRepository.save(toSave);
         ApiResponse response = new ApiResponse("Dip updated and saved successfully");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/editPDDipsell")
     public ResponseEntity<ApiResponse> updateDipsell(@RequestBody DipStock dipStock) {
-        Optional<DipStock> existingDipStock = dipStockRepository.findByDate(dipStock.getDate());
-
-        if (existingDipStock.isPresent()) {
-            DipStock updatedDipStock = existingDipStock.get();
-            updatedDipStock.setPetroldip(dipStock.getPetroldip());
-            updatedDipStock.setPvalue(dipStock.getPvalue());
-            updatedDipStock.setDieseldip(dipStock.getDieseldip());
-            updatedDipStock.setDvalue(dipStock.getDvalue());
-            dipStockRepository.save(updatedDipStock);
-            return ResponseEntity.ok(new ApiResponse("Dip updated and saved successfully."));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse("No record found for the provided date."));
+        if (dipStock.getDate() == null || dipStock.getDate().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Date is required"));
         }
+
+        String rawUserId = dipStock.getUserId() != null ? dipStock.getUserId().trim() : "";
+        String effectiveUserId = rawUserId.isEmpty() ? "" : getEffectiveUserId(rawUserId);
+
+        List<DipStock> existingList = new ArrayList<>();
+        if (dipStock.getId() != null) {
+            Optional<DipStock> byId = dipStockRepository.findById(dipStock.getId());
+            byId.ifPresent(existingList::add);
+        }
+        if (existingList.isEmpty() && !effectiveUserId.isEmpty()) {
+            existingList = dipStockRepository.findByUserIdAndDate(effectiveUserId, dipStock.getDate().trim());
+            if (existingList.isEmpty() && !effectiveUserId.equals(rawUserId)) {
+                existingList = dipStockRepository.findByUserIdAndDate(rawUserId, dipStock.getDate().trim());
+            }
+        }
+
+        DipStock toSave;
+        if (!existingList.isEmpty()) {
+            toSave = existingList.get(0);
+            toSave.setPetroldip(dipStock.getPetroldip());
+            toSave.setPvalue(dipStock.getPvalue());
+            toSave.setDieseldip(dipStock.getDieseldip());
+            toSave.setDvalue(dipStock.getDvalue());
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    try {
+                        dipStockRepository.delete(existingList.get(i));
+                    } catch (Exception e) {
+                        // Ignore duplicate cleanup error
+                    }
+                }
+            }
+        } else {
+            toSave = dipStock;
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+        }
+
+        dipStockRepository.save(toSave);
+        return ResponseEntity.ok(new ApiResponse("Dip updated and saved successfully."));
     }
 
     @DeleteMapping("/deleteDip/{id}")
@@ -1063,27 +1137,101 @@ public class PurchaseController {
 
     @PostMapping("/addextraPDDipsell")
     public ResponseEntity<ApiResponse> addextraDipsell(@RequestBody extraDipStock extradipStock) {
-        extraDipStockRepository.save(extradipStock);
+        if (extradipStock.getDate() == null || extradipStock.getDate().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Date is required"));
+        }
+
+        String rawUserId = extradipStock.getUserId() != null ? extradipStock.getUserId().trim() : "";
+        String effectiveUserId = rawUserId.isEmpty() ? "" : getEffectiveUserId(rawUserId);
+
+        List<extraDipStock> existingList = new ArrayList<>();
+        if (!effectiveUserId.isEmpty()) {
+            existingList = extraDipStockRepository.findByUserIdAndDate(effectiveUserId, extradipStock.getDate().trim());
+            if (existingList.isEmpty() && !effectiveUserId.equals(rawUserId)) {
+                existingList = extraDipStockRepository.findByUserIdAndDate(rawUserId, extradipStock.getDate().trim());
+            }
+        }
+
+        extraDipStock toSave;
+        if (!existingList.isEmpty()) {
+            toSave = existingList.get(0);
+            toSave.setExtra_petroldip(extradipStock.getExtra_petroldip());
+            toSave.setExtra_pvalue(extradipStock.getExtra_pvalue());
+            toSave.setExtra_dieseldip(extradipStock.getExtra_dieseldip());
+            toSave.setExtra_dvalue(extradipStock.getExtra_dvalue());
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    try {
+                        extraDipStockRepository.delete(existingList.get(i));
+                    } catch (Exception e) {
+                        // Ignore duplicate cleanup error
+                    }
+                }
+            }
+        } else {
+            toSave = extradipStock;
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+        }
+
+        extraDipStockRepository.save(toSave);
         ApiResponse response = new ApiResponse("ExtraDip updated and saved successfully");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/editExtraPDDipsell")
     public ResponseEntity<ApiResponse> updateExtraDipsell(@RequestBody extraDipStock extraDipStock) {
-        Optional<extraDipStock> existingextraDipStock = extraDipStockRepository.findByDate(extraDipStock.getDate());
-
-        if (existingextraDipStock.isPresent()) {
-            extraDipStock updatedextraDipStock = existingextraDipStock.get();
-            updatedextraDipStock.setExtra_petroldip(extraDipStock.getExtra_petroldip());
-            updatedextraDipStock.setExtra_pvalue(extraDipStock.getExtra_pvalue());
-            updatedextraDipStock.setExtra_dieseldip(extraDipStock.getExtra_dieseldip());
-            updatedextraDipStock.setExtra_dvalue(extraDipStock.getExtra_dvalue());
-            extraDipStockRepository.save(updatedextraDipStock);
-            return ResponseEntity.ok(new ApiResponse("Extra_Dip updated and saved successfully."));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse("No record found for the provided date."));
+        if (extraDipStock.getDate() == null || extraDipStock.getDate().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Date is required"));
         }
+
+        String rawUserId = extraDipStock.getUserId() != null ? extraDipStock.getUserId().trim() : "";
+        String effectiveUserId = rawUserId.isEmpty() ? "" : getEffectiveUserId(rawUserId);
+
+        List<extraDipStock> existingList = new ArrayList<>();
+        if (extraDipStock.getId() != null) {
+            Optional<extraDipStock> byId = extraDipStockRepository.findById(extraDipStock.getId());
+            byId.ifPresent(existingList::add);
+        }
+        if (existingList.isEmpty() && !effectiveUserId.isEmpty()) {
+            existingList = extraDipStockRepository.findByUserIdAndDate(effectiveUserId, extraDipStock.getDate().trim());
+            if (existingList.isEmpty() && !effectiveUserId.equals(rawUserId)) {
+                existingList = extraDipStockRepository.findByUserIdAndDate(rawUserId, extraDipStock.getDate().trim());
+            }
+        }
+
+        extraDipStock toSave;
+        if (!existingList.isEmpty()) {
+            toSave = existingList.get(0);
+            toSave.setExtra_petroldip(extraDipStock.getExtra_petroldip());
+            toSave.setExtra_pvalue(extraDipStock.getExtra_pvalue());
+            toSave.setExtra_dieseldip(extraDipStock.getExtra_dieseldip());
+            toSave.setExtra_dvalue(extraDipStock.getExtra_dvalue());
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    try {
+                        extraDipStockRepository.delete(existingList.get(i));
+                    } catch (Exception e) {
+                        // Ignore duplicate cleanup error
+                    }
+                }
+            }
+        } else {
+            toSave = extraDipStock;
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+        }
+
+        extraDipStockRepository.save(toSave);
+        return ResponseEntity.ok(new ApiResponse("Extra_Dip updated and saved successfully."));
     }
 
     @DeleteMapping("/deleteExtraDip/{id}")
@@ -1618,6 +1766,14 @@ public class PurchaseController {
                     List<DAOUser> employees = userRepository.findByManagerIdAndRole(userId, "EMPLOYEE");
                     for (DAOUser emp : employees) {
                         userIds.add(String.valueOf(emp.getId()));
+                    }
+                } else if ("EMPLOYEE".equalsIgnoreCase(user.getRole()) && user.getManagerId() != null) {
+                    userIds.add(String.valueOf(user.getManagerId()));
+                    List<DAOUser> employees = userRepository.findByManagerIdAndRole(user.getManagerId(), "EMPLOYEE");
+                    for (DAOUser emp : employees) {
+                        if (!userIds.contains(String.valueOf(emp.getId()))) {
+                            userIds.add(String.valueOf(emp.getId()));
+                        }
                     }
                 }
             }
@@ -2164,15 +2320,47 @@ public class PurchaseController {
 
     @PostMapping("/Dipstock")
     public ResponseEntity<?> setDipstock(@RequestBody DipStock dip) {
-        // Check if a DipStock with the same date already exists
-        Optional<DipStock> existingDipStock = dipStockRepository.findByDate(dip.getDate());
-        if (existingDipStock.isPresent()) {
-            // Return an error message
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("DipStock with this date already exists.");
-        } else {
-            dipStockRepository.save(dip);
-            return ResponseEntity.ok(dip);
+        if (dip.getDate() == null || dip.getDate().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Date is required");
         }
+        String rawUserId = dip.getUserId() != null ? dip.getUserId().trim() : "";
+        String effectiveUserId = rawUserId.isEmpty() ? "" : getEffectiveUserId(rawUserId);
+
+        List<DipStock> existingList = new ArrayList<>();
+        if (!effectiveUserId.isEmpty()) {
+            existingList = dipStockRepository.findByUserIdAndDate(effectiveUserId, dip.getDate().trim());
+            if (existingList.isEmpty() && !effectiveUserId.equals(rawUserId)) {
+                existingList = dipStockRepository.findByUserIdAndDate(rawUserId, dip.getDate().trim());
+            }
+        }
+
+        DipStock toSave;
+        if (!existingList.isEmpty()) {
+            toSave = existingList.get(0);
+            toSave.setPetroldip(dip.getPetroldip());
+            toSave.setPvalue(dip.getPvalue());
+            toSave.setDieseldip(dip.getDieseldip());
+            toSave.setDvalue(dip.getDvalue());
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+            if (existingList.size() > 1) {
+                for (int i = 1; i < existingList.size(); i++) {
+                    try {
+                        dipStockRepository.delete(existingList.get(i));
+                    } catch (Exception e) {
+                        // Ignore duplicate cleanup error
+                    }
+                }
+            }
+        } else {
+            toSave = dip;
+            if (!effectiveUserId.isEmpty()) {
+                toSave.setUserId(effectiveUserId);
+            }
+        }
+        dipStockRepository.save(toSave);
+        return ResponseEntity.ok(toSave);
     }
 
     // @GetMapping("/dataForDate")
@@ -3303,13 +3491,21 @@ public class PurchaseController {
 
     @GetMapping(value = "/dip")
     public List<DipStock> getDip(@RequestParam String date, @RequestParam String userId) {
-        List<DipStock> dip = dipStockRepository.getDipData(date, userId);
+        String effUserId = getEffectiveUserId(userId);
+        List<DipStock> dip = dipStockRepository.getDipData(date, effUserId);
+        if ((dip == null || dip.isEmpty()) && !effUserId.equals(userId)) {
+            dip = dipStockRepository.getDipData(date, userId);
+        }
         return dip;
     }
 
     @GetMapping(value = "/extraDip")
     public List<extraDipStock> getExtraDip(@RequestParam String date, @RequestParam String userId) {
-        List<extraDipStock> extraDip = extraDipStockRepository.getextradip(date, userId);
+        String effUserId = getEffectiveUserId(userId);
+        List<extraDipStock> extraDip = extraDipStockRepository.getextradip(date, effUserId);
+        if ((extraDip == null || extraDip.isEmpty()) && !effUserId.equals(userId)) {
+            extraDip = extraDipStockRepository.getextradip(date, userId);
+        }
         return extraDip;
     }
 

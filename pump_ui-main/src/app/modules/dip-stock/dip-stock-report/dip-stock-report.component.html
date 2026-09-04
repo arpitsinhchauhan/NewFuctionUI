@@ -1,93 +1,123 @@
 <div class="dialog-modern-container dialog-md">
+  <!-- Dialog Header -->
   <div class="dialog-header-modern">
     <div class="header-main">
-      <h4>
-        <mat-icon class="text-primary">straighten</mat-icon>
-        Dip Inventory Details
-      </h4>
+      <div class="header-icon-circle">
+        <mat-icon>straighten</mat-icon>
+      </div>
+      <div class="header-text-block">
+        <h4>Dip Inventory Details</h4>
+        <div class="header-subtitle">Standard Tanks: Regular Petrol & Regular Diesel</div>
+      </div>
     </div>
     <div class="header-actions">
-      <button mat-icon-button (click)="openComponent()" matTooltip="View Dip Chart Table" class="text-primary">
+      <button class="btn-icon-soft" (click)="openComponent()" matTooltip="View Dip Conversion Table">
         <mat-icon>table_chart</mat-icon>
       </button>
-      <button mat-icon-button (click)="cancel()" class="text-muted">
+      <button class="btn-close-soft" (click)="cancel()" matTooltip="Close">
         <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>
 
+  <!-- Dialog Body -->
   <div class="dialog-content-modern">
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Inventory Date</label>
-        <input type="date" class="form-control-modern" [(ngModel)]="purchaDipStockseDetails.date" name="date">
+    <!-- Date Card -->
+    <div class="date-section-card">
+      <div class="date-label-row">
+        <span class="date-title">Inventory Date</span>
+        <span *ngIf="isExistingEntry" class="status-pill status-pill-warning">
+          <mat-icon>sync</mat-icon>
+          Existing Record — Changes Will Update
+        </span>
+        <span *ngIf="!isExistingEntry && purchaDipStockseDetails.date && !isCheckingDate" class="status-pill status-pill-success">
+          <mat-icon>check_circle</mat-icon>
+          New Entry for Date
+        </span>
       </div>
+      <input type="date" class="form-control-modern" [(ngModel)]="purchaDipStockseDetails.date" (change)="onDateChange()" name="date">
     </div>
 
     <!-- Petrol Section -->
-    <div class="section-divider mb-4">
-      <span class="bg-card px-3 text-primary font-weight-bold d-flex align-items-center">
-        <mat-icon class="me-2" style="font-size: 18px;">local_gas_station</mat-icon>
-        PETROL TANK READINGS
-      </span>
-    </div>
-
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Dip Reading (mm)</label>
-        <div class="d-flex align-items-center position-relative">
-          <input type="number" class="form-control-modern text-right pe-5" [(ngModel)]="pdip" name="pdip" (blur)="fetchPvalue()"
-            placeholder="0">
-          <span class="position-absolute end-0 me-3 text-muted small">mm</span>
+    <div class="tank-card tank-card-petrol">
+      <div class="tank-header">
+        <div class="tank-title-group">
+          <mat-icon>local_gas_station</mat-icon>
+          <span class="tank-title">Petrol Tank Readings</span>
         </div>
+        <span class="tank-badge tank-badge-petrol">MS / Regular</span>
       </div>
-      <div class="form-group-modern">
-        <label class="form-label-modern">Calculated Volume (Ltrs)</label>
-        <div class="form-control-modern bg-light d-flex align-items-center justify-content-between">
-          <mat-icon class="text-primary" style="font-size: 18px;">opacity</mat-icon>
-          <span class="font-weight-bold text-primary">{{ pvalue | number:'1.2-2' }} L</span>
+
+      <div class="tank-grid">
+        <div class="field-group">
+          <label class="field-label">Dip Reading</label>
+          <div class="input-suffix-wrapper">
+            <input type="number" class="form-control-modern" [(ngModel)]="pdip" name="pdip" (blur)="fetchPvalue()" placeholder="0">
+            <span class="unit-suffix-pill">mm</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Calculated Stock Volume</label>
+          <div class="volume-display-box volume-petrol-box">
+            <div class="vol-left">
+              <mat-icon>opacity</mat-icon>
+              <span class="vol-text">In Tank</span>
+            </div>
+            <div class="vol-right">
+              <span class="vol-value">{{ (pvalue || 0) | number:'1.2-2' }}</span>
+              <span class="vol-unit">Ltrs</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Diesel Section -->
-    <div class="section-divider mb-4 mt-4">
-      <span class="bg-card px-3 text-warning font-weight-bold d-flex align-items-center">
-        <mat-icon class="me-2" style="font-size: 18px;">ev_station</mat-icon>
-        DIESEL TANK READINGS
-      </span>
-    </div>
-
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Dip Reading (mm)</label>
-        <div class="d-flex align-items-center position-relative">
-          <input type="number" class="form-control-modern text-right pe-5" [(ngModel)]="dieseldip" name="dieseldip"
-            (blur)="fetchDvalue()" placeholder="0">
-          <span class="position-absolute end-0 me-3 text-muted small">mm</span>
+    <div class="tank-card tank-card-diesel">
+      <div class="tank-header">
+        <div class="tank-title-group">
+          <mat-icon>ev_station</mat-icon>
+          <span class="tank-title">Diesel Tank Readings</span>
         </div>
+        <span class="tank-badge tank-badge-diesel">HSD / Regular</span>
       </div>
-      <div class="form-group-modern">
-        <label class="form-label-modern">Calculated Volume (Ltrs)</label>
-        <div class="form-control-modern bg-light d-flex align-items-center justify-content-between">
-          <mat-icon class="text-warning" style="font-size: 18px;">opacity</mat-icon>
-          <span class="font-weight-bold text-warning">{{ dvalue | number:'1.2-2' }} L</span>
+
+      <div class="tank-grid">
+        <div class="field-group">
+          <label class="field-label">Dip Reading</label>
+          <div class="input-suffix-wrapper">
+            <input type="number" class="form-control-modern" [(ngModel)]="dieseldip" name="dieseldip" (blur)="fetchDvalue()" placeholder="0">
+            <span class="unit-suffix-pill">mm</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Calculated Stock Volume</label>
+          <div class="volume-display-box volume-diesel-box">
+            <div class="vol-left">
+              <mat-icon>opacity</mat-icon>
+              <span class="vol-text">In Tank</span>
+            </div>
+            <div class="vol-right">
+              <span class="vol-value">{{ (dvalue || 0) | number:'1.2-2' }}</span>
+              <span class="vol-unit">Ltrs</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Dialog Actions -->
   <div class="dialog-actions-modern">
-    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
+    <button class="btn-modern-cancel" (click)="cancel()">
       Cancel
     </button>
-    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data?.type === 'add'" (click)="logData()">
-      <mat-icon class="me-2">add_circle</mat-icon>
+    <button class="btn-modern-primary" *ngIf="!isExistingEntry && data?.type !== 'edit'" (click)="logData()">
+      <mat-icon>add_circle</mat-icon>
       Add Inventory Record
     </button>
-    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data?.type === 'edit'"
-      (click)="Edit(purchaDipStockseDetails)">
-      <mat-icon class="me-2">save</mat-icon>
+    <button class="btn-modern-primary" *ngIf="isExistingEntry || data?.type === 'edit'" (click)="Edit(purchaDipStockseDetails)">
+      <mat-icon>save</mat-icon>
       Update Inventory Record
     </button>
   </div>

@@ -5,6 +5,9 @@
         <h4 class="card-title-modern">Fuel Dip & Inventory Levels</h4>
       </div>
       <div class="header-actions">
+        <button class="btn-premium btn-premium-primary btn-sm me-3" (click)="openDialog()">
+          <mat-icon class="me-1">add</mat-icon> Add Dip Reading
+        </button>
         <div class="search-container-modern">
           <input type="text" [(ngModel)]="searchTerm" (input)="searchData()" class="search-box-premium"
             placeholder="Search by date...">

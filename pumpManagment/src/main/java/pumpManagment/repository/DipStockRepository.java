@@ -23,12 +23,17 @@ public interface DipStockRepository extends JpaRepository<DipStock, Integer> {
 
     List<DipStock> findByUserId(String userId);
 
-    Optional<DipStock> findByDate(String date);
+    List<DipStock> findByDate(String date);
+
+    List<DipStock> findByUserIdAndDate(String userId, String date);
+
+    Optional<DipStock> findTopByDateOrderByIdDesc(String date);
+
+    Optional<DipStock> findTopByUserIdAndDateOrderByIdDesc(String userId, String date);
 
     @Query("SELECT d.dieseldip, d.petroldip FROM DipStock d WHERE d.userId = :userId AND d.date = :date")
     List<Object[]> getDipDataOnDate(@Param("date") String date, @Param("userId") String userId);
 
     @Query("SELECT d.dieseldip,d.dvalue, d.petroldip,d.pvalue FROM DipStock d WHERE d.userId = :userId AND d.date = :date")
     List<DipStock> getDipData(@Param("date") String date, @Param("userId") String userId);
-
 }

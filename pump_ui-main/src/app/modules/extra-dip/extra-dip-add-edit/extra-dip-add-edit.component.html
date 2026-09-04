@@ -1,85 +1,129 @@
 <div class="dialog-modern-container dialog-md">
+  <!-- Dialog Header -->
   <div class="dialog-header-modern">
     <div class="header-main">
-      <h4>
-        <mat-icon class="me-2 vertical-align-middle">local_gas_station</mat-icon>
-        {{ data?.type === 'edit' ? 'Edit' : 'Add' }} Dip Details
-      </h4>
+      <div class="header-icon-circle">
+        <mat-icon>local_gas_station</mat-icon>
+      </div>
+      <div class="header-text-block">
+        <h4>Extra Dip Inventory Details</h4>
+        <div class="header-subtitle">Premium Tanks: XP Petrol & Power Diesel</div>
+      </div>
     </div>
-    <button mat-icon-button (click)="cancel()" class="text-muted">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="header-actions">
+      <button class="btn-icon-soft" (click)="openComponent()" matTooltip="View Dip Conversion Table">
+        <mat-icon>table_chart</mat-icon>
+      </button>
+      <button class="btn-close-soft" (click)="cancel()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
   </div>
 
+  <!-- Dialog Body -->
   <div class="dialog-content-modern">
-    <div class="form-grid-modern align-items-end">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Transaction Date</label>
-        <input type="date" class="form-control-modern" [(ngModel)]="extraDipvalueDetails.date">
+    <!-- Date Card -->
+    <div class="date-section-card">
+      <div class="date-label-row">
+        <span class="date-title">Transaction Date</span>
+        <span *ngIf="isExistingEntry" class="status-pill status-pill-warning">
+          <mat-icon>sync</mat-icon>
+          Existing Record — Changes Will Update
+        </span>
+        <span *ngIf="!isExistingEntry && extraDipvalueDetails.date && !isCheckingDate" class="status-pill status-pill-success">
+          <mat-icon>check_circle</mat-icon>
+          New Entry for Date
+        </span>
       </div>
-      <div class="form-group-modern">
-        <button class="btn-premium btn-premium-secondary btn-md w-100" (click)="openComponent()">
-          <mat-icon class="me-2">table_chart</mat-icon>
-          View Conversion Table
+      <div class="date-controls-row">
+        <input type="date" class="form-control-modern" [(ngModel)]="extraDipvalueDetails.date" (change)="onDateChange()">
+        <button class="btn-table-shortcut" (click)="openComponent()">
+          <mat-icon>table_chart</mat-icon>
+          Conversion Table
         </button>
       </div>
     </div>
 
-    <!-- Petrol Section -->
-    <div class="section-divider mb-4">
-      <span class="bg-card px-3 text-muted small font-weight-bold">
-        <mat-icon class="vertical-align-middle me-1" style="font-size: 16px;">local_gas_station</mat-icon>
-        PETROL TANK READINGS
-      </span>
-    </div>
-
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Dip Reading (mm)</label>
-        <input type="number" class="form-control-modern" [(ngModel)]="extraPdip" (blur)="fetchPvalue()" placeholder="0">
+    <!-- XP Petrol Section -->
+    <div class="tank-card tank-card-xp">
+      <div class="tank-header">
+        <div class="tank-title-group">
+          <mat-icon>local_gas_station</mat-icon>
+          <span class="tank-title">XP Petrol Tank Readings</span>
+        </div>
+        <span class="tank-badge tank-badge-xp">XP / Speed</span>
       </div>
-      <div class="form-group-modern">
-        <label class="form-label-modern">Calculated Volume (Ltrs)</label>
-        <div class="form-control-modern bg-light d-flex align-items-center justify-content-between">
-          <mat-icon class="text-primary" style="font-size: 18px;">opacity</mat-icon>
-          <span class="font-weight-bold text-primary">{{ extra_pvalue || 0 }} L</span>
+
+      <div class="tank-grid">
+        <div class="field-group">
+          <label class="field-label">Dip Reading</label>
+          <div class="input-suffix-wrapper">
+            <input type="number" class="form-control-modern" [(ngModel)]="extraPdip" (blur)="fetchPvalue()" placeholder="0">
+            <span class="unit-suffix-pill">mm</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Calculated Stock Volume</label>
+          <div class="volume-display-box volume-xp-box">
+            <div class="vol-left">
+              <mat-icon>opacity</mat-icon>
+              <span class="vol-text">In Tank</span>
+            </div>
+            <div class="vol-right">
+              <span class="vol-value">{{ (extra_pvalue || 0) | number:'1.2-2' }}</span>
+              <span class="vol-unit">Ltrs</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Diesel Section -->
-    <div class="section-divider mb-4 mt-4">
-      <span class="bg-card px-3 text-muted small font-weight-bold">
-        <mat-icon class="vertical-align-middle me-1" style="font-size: 16px;">ev_station</mat-icon>
-        DIESEL TANK READINGS
-      </span>
-    </div>
-
-    <div class="form-grid-modern">
-      <div class="form-group-modern">
-        <label class="form-label-modern">Dip Reading (mm)</label>
-        <input type="number" class="form-control-modern" [(ngModel)]="extra_dieseldip" (blur)="fetchDvalue()" placeholder="0">
+    <!-- Power Diesel Section -->
+    <div class="tank-card tank-card-power">
+      <div class="tank-header">
+        <div class="tank-title-group">
+          <mat-icon>bolt</mat-icon>
+          <span class="tank-title">Power Diesel Tank Readings</span>
+        </div>
+        <span class="tank-badge tank-badge-power">Power / Turbo</span>
       </div>
-      <div class="form-group-modern">
-        <label class="form-label-modern">Calculated Volume (Ltrs)</label>
-        <div class="form-control-modern bg-light d-flex align-items-center justify-content-between">
-          <mat-icon class="text-primary" style="font-size: 18px;">opacity</mat-icon>
-          <span class="font-weight-bold text-primary">{{ extra_dvalue || 0 }} L</span>
+
+      <div class="tank-grid">
+        <div class="field-group">
+          <label class="field-label">Dip Reading</label>
+          <div class="input-suffix-wrapper">
+            <input type="number" class="form-control-modern" [(ngModel)]="extra_dieseldip" (blur)="fetchDvalue()" placeholder="0">
+            <span class="unit-suffix-pill">mm</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Calculated Stock Volume</label>
+          <div class="volume-display-box volume-power-box">
+            <div class="vol-left">
+              <mat-icon>opacity</mat-icon>
+              <span class="vol-text">In Tank</span>
+            </div>
+            <div class="vol-right">
+              <span class="vol-value">{{ (extra_dvalue || 0) | number:'1.2-2' }}</span>
+              <span class="vol-unit">Ltrs</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Dialog Actions -->
   <div class="dialog-actions-modern">
-    <button class="btn-premium btn-premium-secondary btn-md" (click)="cancel()">
+    <button class="btn-modern-cancel" (click)="cancel()">
       Cancel
     </button>
-    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data?.type === 'add'" (click)="logData()">
-      <mat-icon class="me-2">add</mat-icon>
+    <button class="btn-modern-primary" *ngIf="!isExistingEntry && data?.type !== 'edit'" (click)="logData()">
+      <mat-icon>add</mat-icon>
       Save Record
     </button>
-    <button class="btn-premium btn-premium-primary btn-md" *ngIf="data?.type === 'edit'" (click)="Edit(extraDipvalueDetails)">
-      <mat-icon class="me-2">check</mat-icon>
+    <button class="btn-modern-primary" *ngIf="isExistingEntry || data?.type === 'edit'" (click)="Edit(extraDipvalueDetails)">
+      <mat-icon>check</mat-icon>
       Update Record
     </button>
   </div>

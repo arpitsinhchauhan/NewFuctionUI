@@ -24,7 +24,11 @@ public interface extraDipStockRepository extends JpaRepository<extraDipStock, In
 
     List<extraDipStock> findByUserId(String userId);
 
-    Optional<extraDipStock> findByDate(String date);
+    List<extraDipStock> findByDate(String date);
+
+    Optional<extraDipStock> findTopByDateOrderByIdDesc(String date);
+
+    Optional<extraDipStock> findTopByUserIdAndDateOrderByIdDesc(String userId, String date);
 
 //    @Query("SELECT d.extraDieseldip, d.extraPetroldip FROM extradip d WHERE d.userId = :userId AND d.date = :date")
 //    List<Object[]> getDipDataOnDate(@Param("date") String date, @Param("userId") String userId);

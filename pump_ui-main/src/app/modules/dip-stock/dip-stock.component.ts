@@ -73,6 +73,8 @@ export class DipStockComponent implements OnInit {
       disableClose: true,
       data: {
         type: "add",
+        date: this.use.getFormattedDate(new Date()),
+        userId: this.userId || localStorage.getItem('userId'),
         petroldip: this.petroldip || null,
         pvalue: this.pvalue || null,
         dieseldip: this.dieseldip || null,

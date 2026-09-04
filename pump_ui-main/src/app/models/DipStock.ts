@@ -1,8 +1,9 @@
 export interface DipStock {
+    id?: number;
     userId: any;
-    date: Date;
+    date: any;
     petroldip: string;
-    pvalue:number;
+    pvalue: number;
     dieseldip: string;
-    dvalue:number;
+    dvalue: number;
 }

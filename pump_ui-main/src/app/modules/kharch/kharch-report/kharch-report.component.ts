@@ -64,7 +64,7 @@ export class KharchReportComponent implements OnInit {
 
   ngOnInit() {
     this.use.dialogZIndexAdjustment();
-    this.userId = localStorage.getItem("userId");
+    this.userId = (this.kharch && this.kharch.userId) ? this.kharch.userId : localStorage.getItem("userId");
     if (this.kharch && this.kharch.date) {
       this.purchaDipStockseDetails.date = this.kharch.date;
     }
@@ -121,7 +121,7 @@ export class KharchReportComponent implements OnInit {
     // Add a new row to the table
     if (this.purchaDipStockseDetails.date) {
       this.lastRowId++;
-      this.userId = localStorage.getItem("userId");
+      this.userId = (this.kharch && this.kharch.userId) ? this.kharch.userId : localStorage.getItem("userId");
       // this.row.push({ id: '', date: this.purchaDipStockseDetails.date, notes: '', price: '' });
       const newRow = {
         idkharch: this.lastRowId,
@@ -201,12 +201,16 @@ export class KharchReportComponent implements OnInit {
   }
 
   getkharch() {
-    this.userId = localStorage.getItem("userId");
+    this.userId = (this.kharch && this.kharch.userId) ? this.kharch.userId : localStorage.getItem("userId");
     const params = { userId: this.userId };
     this.http.get(API_KHARCH_LIST, { params }).subscribe((data: any[]) => {
       if (this.kharch?.date) {
         this.row = data.filter(
-          (item) => new Date(item.date).toDateString() === new Date(this.kharch.date).toDateString()
+          (item) => {
+            if (!item.date) return false;
+            return item.date === this.kharch.date ||
+              new Date(item.date).toDateString() === new Date(this.kharch.date).toDateString();
+          }
         );
       } else {
         this.row = [];
