@@ -307,6 +307,7 @@ export class MainPanelComponent implements OnInit {
 
 
   ngOnInit() {
+    this.userId = localStorage.getItem('userId');
     this.userRole = localStorage.getItem('role') || 'EMPLOYEE';
     if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee') {
       this.reportDate = this.managerSelectedDate || new Date();
@@ -411,23 +412,32 @@ export class MainPanelComponent implements OnInit {
         // Sort by id ascending (chronological shift order)
         items.sort((a, b) => (a.id || 0) - (b.id || 0));
 
-        const firstItem = items[0];
-        const lastItem = items[items.length - 1];
+        // Deduplicate shifts: if duplicate records exist for the same shift (e.g. saved by both employee and manager), keep latest
+        const shiftMap = new Map<string, any>();
+        items.forEach(item => {
+          const shiftKey = (item.shift || 'Morning').trim().toLowerCase();
+          shiftMap.set(shiftKey, item);
+        });
+        const distinctShiftItems = Array.from(shiftMap.values());
+        distinctShiftItems.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+        const firstItem = distinctShiftItems[0];
+        const lastItem = distinctShiftItems[distinctShiftItems.length - 1];
 
         pump.openingMeter = (firstItem.open_meter !== null && firstItem.open_meter !== undefined && firstItem.open_meter !== '') ? +firstItem.open_meter : null;
         pump.closingMeter = (lastItem.close_meter !== null && lastItem.close_meter !== undefined && lastItem.close_meter !== '') ? +lastItem.close_meter : null;
 
-        pump.testing = items.reduce((sum, i) => sum + (+i.testing || 0), 0);
+        pump.testing = distinctShiftItems.reduce((sum, i) => sum + (+i.testing || 0), 0);
 
         if (pump.openingMeter !== null && pump.closingMeter !== null) {
           pump.saleLtr = Math.abs(pump.closingMeter - pump.openingMeter);
         } else {
-          pump.saleLtr = items.reduce((sum, i) => sum + (+i[ltrKey] || 0), 0);
+          pump.saleLtr = distinctShiftItems.reduce((sum, i) => sum + (+i[ltrKey] || 0), 0);
         }
 
         pump.rate = (lastItem.rate !== null && lastItem.rate !== undefined && lastItem.rate !== '') ? +lastItem.rate : null;
         pump.ltr = (pump.saleLtr || 0) - (pump.testing || 0);
-        pump.total_rs = parseFloat(items.reduce((sum, i) => sum + (+i.total_sell || 0), 0).toFixed(2));
+        pump.total_rs = parseFloat(distinctShiftItems.reduce((sum, i) => sum + (+i.total_sell || 0), 0).toFixed(2));
       }
     });
   }
@@ -489,15 +499,21 @@ export class MainPanelComponent implements OnInit {
 
   calculatePetrol(index: number) {
     const petrol = this.petrolPumps[index];
-    const total = (petrol.closingMeter || 0) - (petrol.openingMeter || 0);
-    const testing = petrol.testing || 0;
-    const rate = petrol.rate || 0;
+    if (petrol.closingMeter === null || petrol.closingMeter === undefined || petrol.closingMeter === '' || petrol.closingMeter === 0) {
+      petrol.saleLtr = 0;
+      petrol.ltr = 0;
+      petrol.total_rs = 0;
+    } else {
+      const total = (petrol.closingMeter || 0) - (petrol.openingMeter || 0);
+      const testing = petrol.testing || 0;
+      const rate = petrol.rate || 0;
 
-    petrol.saleLtr = Math.abs(total);
-    petrol.ltr = total - testing;
+      petrol.saleLtr = Math.abs(total);
+      petrol.ltr = total - testing;
 
-    // Round to 2 decimal places
-    petrol.total_rs = parseFloat(Math.abs(petrol.ltr * rate).toFixed(2));
+      // Round to 2 decimal places
+      petrol.total_rs = parseFloat(Math.abs(petrol.ltr * rate).toFixed(2));
+    }
 
     // Update Totals
     this.petrolTotalLTR = parseFloat(
@@ -513,13 +529,19 @@ export class MainPanelComponent implements OnInit {
 
   calculateDiesel(index: number) {
     const diesel = this.dieselPumps[index];
-    const total = (diesel.closingMeter || 0) - (diesel.openingMeter || 0);
-    const testing = diesel.testing || 0;
-    const rate = diesel.rate || 0;
+    if (diesel.closingMeter === null || diesel.closingMeter === undefined || diesel.closingMeter === '' || diesel.closingMeter === 0) {
+      diesel.saleLtr = 0;
+      diesel.ltr = 0;
+      diesel.total_rs = 0;
+    } else {
+      const total = (diesel.closingMeter || 0) - (diesel.openingMeter || 0);
+      const testing = diesel.testing || 0;
+      const rate = diesel.rate || 0;
 
-    diesel.saleLtr = parseFloat(Math.abs(total).toFixed(2));
-    diesel.ltr = parseFloat((total - testing).toFixed(2));
-    diesel.total_rs = parseFloat(Math.abs(diesel.ltr * rate).toFixed(2));
+      diesel.saleLtr = parseFloat(Math.abs(total).toFixed(2));
+      diesel.ltr = parseFloat((total - testing).toFixed(2));
+      diesel.total_rs = parseFloat(Math.abs(diesel.ltr * rate).toFixed(2));
+    }
 
     // Update Totals
     this.dieselTotalLTR = parseFloat(
@@ -536,13 +558,19 @@ export class MainPanelComponent implements OnInit {
 
   calculateXpPetrol(index: number) {
     const xpPetrol = this.xpPetrol[index];
-    const total = (xpPetrol.closingMeter || 0) - (xpPetrol.openingMeter || 0);
-    const testing = xpPetrol.testing || 0;
-    const rate = xpPetrol.rate || 0;
+    if (xpPetrol.closingMeter === null || xpPetrol.closingMeter === undefined || xpPetrol.closingMeter === '' || xpPetrol.closingMeter === 0) {
+      xpPetrol.saleLtr = 0;
+      xpPetrol.ltr = 0;
+      xpPetrol.total_rs = 0;
+    } else {
+      const total = (xpPetrol.closingMeter || 0) - (xpPetrol.openingMeter || 0);
+      const testing = xpPetrol.testing || 0;
+      const rate = xpPetrol.rate || 0;
 
-    xpPetrol.saleLtr = parseFloat(Math.abs(total).toFixed(2));
-    xpPetrol.ltr = parseFloat((total - testing).toFixed(2));
-    xpPetrol.total_rs = parseFloat(Math.abs(xpPetrol.ltr * rate).toFixed(2));
+      xpPetrol.saleLtr = parseFloat(Math.abs(total).toFixed(2));
+      xpPetrol.ltr = parseFloat((total - testing).toFixed(2));
+      xpPetrol.total_rs = parseFloat(Math.abs(xpPetrol.ltr * rate).toFixed(2));
+    }
 
     // Update Totals
     this.xpPetrolTotalLTR = parseFloat(
@@ -558,13 +586,19 @@ export class MainPanelComponent implements OnInit {
 
   calculatepowerDiesel(index: number) {
     const powerDiesel = this.powerDiesel[index];
-    const total = (powerDiesel.closingMeter || 0) - (powerDiesel.openingMeter || 0);
-    const testing = powerDiesel.testing || 0;
-    const rate = powerDiesel.rate || 0;
+    if (powerDiesel.closingMeter === null || powerDiesel.closingMeter === undefined || powerDiesel.closingMeter === '' || powerDiesel.closingMeter === 0) {
+      powerDiesel.saleLtr = 0;
+      powerDiesel.ltr = 0;
+      powerDiesel.total_rs = 0;
+    } else {
+      const total = (powerDiesel.closingMeter || 0) - (powerDiesel.openingMeter || 0);
+      const testing = powerDiesel.testing || 0;
+      const rate = powerDiesel.rate || 0;
 
-    powerDiesel.saleLtr = parseFloat(Math.abs(total).toFixed(2));
-    powerDiesel.ltr = parseFloat((total - testing).toFixed(2));
-    powerDiesel.total_rs = parseFloat(Math.abs(powerDiesel.ltr * rate).toFixed(2));
+      powerDiesel.saleLtr = parseFloat(Math.abs(total).toFixed(2));
+      powerDiesel.ltr = parseFloat((total - testing).toFixed(2));
+      powerDiesel.total_rs = parseFloat(Math.abs(powerDiesel.ltr * rate).toFixed(2));
+    }
 
     // Update Totals
     this.powerDieselTotalLTR = parseFloat(
@@ -592,11 +626,12 @@ export class MainPanelComponent implements OnInit {
   fetchPreviousClosingMeters() {
     if (!this.reportDate) return;
     const formatted = this.use.getFormattedDate(this.reportDate);
+    const uid = this.userId || localStorage.getItem('userId') || '';
 
     // Petrol
     this.petrolPumps.slice(0, this.showPetrolPumpsCount).forEach((pump, index) => {
       if (pump.openingMeter === null || pump.openingMeter === 0) {
-        this.use.getPreviousClosingMeter('petrol', pump.name, formatted).subscribe(res => {
+        this.use.getPreviousClosingMeter('petrol', pump.name, formatted, undefined, uid).subscribe(res => {
           if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
             if (pump.openingMeter === null || pump.openingMeter === 0) {
               pump.openingMeter = +res.previousClosingMeter;
@@ -611,7 +646,7 @@ export class MainPanelComponent implements OnInit {
     // Diesel
     this.dieselPumps.slice(0, this.showDieselPumpsCount).forEach((pump, index) => {
       if (pump.openingMeter === null || pump.openingMeter === 0) {
-        this.use.getPreviousClosingMeter('diesel', pump.name, formatted).subscribe(res => {
+        this.use.getPreviousClosingMeter('diesel', pump.name, formatted, undefined, uid).subscribe(res => {
           if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
             if (pump.openingMeter === null || pump.openingMeter === 0) {
               pump.openingMeter = +res.previousClosingMeter;
@@ -627,7 +662,7 @@ export class MainPanelComponent implements OnInit {
     if (this.showXpPetrolCount > 0) {
       this.xpPetrol.slice(0, this.showXpPetrolCount).forEach((pump, index) => {
         if (pump.openingMeter === null || pump.openingMeter === 0) {
-          this.use.getPreviousClosingMeter('xppetrol', pump.name, formatted).subscribe(res => {
+          this.use.getPreviousClosingMeter('xppetrol', pump.name, formatted, undefined, uid).subscribe(res => {
             if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
               if (pump.openingMeter === null || pump.openingMeter === 0) {
                 pump.openingMeter = +res.previousClosingMeter;
@@ -644,7 +679,7 @@ export class MainPanelComponent implements OnInit {
     if (this.showPowerDieselCount > 0) {
       this.powerDiesel.slice(0, this.showPowerDieselCount).forEach((pump, index) => {
         if (pump.openingMeter === null || pump.openingMeter === 0) {
-          this.use.getPreviousClosingMeter('powerdiesel', pump.name, formatted).subscribe(res => {
+          this.use.getPreviousClosingMeter('powerdiesel', pump.name, formatted, undefined, uid).subscribe(res => {
             if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
               if (pump.openingMeter === null || pump.openingMeter === 0) {
                 pump.openingMeter = +res.previousClosingMeter;

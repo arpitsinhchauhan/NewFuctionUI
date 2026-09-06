@@ -1,0 +1,67 @@
+<div class="tank-config-modal">
+  <div class="modal-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+    <div class="d-flex align-items-center gap-2">
+      <mat-icon class="text-primary">tune</mat-icon>
+      <div>
+        <h4 class="m-0 font-weight-bold">Fuel Tank Capacity & Threshold Settings</h4>
+        <small class="text-muted">Configure calibrated tank capacities, low stock thresholds, and critical alert limits</small>
+      </div>
+    </div>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="text-center py-4">
+    <mat-spinner diameter="36" class="mx-auto"></mat-spinner>
+    <p class="text-muted mt-2">Loading tank parameters...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="tank-list-container">
+    <div *ngFor="let tank of tanks" class="card mb-3 p-3 tank-edit-card shadow-sm">
+      <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+        <h5 class="m-0 font-weight-bold text-primary d-flex align-items-center gap-2">
+          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">local_gas_station</mat-icon>
+          {{ tank.label || tank.tankName || (tank.fuelType | uppercase) }}
+        </h5>
+        <button mat-raised-button color="primary" class="btn-sm" (click)="saveTank(tank)" [disabled]="isSaving">
+          <mat-icon style="font-size:16px; width:16px; height:16px;">save</mat-icon> Update
+        </button>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label class="form-label small text-muted font-weight-bold">Tank Name / Alias</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="tank.tankName" placeholder="e.g. Tank 1">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted font-weight-bold">Total Capacity (L)</label>
+          <input type="number" class="form-control form-control-sm" [(ngModel)]="tank.capacity" min="100" placeholder="e.g. 20000">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted font-weight-bold">Low Level Warning (%)</label>
+          <input type="number" class="form-control form-control-sm" [(ngModel)]="tank.minStockLevel" min="1" max="90" placeholder="e.g. 25">
+          <small class="text-muted d-block" *ngIf="tank.capacity">
+            {{ (tank.capacity * (tank.minStockLevel || 25) / 100) | number:'1.0-0' }} L
+          </small>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted font-weight-bold">Critical Alert Level (%)</label>
+          <input type="number" class="form-control form-control-sm" [(ngModel)]="tank.alertLevel" min="1" max="50" placeholder="e.g. 15">
+          <small class="text-muted d-block" *ngIf="tank.capacity">
+            {{ (tank.capacity * (tank.alertLevel || 15) / 100) | number:'1.0-0' }} L
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="tanks.length === 0" class="text-center py-4 text-muted">
+      No configurable tanks found for this petrol pump.
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+    <button mat-stroked-button (click)="close()">Close</button>
+    <button mat-raised-button color="primary" (click)="saveAllAndClose()">Done</button>
+  </div>
+</div>

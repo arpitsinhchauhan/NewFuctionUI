@@ -1,40 +1,83 @@
-<mat-card class="card-premium tank-card">
+<mat-card class="card-premium tank-card" (click)="onCardClick()" title="Click to view detailed stock breakdown">
+  <!-- Tank Header -->
   <div class="tank-header">
     <div class="header-main">
       <div class="label-with-icon">
-        <mat-icon [style.color]="liquidColor">{{ fuelType === 'petrol' || fuelType === 'xp' ? 'local_gas_station' :
-          'ev_station' }}</mat-icon>
-        <span class="tank-label">{{ label }}</span>
+        <mat-icon [style.color]="liquidColor">
+          {{ effectiveFuelType === 'petrol' || effectiveFuelType === 'xp' ? 'local_gas_station' : 'ev_station' }}
+        </mat-icon>
+        <span class="tank-label">{{ effectiveLabel }}</span>
       </div>
-      <span class="fuel-badge" [style.background-color]="liquidColor">{{ fuelType | uppercase }}</span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="fuel-badge" [style.background-color]="liquidColor">{{ effectiveFuelType | uppercase }}</span>
+        <span class="status-indicator" [ngClass]="{
+          'status-normal': effectiveStatus === 'NORMAL',
+          'status-low': effectiveStatus === 'LOW',
+          'status-critical': effectiveStatus === 'CRITICAL'
+        }">
+          ● {{ effectiveStatus }}
+        </span>
+      </div>
     </div>
     <div class="stock-info">
-      <span class="current-stock">{{ currentStock | number }}</span>
-      <span class="capacity-total">/ {{ capacity | number }} L</span>
+      <span class="current-stock">{{ effectiveStock | number:'1.0-0' }} <small>L</small></span>
+      <span class="capacity-total">of {{ effectiveCapacity | number:'1.0-0' }} L</span>
     </div>
   </div>
 
+  <!-- Visual Liquid Tank & Metrics Row -->
   <div class="tank-visual">
+    <!-- Cylindrical / Glass Tank Display -->
     <div class="tank-container-modern">
-      <div class="tank-fill-modern" [style.height.%]="percentage"
-        [style.background]="'linear-gradient(180deg, ' + liquidColor + ' 0%, ' + borderColor + ' 100%)'"
-        [class.warning]="percentage < 25" [class.danger]="percentage < 10">
+      <div class="tank-fill-modern"
+           [style.height.%]="percentage"
+           [style.background]="'linear-gradient(180deg, ' + liquidColor + ' 0%, ' + borderColor + ' 100%)'"
+           [class.warning]="effectiveStatus === 'LOW'"
+           [class.danger]="effectiveStatus === 'CRITICAL'">
         <div class="wave"></div>
       </div>
       <div class="tank-glass-effect"></div>
       <div class="percentage-overlay">{{ percentage | number:'1.0-0' }}%</div>
     </div>
 
+    <!-- Live Stock Details Columns -->
     <div class="tank-metrics">
-      <div class="metric-item">
-        <span class="metric-label">Status</span>
-        <span class="metric-value" [style.color]="liquidColor">
-          {{ percentage < 10 ? 'Critical' : (percentage < 25 ? 'Low' : 'Stable' ) }} </span>
+      <div class="metric-row d-flex justify-content-between">
+        <span class="metric-label">System Stock:</span>
+        <span class="metric-val-bold">{{ effectiveStock | number:'1.0-0' }} L</span>
       </div>
-      <div class="metric-item">
-        <span class="metric-label">Remaining</span>
-        <span class="metric-value">{{ capacity - currentStock | number }} L</span>
+
+      <div class="metric-row d-flex justify-content-between" *ngIf="physicalStock != null">
+        <span class="metric-label">Dip Stock:</span>
+        <span class="metric-val-bold text-dark">{{ physicalStock | number:'1.0-0' }} L</span>
+      </div>
+
+      <div class="metric-row d-flex justify-content-between" *ngIf="lossGain != null">
+        <span class="metric-label">Variance:</span>
+        <span class="metric-val-bold" [ngClass]="{
+          'text-success font-weight-bold': lossGain > 0,
+          'text-danger font-weight-bold': lossGain < 0,
+          'text-muted': lossGain === 0
+        }">
+          {{ (lossGain > 0 ? '+' : '') + (lossGain | number:'1.1-1') }} L
+        </span>
+      </div>
+
+      <div class="metric-row d-flex justify-content-between" *ngIf="physicalStock == null">
+        <span class="metric-label">Dip Reading:</span>
+        <span class="metric-val-muted small">Not taken today</span>
+      </div>
+
+      <div class="metric-row d-flex justify-content-between border-top pt-1">
+        <span class="metric-label">Remaining:</span>
+        <span class="metric-val-bold text-muted">{{ (effectiveCapacity - effectiveStock > 0 ? effectiveCapacity - effectiveStock : 0) | number:'1.0-0' }} L</span>
       </div>
     </div>
+  </div>
+
+  <!-- Bottom Details Prompt -->
+  <div class="tank-card-footer d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+    <span class="click-hint"><mat-icon class="hint-icon">touch_app</mat-icon> View Full Breakdown</span>
+    <mat-icon class="arrow-icon">arrow_forward</mat-icon>
   </div>
 </mat-card>

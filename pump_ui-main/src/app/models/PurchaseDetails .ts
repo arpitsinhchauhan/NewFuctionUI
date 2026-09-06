@@ -7,4 +7,5 @@ export interface PurchaseDetails {
     cess: string;
     jtcpercentage: string;
     total_purchase: string;
+    skuNumber?: string;
 }

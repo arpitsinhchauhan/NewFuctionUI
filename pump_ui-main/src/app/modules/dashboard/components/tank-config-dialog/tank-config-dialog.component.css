@@ -1,0 +1,12 @@
+.tank-config-modal {
+  padding: 10px 5px;
+}
+
+.tank-edit-card {
+  border-left: 4px solid #1e88e5;
+  background: #fdfdfd;
+}
+
+.form-label {
+  margin-bottom: 2px;
+}

@@ -110,16 +110,233 @@
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary);
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(14, 165, 233, 0.25);
+  flex-shrink: 0;
+}
+
+.user-avatar.avatar-manager {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
+}
+
+.user-avatar.avatar-admin {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25);
+}
+
+.user-info-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name-title {
+  font-weight: 600;
+  color: var(--text-main, #1e293b);
+  font-size: 13.5px;
+  line-height: 1.2;
+}
+
+.user-handle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11.5px;
+  color: var(--text-muted, #64748b);
+}
+
+.inline-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  line-height: 13px;
+  vertical-align: middle;
+}
+
+/* Assigned Petrol Pump Badge */
+.pump-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.pump-badge:hover {
+  background: rgba(14, 165, 233, 0.14);
+  border-color: rgba(14, 165, 233, 0.35);
+  transform: translateY(-1px);
+}
+
+.pump-icon {
+  color: #0284c7;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.pump-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.pump-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #0369a1;
+  letter-spacing: -0.01em;
+}
+
+.pump-station-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: #0284c7;
+  opacity: 0.85;
+}
+
+.pump-owner-sub {
+  color: #d97706 !important;
+}
+
+.no-pump-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+  font-style: italic;
+}
+
+/* Role & Manager Display */
+.role-cell-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+}
+
+.status-pill.role-admin {
+  background: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.status-pill.role-manager {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.status-pill.role-employee {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.manager-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  background: rgba(100, 116, 139, 0.07);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+
+.manager-link strong {
+  color: var(--text-main, #334155);
+}
+
+/* Contact Details */
+.contact-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-main, #334155);
+}
+
+.contact-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted, #64748b);
+  opacity: 0.8;
+}
+
+.contact-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+/* Nozzle Badges */
+.nozzle-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.nozzle-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 500;
+  background: var(--bg-hover, #f1f5f9);
+  color: var(--text-main, #334155);
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.nozzle-chip strong {
+  margin-right: 3px;
+}
+
+.chip-petrol {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #065f46;
+}
+
+.chip-diesel {
+  background: rgba(14, 165, 233, 0.08);
+  border-color: rgba(14, 165, 233, 0.2);
+  color: #0369a1;
+}
+
+.chip-xp {
+  background: rgba(168, 85, 247, 0.08);
+  border-color: rgba(168, 85, 247, 0.2);
+  color: #6b21a8;
+}
+
+.chip-power {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #991b1b;
 }
 
 .card-footer-modern {

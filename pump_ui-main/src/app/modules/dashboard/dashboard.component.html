@@ -224,26 +224,91 @@
     </div>
   </div>
 
-  <!-- Fuel Stock Section -->
-  <!-- <div class="section-header mb-3">
-    <h3 class="section-title">Fuel Stock Monitoring</h3>
-    <span class="section-subtitle">Real-time inventory levels for all tanks</span>
-  </div> -->
+  <!-- ================================================= -->
+  <!-- CURRENT TANK STOCK / LIVE MONITORING SECTION      -->
+  <!-- ================================================= -->
+  <div class="tank-section-container">
+    <!-- Low Stock Alert Banner (Dynamic) -->
+    <div class="low-stock-alert-banner mb-3 shadow-sm" *ngIf="lowStockAlerts.length > 0">
+      <div class="alert-icon-wrap">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div class="flex-grow-1">
+        <h6 class="m-0 font-weight-bold text-dark">Low Fuel Stock Alert</h6>
+        <div class="d-flex flex-wrap align-items-center mt-1">
+          <span *ngFor="let alert of lowStockAlerts"
+                class="alert-pill"
+                [ngClass]="alert.status === 'CRITICAL' ? 'alert-pill-danger' : 'alert-pill-warning'">
+            <strong>{{ alert.label || alert.tankName }}:</strong>
+            {{ alert.currentStock | number:'1.0-0' }} L ({{ alert.percentage | number:'1.0-0' }}%)
+            — {{ alert.status === 'CRITICAL' ? 'Critical Level!' : 'Below Minimum Threshold' }}
+          </span>
+        </div>
+      </div>
+      <button mat-stroked-button color="warn" class="btn-sm text-nowrap" (click)="openTankConfig()">
+        <mat-icon style="font-size:16px;">settings</mat-icon> Adjust Limits
+      </button>
+    </div>
 
-  <!-- <div class="row mb-4">
-    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showPetrolPumpsCount > 0">
-      <app-fuel-tank [currentStock]="petrolCurrentStock" [capacity]="petrolCapacity" label="Petrol" fuelType="petrol"></app-fuel-tank>
+    <!-- Section Header with Real-Time Actions -->
+    <div class="tank-section-header mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="section-icon-badge">
+          <mat-icon>local_gas_station</mat-icon>
+        </div>
+        <div>
+          <h3 class="section-title font-weight-bold m-0 text-dark">Current Tank Stock</h3>
+          <span class="section-subtitle text-muted">
+            Live storage inventory & physical dip reconciliation | Business Date: <strong>{{ tankStockDate || 'Today' }}</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex align-items-center gap-2">
+        <button mat-stroked-button class="btn-sm" (click)="openTankConfig()" title="Calibrate tank capacities and alerts">
+          <mat-icon style="font-size:16px; margin-right:4px;">tune</mat-icon> Configure Tanks
+        </button>
+        <button mat-stroked-button color="primary" class="btn-sm" (click)="loadCurrentTankStock(true)" [disabled]="isLoadingTankStock" title="Refresh live stock calculations">
+          <mat-icon style="font-size:16px; margin-right:4px;" [class.spinning]="isLoadingTankStock">refresh</mat-icon>
+          {{ isLoadingTankStock ? 'Refreshing...' : 'Live Sync' }}
+        </button>
+      </div>
     </div>
-    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showDieselPumpsCount > 0">
-      <app-fuel-tank [currentStock]="dieselCurrentStock" [capacity]="dieselCapacity" label="Diesel" fuelType="diesel"></app-fuel-tank>
+
+    <!-- Dynamic Fuel Tank Cards Grid -->
+    <div class="row mb-4" *ngIf="currentTankStocks.length > 0">
+      <div *ngFor="let tank of currentTankStocks"
+           class="mb-4"
+           [ngClass]="{
+             'col-lg-6 col-md-6': currentTankStocks.length === 2,
+             'col-lg-4 col-md-6': currentTankStocks.length === 3,
+             'col-lg-3 col-md-6': currentTankStocks.length >= 4,
+             'col-12': currentTankStocks.length === 1
+           }">
+        <app-fuel-tank [stockData]="tank" (openDetails)="openTankDetails($event)"></app-fuel-tank>
+      </div>
     </div>
-    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showXpPetrolCount > 0">
-      <app-fuel-tank [currentStock]="xpPetrolCurrentStock" [capacity]="xpPetrolCapacity" label="XP Petrol" fuelType="xp"></app-fuel-tank>
+
+    <!-- Loading State -->
+    <div class="row mb-4" *ngIf="isLoadingTankStock && currentTankStocks.length === 0">
+      <div class="col-12 text-center py-5">
+        <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+        <p class="text-muted mt-2">Computing real-time tank stock balance...</p>
+      </div>
     </div>
-    <div class="col-lg-3 col-md-6 mb-4" *ngIf="showPowerDieselCount > 0">
-      <app-fuel-tank [currentStock]="powerDieselCurrentStock" [capacity]="powerDieselCapacity" label="Power Diesel" fuelType="power"></app-fuel-tank>
+
+    <!-- Empty State -->
+    <div class="row mb-4" *ngIf="!isLoadingTankStock && currentTankStocks.length === 0">
+      <div class="col-12">
+        <div class="tank-empty-card">
+          <mat-icon class="text-muted" style="font-size:36px; height:36px; width:36px;">warning_amber</mat-icon>
+          <h5 class="text-muted mt-2 mb-1">No Fuel Tanks Configured</h5>
+          <p class="text-muted small m-0">No nozzle or fuel configurations were detected for this pump manager.</p>
+        </div>
+      </div>
     </div>
-  </div> -->
+  </div>
 
   <!-- Charts & Nozzle Sales Section Side-by-Side -->
   <div class="row mb-4">
@@ -256,7 +321,7 @@
           </div>
         </div>
         <div class="chart-container mt-4" style="position: relative; height: 320px;">
-          <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions">
+          <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions" [plugins]="doughnutPlugins">
           </canvas>
         </div>
 

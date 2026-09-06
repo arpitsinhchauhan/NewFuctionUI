@@ -113,6 +113,8 @@ import { OilpurchaseComponent } from './modules/oil-purchase-table/oilpurchase/o
 import { OilPuchasePdfExcelComponent } from './modules/oil-purchase-table/oil-puchase-pdf-excel/oil-puchase-pdf-excel.component';
 import { FuelTankComponent } from './modules/dashboard/components/fuel-tank/fuel-tank.component';
 import { NozzleCardComponent } from './modules/dashboard/components/nozzle-card/nozzle-card.component';
+import { TankDetailsDialogComponent } from './modules/dashboard/components/tank-details-dialog/tank-details-dialog.component';
+import { TankConfigDialogComponent } from './modules/dashboard/components/tank-config-dialog/tank-config-dialog.component';
 
 
 @NgModule({
@@ -242,7 +244,9 @@ import { NozzleCardComponent } from './modules/dashboard/components/nozzle-card/
     OilPurchaseTableComponent,
     OilPuchasePdfExcelComponent,
     FuelTankComponent,
-    NozzleCardComponent
+    NozzleCardComponent,
+    TankDetailsDialogComponent,
+    TankConfigDialogComponent
     // KharchComponent,
     // JamaBakiComponent,
     // CustomPdfViewerComponent,

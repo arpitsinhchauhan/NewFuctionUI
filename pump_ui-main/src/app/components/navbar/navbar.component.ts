@@ -59,8 +59,10 @@ export class NavbarComponent implements OnInit {
   logout(): void {
     // Dismiss any open snackbar so it does not bleed into the login page
     this.snackBar.dismiss();
-    // Clear all session data
+    // Clear all session and cached data
     localStorage.clear();
+    sessionStorage.clear();
+    this.userServiceService.clearUserData();
     // Navigate to login immediately without waiting for server
     this.router.navigate(['/']);
     // Also attempt to close the server in the background

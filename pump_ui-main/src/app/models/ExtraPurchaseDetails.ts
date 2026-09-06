@@ -7,4 +7,5 @@ export interface ExtraPurchaseDetails {
     extra_cess: string;
     extra_jtcpercentage: string;
     extra_total_purchase: string;
+    skuNumber?: string;
 }

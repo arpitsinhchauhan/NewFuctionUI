@@ -22,6 +22,8 @@ public interface extraPurchaseRepository extends JpaRepository<extraPurchases, I
 
         Optional<extraPurchases> findByDateAndExtraType(String date, String extraType);
 
+        Optional<extraPurchases> findByDateAndExtraTypeAndUserId(String date, String extraType, String userId);
+
         List<extraPurchases> findByUserId(String userId);
 
         // @Query("SELECT t2.date, t2.pump, t2.close_meter, t2.open_meter, t2.total,

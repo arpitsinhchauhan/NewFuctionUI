@@ -5,11 +5,19 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "daily_reports")
+@Table(name = "daily_reports", indexes = {
+    @Index(name = "idx_daily_report_created_by", columnList = "created_by"),
+    @Index(name = "idx_daily_report_pump_id", columnList = "pump_id"),
+    @Index(name = "idx_daily_report_employee_id", columnList = "employee_id"),
+    @Index(name = "idx_daily_report_manager_id", columnList = "manager_id"),
+    @Index(name = "idx_daily_report_employee_date", columnList = "employee_id, report_date"),
+    @Index(name = "idx_daily_report_pump_date", columnList = "pump_id, report_date")
+})
 public class DailyReport {
 
     @Id
@@ -22,6 +30,9 @@ public class DailyReport {
 
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
+
+    @Column(name = "manager_id")
+    private Long managerId;
 
     @Column(name = "report_date", nullable = false)
     private String reportDate;
@@ -188,5 +199,13 @@ public class DailyReport {
 
     public void setCash(Double cash) {
         this.cash = cash;
+    }
+
+    public Long getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(Long managerId) {
+        this.managerId = managerId;
     }
 }

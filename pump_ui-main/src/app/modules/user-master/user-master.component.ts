@@ -23,7 +23,7 @@ export class UserMasterComponent implements OnInit, OnDestroy {
   compD: any;
   dataSource: any[] | undefined;
   currentPage = 1;
-  itemsPerPage = 4;
+  itemsPerPage = 8;
   userId: string;
   loggedInRole: string = '';
 
@@ -65,6 +65,15 @@ export class UserMasterComponent implements OnInit, OnDestroy {
     });
   }
 
+  getManagerName(managerId: any): string {
+    if (!managerId) return '';
+    const mgr = this.originalUserList.find((u: any) => String(u.id) === String(managerId) || String(u.userId) === String(managerId));
+    if (mgr) {
+      return mgr.lastName ? `${mgr.lastName}` : (mgr.username || `Manager #${managerId}`);
+    }
+    return `ID: ${managerId}`;
+  }
+
   addUser() {
     const dialogRef = this.dialog.open(AddUserComponent, {
       panelClass: 'dialog-lg',
@@ -91,7 +100,9 @@ export class UserMasterComponent implements OnInit, OnDestroy {
       (item.email && item.email.toLowerCase().includes(term)) ||
       (item.firstName && item.firstName.toLowerCase().includes(term)) ||
       (item.lastName && item.lastName.toLowerCase().includes(term)) ||
-      (item.role && item.role.toLowerCase().includes(term))
+      (item.role && item.role.toLowerCase().includes(term)) ||
+      (item.phoneNumber && item.phoneNumber.toLowerCase().includes(term)) ||
+      (item.managerId && this.getManagerName(item.managerId).toLowerCase().includes(term))
     );
   }
 

@@ -8,6 +8,7 @@ import { UserServiceService } from 'app/services/user-service.service';
 export interface PurchaseRow {
   id?: any;
   type: string;
+  skuNumber?: string;
   quantity: any;
   total: any;
   vat: any;
@@ -35,6 +36,7 @@ export class PurchaseReportComponent implements OnInit {
     {
       id: this.purchase?.id,
       type: 'Petrol',
+      skuNumber: '',
       quantity: '',
       total: '',
       vat: '',
@@ -47,6 +49,7 @@ export class PurchaseReportComponent implements OnInit {
     {
       id: this.purchase?.id,
       type: 'Diesel',
+      skuNumber: '',
       quantity: '',
       total: '',
       vat: '',
@@ -101,6 +104,7 @@ export class PurchaseReportComponent implements OnInit {
     this.row.push({
       id: this.purchase?.id,
       type: '',
+      skuNumber: '',
       quantity: '',
       total: '',
       vat: '',
@@ -202,6 +206,7 @@ export class PurchaseReportComponent implements OnInit {
       const petrolRow = filteredData.find(item => item.type === 'Petrol') || {
         id: this.purchase?.id,
         type: 'Petrol',
+        skuNumber: '',
         quantity: '',
         total: '',
         vat: '',
@@ -215,6 +220,7 @@ export class PurchaseReportComponent implements OnInit {
       const dieselRow = filteredData.find(item => item.type === 'Diesel') || {
         id: this.purchase?.id,
         type: 'Diesel',
+        skuNumber: '',
         quantity: '',
         total: '',
         vat: '',

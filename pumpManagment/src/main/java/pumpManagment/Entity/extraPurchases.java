@@ -41,6 +41,8 @@ public class extraPurchases {
     private double extra_total_purchase;
     @Column(name = "user_id")
     private String userId;
+    @Column(name = "sku_number")
+    private String skuNumber;
 
     public Integer getId() {
         return id;
@@ -124,8 +126,11 @@ public class extraPurchases {
         this.userId = userId;
     }
 
-   
+    public String getSkuNumber() {
+        return skuNumber;
+    }
 
-    
-    
+    public void setSkuNumber(String skuNumber) {
+        this.skuNumber = skuNumber;
+    }
 }

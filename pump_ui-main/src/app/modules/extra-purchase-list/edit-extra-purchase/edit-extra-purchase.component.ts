@@ -33,6 +33,7 @@ export class EditExtraPurchaseComponent implements OnInit {
     extra_cess: '',
     extra_jtcpercentage: '',
     extra_total_purchase: '',
+    skuNumber: '',
   };
 
  

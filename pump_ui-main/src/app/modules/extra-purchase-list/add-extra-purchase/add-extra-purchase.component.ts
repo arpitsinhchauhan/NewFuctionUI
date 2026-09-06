@@ -19,6 +19,7 @@ export class AddExtraPurchaseComponent implements OnInit {
     {
       id: this.purchase?.id,
       extraType: 'XP Petrol',
+      skuNumber: '',
       extra_quantity: '',
       extra_total: '',
       extra_vat: '',
@@ -31,6 +32,7 @@ export class AddExtraPurchaseComponent implements OnInit {
     {
       id: this.purchase?.id,
       extraType: 'Power Diesel',
+      skuNumber: '',
       extra_quantity: '',
       extra_total: '',
       extra_vat: '',
@@ -71,6 +73,7 @@ export class AddExtraPurchaseComponent implements OnInit {
     this.row.push({
       id: this.purchase?.id,
       extraType: '',
+      skuNumber: '',
       extra_quantity: '',
       extra_total: '',
       extra_vat: '',
@@ -98,11 +101,11 @@ export class AddExtraPurchaseComponent implements OnInit {
     }
     for (let item of this.row) {
       if (!this.isNumber(item.extra_quantity) || !this.isNumber(item.extra_total) || !this.isNumber(item.extra_vat) || !this.isNumber(item.extra_cess) || !this.isNumber(item.extra_jtcpercentage) || !this.isNumber(item.extra_total_purchase)) {
-        this.notificationService.failure("All numeric fields must contain valid numbers.");
+        this.notificationService.failure('All numeric fields must contain valid numbers.');
         return false;
       }
       if (!item.extraType) {
-        this.notificationService.failure('Type field is required.');
+        this.notificationService.failure('Extra Type is required.');
         return false;
       }
     }
@@ -119,16 +122,11 @@ export class AddExtraPurchaseComponent implements OnInit {
 
     this.http.post<any>(API_EXTRA_PURCHASE_ADD, this.row)
       .subscribe(response => {
-        if (response.length === 0) {
-          this.notificationService.failure("No data received from the server.");
-          this.row = [];
-          this.dialogRef.close();
-          return;
-        }
-        this.notificationService.success("Extra Purchase data Succefully Add");
-        this.extraDetails.date = null;
-        this.row = [];
-        this.dialogRef.close();
+        this.notificationService.success("Purchase data Succefully Add");
+        this.isReload = true;
+        this.dialogRef.close({ 'isReload': true });
+      }, error => {
+        this.notificationService.failure("Error saving extra purchase data");
       });
   }
 
@@ -163,6 +161,7 @@ export class AddExtraPurchaseComponent implements OnInit {
         filteredData.find(item => item.extraType === 'XP Petrol') || {
           id: this.purchase?.id,
           extraType: 'XP Petrol',
+          skuNumber: '',
           extra_quantity: '',
           extra_total: '',
           extra_vat: '',
@@ -177,6 +176,7 @@ export class AddExtraPurchaseComponent implements OnInit {
         filteredData.find(item => item.extraType === 'Power Diesel') || {
           id: this.purchase?.id,
           extraType: 'Power Diesel',
+          skuNumber: '',
           extra_quantity: '',
           extra_total: '',
           extra_vat: '',

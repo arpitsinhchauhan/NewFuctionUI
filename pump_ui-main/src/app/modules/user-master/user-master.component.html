@@ -2,22 +2,24 @@
   <div class="card-modern">
     <div class="card-header-modern">
       <div class="header-main">
-        <h4 class="card-title-modern">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'User Management
-          Master' : 'Employee Management Master' }}</h4>
-        <!-- <p class="text-muted small mb-0">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Manage system users, roles, and permissions' : 'Manage your pump employees' }}</p> -->
+        <h4 class="card-title-modern">
+          {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'User Management Master' : 'Employee Management Master' }}
+        </h4>
+        <p class="header-subtitle text-muted small mb-0">
+          {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Manage station managers, employees, and pump assignments' : 'Manage staff, fuel stations, and nozzle configurations' }}
+        </p>
       </div>
       <div class="header-actions">
         <div class="search-container-modern">
           <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter(searchTerm)" class="search-box-premium"
-            placeholder="Search users...">
+            placeholder="Search by user, pump, or role...">
           <button class="search-btn-premium" (click)="applyFilter(searchTerm)">
             <mat-icon>search</mat-icon>
           </button>
         </div>
         <button mat-flat-button color="primary" class="premium-btn-primary" (click)="addUser()">
           <mat-icon>person_add</mat-icon>
-          <span>{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Add New User' : 'Add New Employee'
-            }}</span>
+          <span>{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Add New User' : 'Add New Employee' }}</span>
         </button>
       </div>
     </div>
@@ -26,30 +28,88 @@
       <table class="modern-table">
         <thead>
           <tr>
-            <th>Username</th>
-            <th>Email Address</th>
-            <th>Full Name</th>
-            <th>Phone Number</th>
-            <th>System Role</th>
+            <th>Employee / User</th>
+            <th>Assigned Petrol Pump</th>
+            <th>System Role & Manager</th>
+            <th>Contact Details</th>
+            <th>Nozzle Count</th>
             <th class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of userList | paginate: { itemsPerPage: 4, currentPage: currentPage }; trackBy: trackById">
+          <tr *ngFor="let item of userList | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; trackBy: trackById">
+            <!-- Employee / User Name -->
             <td>
               <div class="user-cell">
-                <div class="user-avatar">{{ item.username.charAt(0) | uppercase }}</div>
-                <span class="font-weight-medium">{{ item.username }}</span>
+                <div class="user-avatar" 
+                  [class.avatar-manager]="item.role === 'PUMP_MANAGER' || item.role === 'user'" 
+                  [class.avatar-admin]="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN'">
+                  {{ (item.lastName || item.username || 'U').charAt(0) | uppercase }}
+                </div>
+                <div class="user-info-stacked">
+                  <span class="user-name-title">{{ item.lastName || item.username }}</span>
+                  <span class="user-handle"><mat-icon class="inline-icon">alternate_email</mat-icon>{{ item.username }}</span>
+                </div>
               </div>
             </td>
-            <td>{{ item.email }}</td>
-            <td>{{ item.firstName }} {{ item.lastName }}</td>
-            <td>{{ item.phoneNumber }}</td>
+
+            <!-- Assigned Petrol Pump Station -->
             <td>
-              <span class="status-pill" [class.success]="item.role === 'ADMIN'" [class.info]="item.role !== 'ADMIN'">
-                {{ item.role }}
+              <div *ngIf="item.firstName" class="pump-badge">
+                <mat-icon class="pump-icon">local_gas_station</mat-icon>
+                <div class="pump-text-group">
+                  <span class="pump-name">{{ item.firstName }}</span>
+                  <span *ngIf="item.role === 'EMPLOYEE'" class="pump-station-sub">Assigned Station</span>
+                  <span *ngIf="item.role === 'PUMP_MANAGER' || item.role === 'user'" class="pump-station-sub pump-owner-sub">Station Owner</span>
+                </div>
+              </div>
+              <span *ngIf="!item.firstName" class="no-pump-text">
+                <mat-icon class="inline-icon">domain_disabled</mat-icon> Head Office
               </span>
             </td>
+
+            <!-- System Role & Manager -->
+            <td>
+              <div class="role-cell-stacked">
+                <span class="status-pill" 
+                  [class.role-admin]="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN'"
+                  [class.role-manager]="item.role === 'PUMP_MANAGER' || item.role === 'user'"
+                  [class.role-employee]="item.role === 'EMPLOYEE'">
+                  {{ item.role === 'PUMP_MANAGER' || item.role === 'user' ? 'Pump Manager' : (item.role === 'EMPLOYEE' ? 'Employee' : item.role) }}
+                </span>
+                <span *ngIf="item.role === 'EMPLOYEE' && item.managerId" class="manager-link">
+                  <mat-icon class="inline-icon">supervisor_account</mat-icon>
+                  Mgr: <strong>{{ getManagerName(item.managerId) }}</strong>
+                </span>
+              </div>
+            </td>
+
+            <!-- Contact Details -->
+            <td>
+              <div class="contact-stacked">
+                <div *ngIf="item.email" class="contact-row" [title]="item.email">
+                  <mat-icon class="contact-icon">mail_outline</mat-icon>
+                  <span class="contact-text">{{ item.email }}</span>
+                </div>
+                <div *ngIf="item.phoneNumber" class="contact-row">
+                  <mat-icon class="contact-icon">phone_android</mat-icon>
+                  <span class="contact-text">{{ item.phoneNumber }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Nozzle Count -->
+            <td>
+              <div class="nozzle-badges" *ngIf="item.role !== 'SUPER_ADMIN' && item.role !== 'ADMIN'">
+                <span class="nozzle-chip chip-petrol" title="Petrol Nozzles"><strong>P:</strong> {{ item.petrol_nozzle || 0 }}</span>
+                <span class="nozzle-chip chip-diesel" title="Diesel Nozzles"><strong>D:</strong> {{ item.diesel_nozzle || 0 }}</span>
+                <span class="nozzle-chip chip-xp" title="XP Petrol Nozzles" *ngIf="item.xp_petrol_nozzle > 0"><strong>XP:</strong> {{ item.xp_petrol_nozzle }}</span>
+                <span class="nozzle-chip chip-power" title="Power Diesel Nozzles" *ngIf="item.powe_diesel_nozzle > 0"><strong>PWR:</strong> {{ item.powe_diesel_nozzle }}</span>
+              </div>
+              <span *ngIf="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN'" class="text-muted small">HQ (All)</span>
+            </td>
+
+            <!-- Actions -->
             <td class="text-center">
               <div class="action-buttons">
                 <button mat-icon-button class="btn-action-edit" (click)="editUser(item)" title="Edit User">
@@ -67,8 +127,7 @@
 
     <div class="card-footer-modern">
       <div class="pagination-info">
-        Displaying {{ userList.length }} total {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'users' :
-        'employees' }}
+        Displaying {{ userList.length }} total {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'users' : 'employees' }}
       </div>
       <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
     </div>

@@ -313,20 +313,26 @@
                 <span class="summary-label">Customer Deposits (Jama)</span>
                 <span class="summary-value text-success">₹{{ jamaTotal | number:'1.2-2' }}</span>
               </div>
-              <div class="summary-item purchase-summary-item"  *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="creditNoteIOCL()">
+              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'"
+                (click)="creditNoteIOCL()">
                 <span class="summary-label">Indirect Incomes</span>
                 <span class="summary-value text-success">₹{{ creditNOteIOCL | number:'1.2-2' }}</span>
               </div>
-              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="openPurchase()">
+              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'"
+                (click)="openPurchase()">
                 <span class="summary-label">Fuel Purchase (Petrol/Diesel)</span>
-                <span class="summary-value text-info font-weight-bold"><u>{{ (petolQuantity || 0) | number:'1.2-2' }} / {{ (dieselQuantity || 0) | number:'1.2-2' }}</u></span>
+                <span class="summary-value text-info font-weight-bold"><u>{{ (petolQuantity || 0) | number:'1.2-2' }} /
+                    {{ (dieselQuantity || 0) | number:'1.2-2' }}</u></span>
               </div>
-              <div class="summary-item purchase-summary-item" *ngIf="(userRole !== 'EMPLOYEE' && userRole !== 'employee') && (showXpPetrolCount > 0 || showPowerDieselCount > 0)"
+              <div class="summary-item purchase-summary-item"
+                *ngIf="(userRole !== 'EMPLOYEE' && userRole !== 'employee') && (showXpPetrolCount > 0 || showPowerDieselCount > 0)"
                 (click)="openExtraPurchase()">
                 <span class="summary-label">Extra Fuel Purchase (XP/Power)</span>
-                <span class="summary-value text-info font-weight-bold"><u>{{ (xpPetolQuantity || 0) | number:'1.2-2' }} / {{ (powerDieselQuantity || 0) | number:'1.2-2' }}</u></span>
+                <span class="summary-value text-info font-weight-bold"><u>{{ (xpPetolQuantity || 0) | number:'1.2-2' }}
+                    / {{ (powerDieselQuantity || 0) | number:'1.2-2' }}</u></span>
               </div>
-              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'" (click)="openOilPurchase()">
+              <div class="summary-item purchase-summary-item" *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'"
+                (click)="openOilPurchase()">
                 <span class="summary-label">Lube Oil Purchase</span>
                 <span class="summary-value text-info">{{ (oilQuantity || 0) | number:'1.2-2' }} </span>
               </div>
@@ -450,7 +456,8 @@
             <mat-icon>picture_as_pdf</mat-icon>
             <span>Download PDF</span>
           </button>
-          <button *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee' || userRole === 'PUMP_MANAGER' || userRole === 'pumpmanager' || userRole === 'user'"
+          <button
+            *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee' || userRole === 'PUMP_MANAGER' || userRole === 'pumpmanager' || userRole === 'user'"
             class="btn-premium btn-premium-primary btn-md" (click)="Submit()">
             <mat-icon>save</mat-icon>
             <span>Finalize &amp; Save Report</span>

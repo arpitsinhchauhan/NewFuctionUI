@@ -54,6 +54,7 @@ export class ExtraPurchasePdfExcelComponent implements OnInit {
     const totalRow = {
       date: 'Total',
       extra_type: '',
+      skuNumber: '',
       extra_quantity: '',
       extra_total: '',
       extra_vat: '',

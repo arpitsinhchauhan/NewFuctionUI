@@ -28,6 +28,7 @@
           </th>
           <th>Date</th>
           <th>Type</th>
+          <th>SKU Number</th>
           <th class="text-right">Quantity</th>
           <th class="text-right">Total</th>
           <th class="text-right">VAT</th>
@@ -43,6 +44,7 @@
           </td>
           <td>{{items.date | date: 'dd-MM-yyyy'}}</td>
           <td>{{items.extraType}}</td>
+          <td>{{items.skuNumber || '-'}}</td>
           <td class="text-right">{{items.extra_quantity}}</td>
           <td class="text-right">{{items.extra_total}}</td>
           <td class="text-right">{{items.extra_vat}}</td>
@@ -53,7 +55,7 @@
       </tbody>
       <tfoot>
         <tr class="footer-row">
-          <td colspan="8" class="text-right"><strong>Grand Total Extra Purchase:</strong></td>
+          <td colspan="9" class="text-right"><strong>Grand Total Extra Purchase:</strong></td>
           <td class="text-right text-primary font-weight-bold h5 mb-0">
             ₹{{ getTotalPurchase() | number:'1.2-2' }}
           </td>

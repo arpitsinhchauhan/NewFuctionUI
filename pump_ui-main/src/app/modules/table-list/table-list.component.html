@@ -31,6 +31,7 @@
             </th>
             <th *ngIf="role !== 'EMPLOYEE' && role !== 'employee'">Employee</th>
             <th>Type</th>
+            <th>SKU Number</th>
             <th>Quantity</th>
             <th>Base Total</th>
             <th>VAT</th>
@@ -48,6 +49,10 @@
             </td>
             <td>
               <span class="status-pill info">{{ item.type }}</span>
+            </td>
+            <td>
+              <span class="badge badge-secondary" *ngIf="item.skuNumber">{{ item.skuNumber }}</span>
+              <span class="text-muted" *ngIf="!item.skuNumber">-</span>
             </td>
             <td>{{ item.quantity | number }} L</td>
             <td>₹{{ item.total | number:'1.2-2' }}</td>

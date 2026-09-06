@@ -21,12 +21,14 @@ export interface AggregatedDataDTO {
   powerdieselCloseMeter?: number;
   oilTotalPrice: number;
   kharchTotal: number;
+  petrolSkuNumber?: string;
   petrolQuantity: number;
   petrolTotal: number;
   petrolVat: number;
   petrolCess: number;
   petrolJtcpercentage: number;
   petrolTotalPurchase: number;
+  dieselSkuNumber?: string;
   dieselQuantity: number;
   dieselTotal: number;
   dieselVat: number;
@@ -68,6 +70,7 @@ export interface AggregatedDataDTO {
   powerdieselTotalSell: number;
 
   // ✅ New XP Petrol purchase fields
+  xppetrolSkuNumber?: string;
   xppetrolQuantity: number;
   xppetrolTotal: number;
   xppetrolVat: number;
@@ -76,6 +79,7 @@ export interface AggregatedDataDTO {
   xppetrolTotalPurchase: number;
 
   // ✅ New Power Diesel purchase fields
+  powerdieselSkuNumber?: string;
   powerdieselQuantity: number;
   powerdieselTotal: number;
   powerdieselVat: number;
@@ -88,6 +92,13 @@ export interface AggregatedDataDTO {
   dieselgatt: number;
   xppetrolgatt: number;
   power_dieselgatt: number;
+
+  petrolgatt_Total?: number;
+  dieselgatt_Total?: number;
+  xppetrolgatt_Total?: number;
+  power_dieselgatt_Total?: number;
+  xppetrolRate?: number;
+  powerdieselRate?: number;
 
   locl_balance_Total: number;
   totalValue?: number;

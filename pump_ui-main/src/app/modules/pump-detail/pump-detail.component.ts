@@ -203,6 +203,7 @@ export class PumpDetailComponent implements OnInit {
         g.oilTaxableValue = (g.oilTaxableValue || 0) + (item.oilTaxableValue || 0);
         g.oilDiscount = (g.oilDiscount || 0) + (item.oilDiscount || 0);
         // ── Petrol Purchase ──
+        if (!g.petrolSkuNumber && item.petrolSkuNumber) g.petrolSkuNumber = item.petrolSkuNumber;
         g.petrolQuantity = (g.petrolQuantity || 0) + (item.petrolQuantity || 0);
         g.petrolTotal = (g.petrolTotal || 0) + (item.petrolTotal || 0);
         g.petrolVat = (g.petrolVat || 0) + (item.petrolVat || 0);
@@ -210,12 +211,18 @@ export class PumpDetailComponent implements OnInit {
         g.petrolJtcpercentage = (g.petrolJtcpercentage || 0) + (item.petrolJtcpercentage || 0);
         g.petrolTotalPurchase = (g.petrolTotalPurchase || 0) + (item.petrolTotalPurchase || 0);
         // ── Diesel Purchase ──
+        if (!g.dieselSkuNumber && item.dieselSkuNumber) g.dieselSkuNumber = item.dieselSkuNumber;
         g.dieselQuantity = (g.dieselQuantity || 0) + (item.dieselQuantity || 0);
         g.dieselTotal = (g.dieselTotal || 0) + (item.dieselTotal || 0);
         g.dieselVat = (g.dieselVat || 0) + (item.dieselVat || 0);
         g.dieselCess = (g.dieselCess || 0) + (item.dieselCess || 0);
         g.dieselJtcpercentage = (g.dieselJtcpercentage || 0) + (item.dieselJtcpercentage || 0);
         g.dieselTotalPurchase = (g.dieselTotalPurchase || 0) + (item.dieselTotalPurchase || 0);
+        // ── XP & Power SKU ──
+        if (!g.xppetrolSkuNumber && item.xppetrolSkuNumber) g.xppetrolSkuNumber = item.xppetrolSkuNumber;
+        if (!g.powerdieselSkuNumber && item.powerdieselSkuNumber) g.powerdieselSkuNumber = item.powerdieselSkuNumber;
+        if (!g.oilSkuNumber && item.oilSkuNumber) g.oilSkuNumber = item.oilSkuNumber;
+        if (!g.oilSkuName && item.oilSkuName) g.oilSkuName = item.oilSkuName;
         // ── Financials ──
         g.kharchTotal = (g.kharchTotal || 0) + (item.kharchTotal || 0);
         g.amountTotal = (g.amountTotal || 0) + (item.amountTotal || 0);
@@ -279,6 +286,13 @@ export class PumpDetailComponent implements OnInit {
     if (!Array.isArray(expensesList)) return 0;
     const exp = expensesList.find(e => e.expenses === header);
     return exp ? Number(exp.total_price) : 0;
+  }
+
+  public getExpenseTotal(header: string): number {
+    return this.productList.reduce((sum, item) => {
+      const match = item.expensesList?.find((exp: any) => exp.expenses === header);
+      return sum + (match ? (Number(match.total_price) || 0) : 0);
+    }, 0);
   }
 
   calculateTotals() {
@@ -493,10 +507,92 @@ export class PumpDetailComponent implements OnInit {
   exportToExcel(): void {
 
     const dataForExcel = this.productList.map(item => {
-      const row: any = { ...item };
+      const row: any = {
+        date: item.date || "",
+        // Petrol Sale
+        petrolTotalSum: item.petrolTotalSum ?? 0,
+        petrolRate: item.petrolRate ?? 0,
+        petrolTotalTotalSell: item.petrolTotalTotalSell ?? 0,
+        petrolgatt_Total: item.petrolgatt_Total ?? 0,
+        // Diesel Sale
+        dieselTotalSum: item.dieselTotalSum ?? 0,
+        dieselRate: item.dieselRate ?? 0,
+        dieselTotalTotalSell: item.dieselTotalTotalSell ?? 0,
+        dieselgatt_Total: item.dieselgatt_Total ?? 0,
+        oilTotalPrice: item.oilTotalPrice ?? 0,
+        kharchTotal: item.kharchTotal ?? 0,
+        // Petrol Purchase
+        petrolSkuNumber: item.petrolSkuNumber || "",
+        petrolQuantity: item.petrolQuantity ?? 0,
+        petrolTotal: item.petrolTotal ?? 0,
+        petrolVat: item.petrolVat ?? 0,
+        petrolCess: item.petrolCess ?? 0,
+        petrolJtcpercentage: item.petrolJtcpercentage ?? 0,
+        petrolTotalPurchase: item.petrolTotalPurchase ?? 0,
+        // Diesel Purchase
+        dieselSkuNumber: item.dieselSkuNumber || "",
+        dieselQuantity: item.dieselQuantity ?? 0,
+        dieselTotal: item.dieselTotal ?? 0,
+        dieselVat: item.dieselVat ?? 0,
+        dieselCess: item.dieselCess ?? 0,
+        dieselJtcpercentage: item.dieselJtcpercentage ?? 0,
+        dieselTotalPurchase: item.dieselTotalPurchase ?? 0,
+        // Oil Purchase
+        oilQuantity: item.oilQuantity ?? 0,
+        oilType: item.oilType || "",
+        oilGstPercentage: item.oilGstPercentage ?? 0,
+        oilHsn: item.oilHsn || "",
+        oilMrp: item.oilMrp ?? 0,
+        oilNetAmount: item.oilNetAmount ?? 0,
+        oilNetTotal: item.oilNetTotal ?? 0,
+        oilQtyLtrOrKg: item.oilQtyLtrOrKg ?? 0,
+        oilRate: item.oilRate ?? 0,
+        oilSkuName: item.oilSkuName || "",
+        oilSkuNumber: item.oilSkuNumber || "",
+        oilTaxableValue: item.oilTaxableValue ?? 0,
+        oilUnit: item.oilUnit || "",
+        oilVendorName: item.oilVendorName || "",
+        oilCessAmount: item.oilCessAmount ?? 0,
+        oilCessPercentage: item.oilCessPercentage ?? 0,
+        oilDiscount: item.oilDiscount ?? 0,
+        oilGstAmount: item.oilGstAmount ?? 0,
+        // Financials
+        amountTotal: item.amountTotal ?? 0,
+        jamaTotal: item.jamaTotal ?? 0,
+        bakiTotal: item.bakiTotal ?? 0,
+        locl_balance_Total: item.locl_balance_Total ?? 0,
+        // XP Petrol Sale
+        xppetrolTotalSum: item.xppetrolTotalSum ?? 0,
+        xppetrolRate: item.xppetrolRate ?? 0,
+        xppetrolTotalSell: item.xppetrolTotalSell ?? 0,
+        xppetrolgatt_Total: item.xppetrolgatt_Total ?? 0,
+        // XP Petrol Purchase
+        xppetrolSkuNumber: item.xppetrolSkuNumber || "",
+        xppetrolQuantity: item.xppetrolQuantity ?? 0,
+        xppetrolTotal: item.xppetrolTotal ?? 0,
+        xppetrolVat: item.xppetrolVat ?? 0,
+        xppetrolCess: item.xppetrolCess ?? 0,
+        xppetrolJtcpercentage: item.xppetrolJtcpercentage ?? 0,
+        xppetrolTotalPurchase: item.xppetrolTotalPurchase ?? 0,
+        // Power Diesel Sale
+        powerdieselTotalSum: item.powerdieselTotalSum ?? 0,
+        powerdieselRate: item.powerdieselRate ?? 0,
+        powerdieselTotalSell: item.powerdieselTotalSell ?? 0,
+        power_dieselgatt_Total: item.power_dieselgatt_Total ?? 0,
+        // Power Diesel Purchase
+        powerdieselSkuNumber: item.powerdieselSkuNumber || "",
+        powerdieselQuantity: item.powerdieselQuantity ?? 0,
+        powerdieselTotal: item.powerdieselTotal ?? 0,
+        powerdieselVat: item.powerdieselVat ?? 0,
+        powerdieselCess: item.powerdieselCess ?? 0,
+        powerdieselJtcpercentage: item.powerdieselJtcpercentage ?? 0,
+        powerdieselTotalPurchase: item.powerdieselTotalPurchase ?? 0,
+        totalValue: item.totalValue ?? 0
+      };
+
       if (item.expensesList) {
         item.expensesList.forEach((exp: any) => {
-          row[exp.expenses] = exp.total_price;
+          row[exp.expenses] = Number(exp.total_price) || 0;
         });
       }
 
@@ -505,32 +601,37 @@ export class PumpDetailComponent implements OnInit {
 
     const totalsRow: any = {
       date: "Total",
-      petrolTotalOpenMeter: this.productList.reduce((sum, item) => sum + (item.petrolTotalOpenMeter || 0), 0),
-      petrolTotalCloseMeter: this.productList.reduce((sum, item) => sum + (item.petrolTotalCloseMeter || 0), 0),
+      // Petrol Sale
       petrolTotalSum: this.totalPetrolSum,
+      petrolRate: "",
       petrolTotalTotalSell: this.totalPetroltotalsum,
-      dieselTotalOpenMeter: this.productList.reduce((sum, item) => sum + (item.dieselTotalOpenMeter || 0), 0),
-      dieselTotalCloseMeter: this.productList.reduce((sum, item) => sum + (item.dieselTotalCloseMeter || 0), 0),
+      petrolgatt_Total: this.productList.reduce((sum, item) => sum + (item.petrolgatt_Total || 0), 0),
+      // Diesel Sale
       dieselTotalSum: this.totalDieselsum,
+      dieselRate: "",
       dieselTotalTotalSell: this.totalDieseltotalSum,
+      dieselgatt_Total: this.productList.reduce((sum, item) => sum + (item.dieselgatt_Total || 0), 0),
       oilTotalPrice: this.totalOilTotalPrice,
       kharchTotal: this.totalKharchTotal,
+      // Petrol Purchase
+      petrolSkuNumber: "",
       petrolQuantity: this.totalPetrolQuantity,
       petrolTotal: this.totalPetrolTotal,
       petrolVat: this.totalPetrolVat,
       petrolCess: this.totalPetrolCess,
       petrolJtcpercentage: this.totalPetrolJtcpercentage,
       petrolTotalPurchase: this.totalPetrolTotalPurchase,
+      // Diesel Purchase
+      dieselSkuNumber: "",
       dieselQuantity: this.totalDieselQuantity,
       dieselTotal: this.totalDieselTotal,
       dieselVat: this.totalDieselVat,
       dieselCess: this.totalDieselCess,
       dieselJtcpercentage: this.totalDieselJtcpercentage,
       dieselTotalPurchase: this.totalDieselTotalPurchase,
-      oilId: "",
+      // Oil Purchase
       oilQuantity: this.totalOilQuantity,
       oilType: "",
-      oilUserId: "",
       oilGstPercentage: this.totalOilGstPercentage,
       oilHsn: "",
       oilMrp: this.totalOilMrp,
@@ -547,24 +648,31 @@ export class PumpDetailComponent implements OnInit {
       oilCessPercentage: this.totalOilCessPercentage,
       oilDiscount: this.totalOilDiscount,
       oilGstAmount: this.totalOilGstAmount,
+      // Financials
       amountTotal: this.totalAmountTotal,
       jamaTotal: this.totalJamaTotal,
       bakiTotal: this.totalBakiTotal,
       locl_balance_Total: this.totalloclTotal,
-      xppetrolOpenMeter: this.productList.reduce((sum, item) => sum + (item.xppetrolOpenMeter || 0), 0),
-      xppetrolCloseMeter: this.productList.reduce((sum, item) => sum + (item.xppetrolCloseMeter || 0), 0),
+      // XP Petrol Sale
       xppetrolTotalSum: this.totalXpPetrolTotalSum,
+      xppetrolRate: "",
       xppetrolTotalSell: this.totalXpPetrolTotalSell,
+      xppetrolgatt_Total: this.productList.reduce((sum, item) => sum + (item.xppetrolgatt_Total || 0), 0),
+      // XP Petrol Purchase
+      xppetrolSkuNumber: "",
       xppetrolQuantity: this.totalXpPetrolQuantity,
       xppetrolTotal: this.totalXpPetrolTotal,
       xppetrolVat: this.totalXpPetrolVat,
       xppetrolCess: this.totalXpPetrolCess,
       xppetrolJtcpercentage: this.totalXpPetrolJtcpercentage,
       xppetrolTotalPurchase: this.totalXpPetrolTotalPurchase,
-      powerdieselOpenMeter: this.productList.reduce((sum, item) => sum + (item.powerdieselOpenMeter || 0), 0),
-      powerdieselCloseMeter: this.productList.reduce((sum, item) => sum + (item.powerdieselCloseMeter || 0), 0),
+      // Power Diesel Sale
       powerdieselTotalSum: this.totalPowerDieselTotalSum,
+      powerdieselRate: "",
       powerdieselTotalSell: this.totalPowerDieselTotalSell,
+      power_dieselgatt_Total: this.productList.reduce((sum, item) => sum + (item.power_dieselgatt_Total || 0), 0),
+      // Power Diesel Purchase
+      powerdieselSkuNumber: "",
       powerdieselQuantity: this.totalPowerDieselQuantity,
       powerdieselTotal: this.totalPowerDieselTotal,
       powerdieselVat: this.totalPowerDieselVat,
@@ -577,7 +685,7 @@ export class PumpDetailComponent implements OnInit {
     this.expenseHeaders.forEach(header => {
       totalsRow[header] = this.productList.reduce((sum, item) => {
         const match = item.expensesList?.find((exp: any) => exp.expenses === header);
-        return sum + (match ? match.total_price : 0);
+        return sum + (match ? (Number(match.total_price) || 0) : 0);
       }, 0);
     });
 
@@ -585,48 +693,44 @@ export class PumpDetailComponent implements OnInit {
 
     const headerOrder = [
       "date",
-      "petrolTotalOpenMeter", "petrolTotalCloseMeter", "petrolTotalSum", "petrolRate", "petrolTotalTotalSell", "petrolgatt_Total",
-      "dieselTotalOpenMeter", "dieselTotalCloseMeter", "dieselTotalSum", "dieselRate", "dieselTotalTotalSell", "dieselgatt_Total",
+      "petrolTotalSum", "petrolRate", "petrolTotalTotalSell", "petrolgatt_Total",
+      "dieselTotalSum", "dieselRate", "dieselTotalTotalSell", "dieselgatt_Total",
       "oilTotalPrice", "kharchTotal",
-      "petrolQuantity", "petrolTotal", "petrolVat", "petrolCess", "petrolJtcpercentage",
-      "petrolTotalPurchase",
-      "dieselQuantity", "dieselTotal", "dieselVat", "dieselCess",
-      "dieselJtcpercentage", "dieselTotalPurchase",
+      "petrolSkuNumber", "petrolQuantity", "petrolTotal", "petrolVat", "petrolCess", "petrolJtcpercentage", "petrolTotalPurchase",
+      "dieselSkuNumber", "dieselQuantity", "dieselTotal", "dieselVat", "dieselCess", "dieselJtcpercentage", "dieselTotalPurchase",
       "oilQuantity", "oilType", "oilGstPercentage",
       "oilHsn", "oilMrp", "oilNetAmount", "oilNetTotal", "oilQtyLtrOrKg", "oilRate",
       "oilSkuName", "oilSkuNumber", "oilTaxableValue", "oilUnit", "oilVendorName",
       "oilCessAmount", "oilCessPercentage", "oilDiscount", "oilGstAmount",
       "amountTotal", "jamaTotal", "bakiTotal", "locl_balance_Total",
-      "xppetrolOpenMeter", "xppetrolCloseMeter", "xppetrolTotalSum", "xppetrolRate", "xppetrolTotalSell", "xppetrolgatt_Total",
-      "xppetrolQuantity", "xppetrolTotal", "xppetrolVat", "xppetrolCess", "xppetrolJtcpercentage", "xppetrolTotalPurchase",
-      "powerdieselOpenMeter", "powerdieselCloseMeter", "powerdieselTotalSum", "powerdieselRate", "powerdieselTotalSell", "power_dieselgatt_Total",
-      "powerdieselQuantity", "powerdieselTotal", "powerdieselVat", "powerdieselCess", "powerdieselJtcpercentage", "powerdieselTotalPurchase",
+      "xppetrolTotalSum", "xppetrolRate", "xppetrolTotalSell", "xppetrolgatt_Total",
+      "xppetrolSkuNumber", "xppetrolQuantity", "xppetrolTotal", "xppetrolVat", "xppetrolCess", "xppetrolJtcpercentage", "xppetrolTotalPurchase",
+      "powerdieselTotalSum", "powerdieselRate", "powerdieselTotalSell", "power_dieselgatt_Total",
+      "powerdieselSkuNumber", "powerdieselQuantity", "powerdieselTotal", "powerdieselVat", "powerdieselCess", "powerdieselJtcpercentage", "powerdieselTotalPurchase",
       "totalValue",
       ...this.expenseHeaders
     ];
 
     const headerDisplayMap: any = {
       date: "Date",
-      petrolTotalOpenMeter: "Petrol Open Meter",
-      petrolTotalCloseMeter: "Petrol Close Meter",
       petrolTotalSum: "Petrol Sale LTR",
       petrolRate: "Petrol Sale Rate",
       petrolTotalTotalSell: "Petrol Sale Rs",
       petrolgatt_Total: "Petrol Gatt LTR",
-      dieselTotalOpenMeter: "Diesel Open Meter",
-      dieselTotalCloseMeter: "Diesel Close Meter",
       dieselTotalSum: "Diesel Sale LTR",
       dieselRate: "Diesel Sale Rate",
       dieselTotalTotalSell: "Diesel Sale Rs",
       dieselgatt_Total: "Diesel Gatt LTR",
       oilTotalPrice: "Oil Sale Total Rs",
       kharchTotal: "Indirect Expenses Rs",
+      petrolSkuNumber: "Petrol Purchase SKU Number",
       petrolQuantity: "Petrol Purchase Ltr",
       petrolTotal: "Petrol Purchase Rs",
       petrolVat: "Petrol Purchase Vat",
       petrolCess: "Petrol Purchase Cess",
       petrolJtcpercentage: "Petrol Purchase JTC",
       petrolTotalPurchase: "Petrol Purchase Total Rs",
+      dieselSkuNumber: "Diesel Purchase SKU Number",
       dieselQuantity: "Diesel Purchase Ltr",
       dieselTotal: "Diesel Purchase Rs",
       dieselVat: "Diesel Purchase Vat",
@@ -655,24 +759,22 @@ export class PumpDetailComponent implements OnInit {
       jamaTotal: "Customer Credit Bill",
       bakiTotal: "Customer Outstanding Bill",
       locl_balance_Total: "Credit Total",
-      xppetrolOpenMeter: "XP Petrol Open Meter",
-      xppetrolCloseMeter: "XP Petrol Close Meter",
       xppetrolTotalSum: "XP Petrol Sale LTR",
       xppetrolRate: "XP Petrol Sale Rate",
       xppetrolTotalSell: "XP Petrol Sale Rs",
       xppetrolgatt_Total: "XP Petrol Gatt LTR",
+      xppetrolSkuNumber: "XP Petrol Purchase SKU Number",
       xppetrolQuantity: "XP Petrol Purchase Ltr",
       xppetrolTotal: "XP Petrol Purchase Rs",
       xppetrolVat: "XP Petrol Purchase Vat",
       xppetrolCess: "XP Petrol Purchase Cess",
       xppetrolJtcpercentage: "XP Petrol Purchase JTC",
       xppetrolTotalPurchase: "XP Petrol Purchase Total Rs",
-      powerdieselOpenMeter: "Power Diesel Open Meter",
-      powerdieselCloseMeter: "Power Diesel Close Meter",
       powerdieselTotalSum: "Power Diesel Sale LTR",
       powerdieselRate: "Power Diesel Sale Rate",
       powerdieselTotalSell: "Power Diesel Sale Rs",
       power_dieselgatt_Total: "Power Diesel Gatt LTR",
+      powerdieselSkuNumber: "Power Diesel Purchase SKU Number",
       powerdieselQuantity: "Power Diesel Purchase Ltr",
       powerdieselTotal: "Power Diesel Purchase Rs",
       powerdieselVat: "Power Diesel Purchase Vat",

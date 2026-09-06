@@ -35,6 +35,7 @@ export const API_XP_PETROL_CURRENTYEAR_DATE: string = `${prefix}/portal/api/XPpe
 export const API_POWER_DIESEL_CURRENTYEAR_DATE: string = `${prefix}/portal/api/Powerdiesel-year-total`;
 export const API_JAMABAKI_CURRENTYEAR_DATE: string = `${prefix}/portal/api/jamabaki-year-total`;
 export const API_OIL_PURCHASE_CURRENTYEAR_DATE: string = `${prefix}/portal/api/oil-purchase-year-total`;
+export const API_DASHBOARD_DISTRIBUTION: string = `${prefix}/portal/api/dashboard-distribution`;
 
 // Purchase Sell
 export const API_PURCHASE_LIST: string = `${prefix}/portal/api/purchasesList`;
@@ -208,6 +209,9 @@ export const API_DIESEL_STOCK_ADDEDIT = `${prefix}/portal/api/dieselStockAddEdit
 export const API_XP_PETROL_STOCK_ADDEDIT = `${prefix}/portal/api/XPpetrolStockAddEdit`;
 export const API_POWER_DIESEL_STOCK_ADDEDIT = `${prefix}/portal/api/PowerdieselStockAddEdit`;
 
+export const API_DASHBOARD_CURRENT_STOCK: string = `${prefix}/portal/api/dashboard/current-stock`;
+export const API_TANK_CONFIG: string = `${prefix}/portal/api/tank/config`;
+
 export const API_GATT: string = `${prefix}/portal/api/gattList`;
 export const API_GATT_ADDEDIT = `${prefix}/portal/api/gattAddEdit`;
 
@@ -335,6 +339,7 @@ export const API_GET_EMPLOYEE_REPORTS: string = `${prefix}/portal/api/dailyRepor
 export const API_GET_MANAGER_REPORTS: string = `${prefix}/portal/api/dailyReport/manager`;
 export const API_MANAGER_DAILY_REPORTS: string = `${prefix}/portal/api/manager/daily-report`;
 export const API_UPDATE_DAILY_REPORT: string = `${prefix}/portal/api/dailyReport`;
+export const API_MY_DAILY_REPORTS: string = `${prefix}/portal/api/dailyReport/my-reports`;
 
 export const API_FORGOT_PASSWORD_DIRECT: string = `${prefix}/portal/api/forgotPassword/resetDirect`;
 

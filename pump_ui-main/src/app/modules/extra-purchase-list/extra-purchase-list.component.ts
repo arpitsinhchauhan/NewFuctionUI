@@ -153,7 +153,10 @@ export class ExtraPurchaseListComponent implements OnInit {
     }
 
     this.extraPurchaseList = this.extraPurchaseList.filter((item: any) =>
+      (item.extraType && item.extraType.toLowerCase().includes(term)) ||
+      (item.skuNumber && item.skuNumber.toLowerCase().includes(term)) ||
       (item.type && item.type.toLowerCase().includes(term)) ||
+      (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );
   }

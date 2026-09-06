@@ -98,6 +98,9 @@ export class UserProfileComponent implements OnInit {
     this.userId = localStorage.getItem('userId');
     this.role = localStorage.getItem('role') || 'Owner';
     this.isManager = this.role === 'PUMP_MANAGER' || this.role === 'user';
+    this.dailyReports = [];
+    this.totalReportsSales = 0;
+    this.totalSubmissionsCount = 0;
     this.getdata();
     this.getUserName();
     this.getDailyReports();

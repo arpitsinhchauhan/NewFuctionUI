@@ -28,6 +28,7 @@
         <thead>
           <tr>
             <th>Product Type</th>
+            <th>SKU Number</th>
             <th>Quantity (LTR)</th>
             <th>Base Total (₹)</th>
             <th>VAT (₹)</th>
@@ -39,6 +40,9 @@
         <tbody>
           <tr *ngFor="let item of row; let i = index">
             <td class="font-weight-bold text-dark align-middle">{{ item.type }}</td>
+            <td>
+              <input type="text" [(ngModel)]="item.skuNumber" class="report-input text-center" placeholder="e.g. SKU-101" />
+            </td>
             <td>
               <input type="number" [(ngModel)]="item.quantity" class="report-input no-spinner text-right" [ngClass]="{'invalid-input': !isNumber(item.quantity)}" placeholder="0.00" />
             </td>

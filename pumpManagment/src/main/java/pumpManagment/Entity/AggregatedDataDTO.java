@@ -93,6 +93,7 @@ public class AggregatedDataDTO {
     private Double powerdieselTotalSell;
 
     // For XP Petrol Purchases
+    private String xppetrolSkuNumber;
     private Double xppetrolQuantity;
     private Double xppetrolTotal;
     private Double xppetrolVat;
@@ -101,12 +102,16 @@ public class AggregatedDataDTO {
     private Double xppetrolTotalPurchase;
 
     // For Power Diesel Purchases
+    private String powerdieselSkuNumber;
     private Double powerdieselQuantity;
     private Double powerdieselTotal;
     private Double powerdieselVat;
     private Double powerdieselCess;
     private Double powerdieselJtcpercentage;
     private Double powerdieselTotalPurchase;
+
+    private String petrolSkuNumber;
+    private String dieselSkuNumber;
 
     private Double petrolgatt_Total;
     private Double dieselgatt_Total;
@@ -839,5 +844,37 @@ public class AggregatedDataDTO {
 
     public void setOilDate(String oilDate) {
         this.oilDate = oilDate;
+    }
+
+    public String getPetrolSkuNumber() {
+        return petrolSkuNumber;
+    }
+
+    public void setPetrolSkuNumber(String petrolSkuNumber) {
+        this.petrolSkuNumber = petrolSkuNumber;
+    }
+
+    public String getDieselSkuNumber() {
+        return dieselSkuNumber;
+    }
+
+    public void setDieselSkuNumber(String dieselSkuNumber) {
+        this.dieselSkuNumber = dieselSkuNumber;
+    }
+
+    public String getXppetrolSkuNumber() {
+        return xppetrolSkuNumber;
+    }
+
+    public void setXppetrolSkuNumber(String xppetrolSkuNumber) {
+        this.xppetrolSkuNumber = xppetrolSkuNumber;
+    }
+
+    public String getPowerdieselSkuNumber() {
+        return powerdieselSkuNumber;
+    }
+
+    public void setPowerdieselSkuNumber(String powerdieselSkuNumber) {
+        this.powerdieselSkuNumber = powerdieselSkuNumber;
     }
 }

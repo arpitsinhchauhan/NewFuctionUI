@@ -65,6 +65,7 @@ export class PuchasePdfExcelComponent implements OnInit {
     const totalRow = {
       date: 'Total',
       type: '',
+      skuNumber: '',
       quantity: '',
       total: '',
       vat: '',

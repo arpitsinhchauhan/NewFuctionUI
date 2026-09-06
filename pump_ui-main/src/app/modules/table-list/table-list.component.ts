@@ -103,6 +103,7 @@ export class TableListComponent implements OnInit, OnDestroy {
     }
     this.productList = this.originalProductList.filter((item: any) =>
       (item.type && item.type.toLowerCase().includes(term)) ||
+      (item.skuNumber && item.skuNumber.toLowerCase().includes(term)) ||
       (item.employeeName && item.employeeName.toLowerCase().includes(term)) ||
       (item.date && item.date.toLowerCase().includes(term))
     );

@@ -65,6 +65,7 @@ import {
   API_GET_MANAGER_REPORTS,
   API_MANAGER_DAILY_REPORTS,
   API_UPDATE_DAILY_REPORT,
+  API_MY_DAILY_REPORTS,
   API_DIESEL_LIST,
   API_DIESEL,
   API_Petrol,
@@ -103,6 +104,9 @@ import {
   API_POWER_DIESEL_STOCK,
   API_XP_PETROL_STOCK_ADDEDIT,
   API_POWER_DIESEL_STOCK_ADDEDIT,
+  API_DASHBOARD_CURRENT_STOCK,
+  API_DASHBOARD_DISTRIBUTION,
+  API_TANK_CONFIG,
   API_GATT,
   API_GATT_ADDEDIT,
   API_DIESEL_GATT,
@@ -155,6 +159,10 @@ export class UserServiceService {
 
   getUserId(): string | null {
     return this.userId;
+  }
+
+  clearUserData() {
+    this.userId = null;
   }
 
   loginIN(username: string, password: string) {
@@ -915,14 +923,29 @@ export class UserServiceService {
     return this.http.put<any>(`${API_UPDATE_DAILY_REPORT}/${id}`, data);
   }
 
+  getMyDailyReports(): Observable<any[]> {
+    return this.http.get<any[]>(API_MY_DAILY_REPORTS);
+  }
+
+  getDailyReportById(id: number): Observable<any> {
+    return this.http.get<any>(`${API_DAILY_REPORT_SUBMIT}/${id}`);
+  }
+
+  deleteDailyReport(id: number): Observable<any> {
+    return this.http.delete<any>(`${API_DAILY_REPORT_SUBMIT}/${id}`, { responseType: 'text' as 'json' });
+  }
+
   resetForgotPasswordDirect(identity: string, newPassword: string): Observable<any> {
     return this.http.post<any>(API_FORGOT_PASSWORD_DIRECT, { identity, newPassword });
   }
 
-  getPreviousClosingMeter(fuelType: string, pump: string, date: string, currentId?: number): Observable<any> {
+  getPreviousClosingMeter(fuelType: string, pump: string, date: string, currentId?: number, userId?: string): Observable<any> {
     let params = new HttpParams().set('fuelType', fuelType).set('pump', pump).set('date', date);
     if (currentId) {
       params = params.set('currentId', currentId.toString());
+    }
+    if (userId) {
+      params = params.set('userId', userId.toString());
     }
     return this.http.get<any>(API_PREVIOUS_CLOSING_METER, { params });
   }
@@ -972,5 +995,24 @@ export class UserServiceService {
     let params = new HttpParams().set('userId', userId);
     if (date) params = params.set('date', date);
     return this.http.get<any>(API_EOD_AUDIT_LOGS, { params });
+  }
+
+  getCurrentTankStock(date: string, userId: string): Observable<any> {
+    const params = new HttpParams().set('date', date).set('userId', userId);
+    return this.http.get<any>(API_DASHBOARD_CURRENT_STOCK, { params });
+  }
+
+  getTankConfigs(userId: string): Observable<any> {
+    const params = new HttpParams().set('userId', userId);
+    return this.http.get<any>(API_TANK_CONFIG, { params });
+  }
+
+  saveTankConfig(config: any): Observable<any> {
+    return this.http.post<any>(API_TANK_CONFIG, config);
+  }
+
+  getDashboardDistribution(userId: string): Observable<any> {
+    const params = new HttpParams().set('userId', userId);
+    return this.http.get<any>(API_DASHBOARD_DISTRIBUTION, { params });
   }
 }
