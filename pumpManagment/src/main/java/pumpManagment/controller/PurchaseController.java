@@ -32,13 +32,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -2753,18 +2756,86 @@ public class PurchaseController {
     public List<AggregatedDataDTO> getAggregatedData(
             @RequestParam String startDate,
             @RequestParam String endDate,
-            @RequestParam String userId) {
+            @RequestParam String userId,
+            @RequestParam(value = "managerId", required = false) String managerId) {
 
-        UserNozzleDTO userData = userRepository.getUserData(Long.parseLong(userId));
+        Set<Long> userIds = new HashSet<>();
+        Long parsedUid = null;
+        try {
+            parsedUid = Long.parseLong(userId.trim());
+            userIds.add(parsedUid);
+        } catch (Exception ignored) {}
 
-        boolean includeXpPetrol = userData != null
-                && parseIntSafe(userData.getXp_petrol_nozzle()) > 0;
+        if (parsedUid != null) {
+            DAOUser currentUser = userRepository.findById(parsedUid).orElse(null);
+            if (currentUser != null) {
+                // If user is tied to a pump, include all users belonging to this pump
+                if (currentUser.getPumpId() != null) {
+                    List<DAOUser> pumpUsers = userRepository.findByPumpId(currentUser.getPumpId());
+                    if (pumpUsers != null) {
+                        for (DAOUser u : pumpUsers) {
+                            if (u.getId() != null) userIds.add(u.getId());
+                        }
+                    }
+                }
+                // If manager, include all employees under this manager
+                List<DAOUser> managedUsers = userRepository.findByManagerId(currentUser.getId());
+                if (managedUsers != null) {
+                    for (DAOUser u : managedUsers) {
+                        if (u.getId() != null) userIds.add(u.getId());
+                    }
+                }
+                // If employee under a manager, include manager and siblings
+                if (currentUser.getManagerId() != null) {
+                    userIds.add(currentUser.getManagerId());
+                    List<DAOUser> siblings = userRepository.findByManagerId(currentUser.getManagerId());
+                    if (siblings != null) {
+                        for (DAOUser u : siblings) {
+                            if (u.getId() != null) userIds.add(u.getId());
+                        }
+                    }
+                }
+            }
+        }
 
-        boolean includePowerDiesel = userData != null
-                && parseIntSafe(userData.getPowe_diesel_nozzle()) > 0;
-        List<Map<String, Object>> myobj = queryThis(startDate, endDate, userId);
+        if (managerId != null && !managerId.trim().isEmpty()) {
+            try {
+                Long mid = Long.parseLong(managerId.trim());
+                userIds.add(mid);
+                List<DAOUser> managed = userRepository.findByManagerId(mid);
+                if (managed != null) {
+                    for (DAOUser u : managed) {
+                        if (u.getId() != null) userIds.add(u.getId());
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
-        List<Object[]> expensesList = kharchrepository.getExpenseSummary(startDate, endDate, userId);
+        if (userIds.isEmpty() && userId != null && !userId.trim().isEmpty()) {
+            try {
+                userIds.add(Long.parseLong(userId.trim()));
+            } catch (Exception ignored) {}
+        }
+
+        List<String> targetUserIds = userIds.stream().map(String::valueOf).collect(Collectors.toList());
+
+        boolean includeXpPetrol = false;
+        boolean includePowerDiesel = false;
+        for (Long id : userIds) {
+            UserNozzleDTO userData = userRepository.getUserData(id);
+            if (userData != null) {
+                if (parseIntSafe(userData.getXp_petrol_nozzle()) > 0) {
+                    includeXpPetrol = true;
+                }
+                if (parseIntSafe(userData.getPowe_diesel_nozzle()) > 0) {
+                    includePowerDiesel = true;
+                }
+            }
+        }
+
+        List<Map<String, Object>> myobj = queryThis(startDate, endDate, targetUserIds);
+
+        List<Object[]> expensesList = kharchrepository.getExpenseSummaryForUsers(startDate, endDate, targetUserIds);
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         List<AggregatedDataDTO> result = new ArrayList<>();
@@ -2950,80 +3021,91 @@ public class PurchaseController {
     }
 
     private List<Map<String, Object>> queryThis(String startDate, String endDate, String userId) {
+        return queryThis(startDate, endDate, Collections.singletonList(userId));
+    }
+
+    private List<Map<String, Object>> queryThis(String startDate, String endDate, List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String userIdsIn = userIds.stream()
+                .map(id -> "'" + id.replace("'", "''") + "'")
+                .collect(Collectors.joining(","));
+
         String sql = "SELECT "
-                + "p.date, "
-                + "COALESCE(p.total_open_meter, 0) AS petrolTotalOpenMeter, "
-                + "COALESCE(p.total_close_meter, 0) AS petrolTotalCloseMeter, "
-                + "COALESCE(p.total_sum, 0) AS petrol_total_sum, "
-                + "COALESCE(p.total_testing, 0) AS petrol_total_testing, "
+                + "dates.date, "
+                + "COALESCE(p.petrolTotalOpenMeter, 0) AS petrolTotalOpenMeter, "
+                + "COALESCE(p.petrolTotalCloseMeter, 0) AS petrolTotalCloseMeter, "
+                + "COALESCE(p.petrol_total_sum, 0) AS petrol_total_sum, "
+                + "COALESCE(p.petrol_total_testing, 0) AS petrol_total_testing, "
                 + "COALESCE(p.petrol_ltr, 0) AS petrol_ltr, "
-                + "COALESCE(p.rate, 0) AS petrol_rate, "
-                + "COALESCE(p.total_total_sell, 0) AS petrol_total_total_sell, "
-                + "COALESCE(d.total_open_meter, 0) AS dieselTotalOpenMeter, "
-                + "COALESCE(d.total_close_meter, 0) AS dieselTotalCloseMeter, "
-                + "COALESCE(d.total_sum, 0) AS diesel_total_sum, "
-                + "COALESCE(d.total_testing, 0) AS diesel_total_testing, "
+                + "COALESCE(p.petrol_rate, 0) AS petrol_rate, "
+                + "COALESCE(p.petrol_total_total_sell, 0) AS petrol_total_total_sell, "
+                + "COALESCE(d.dieselTotalOpenMeter, 0) AS dieselTotalOpenMeter, "
+                + "COALESCE(d.dieselTotalCloseMeter, 0) AS dieselTotalCloseMeter, "
+                + "COALESCE(d.diesel_total_sum, 0) AS diesel_total_sum, "
+                + "COALESCE(d.diesel_total_testing, 0) AS diesel_total_testing, "
                 + "COALESCE(d.diesel_ltr, 0) AS diesel_ltr, "
-                + "COALESCE(d.rate, 0) AS diesel_rate, "
-                + "COALESCE(d.total_total_sell, 0) AS diesel_total_total_sell, "
+                + "COALESCE(d.diesel_rate, 0) AS diesel_rate, "
+                + "COALESCE(d.diesel_total_total_sell, 0) AS diesel_total_total_sell, "
                 + "COALESCE(pg.petrolgatt_Total, 0) AS petrolgatt_Total, "
                 + "COALESCE(dg.dieselgatt_Total, 0) AS dieselgatt_Total, "
 
                 // xppetrol
-                + "COALESCE(xp.total_open_meter, 0) AS xppetrolOpenMeter, "
-                + "COALESCE(xp.total_close_meter, 0) AS xppetrolCloseMeter, "
+                + "COALESCE(xp.xppetrolOpenMeter, 0) AS xppetrolOpenMeter, "
+                + "COALESCE(xp.xppetrolCloseMeter, 0) AS xppetrolCloseMeter, "
                 + "COALESCE(xp.xppetrol_ltr, 0) AS xppetrol_ltr, "
-                + "COALESCE(xp.total_sum, 0) AS xppetrol_total_sum, "
-                + "COALESCE(xp.rate, 0) AS xppetrol_rate, "
+                + "COALESCE(xp.xppetrol_total_sum, 0) AS xppetrol_total_sum, "
+                + "COALESCE(xp.xppetrol_rate, 0) AS xppetrol_rate, "
                 + "COALESCE(xp.total_testing, 0) AS xppetrol_total_testing, "
-                + "COALESCE(xp.total_sell, 0) AS xppetrol_total_sell, "
+                + "COALESCE(xp.xppetrol_total_sell, 0) AS xppetrol_total_sell, "
                 + "COALESCE(xpg.xppetrolgatt_Total, 0) AS xppetrolgatt_Total, "
                 // powerdiesel
-                + "COALESCE(pd.total_open_meter, 0) AS powerdieselOpenMeter, "
-                + "COALESCE(pd.total_close_meter, 0) AS powerdieselCloseMeter, "
+                + "COALESCE(pd.powerdieselOpenMeter, 0) AS powerdieselOpenMeter, "
+                + "COALESCE(pd.powerdieselCloseMeter, 0) AS powerdieselCloseMeter, "
                 + "COALESCE(pd.powerdiesel_ltr, 0) AS powerdiesel_ltr, "
-                + "COALESCE(pd.total_sum, 0) AS powerdiesel_total_sum, "
-                + "COALESCE(pd.rate, 0) AS powerdiesel_rate, "
+                + "COALESCE(pd.powerdiesel_total_sum, 0) AS powerdiesel_total_sum, "
+                + "COALESCE(pd.powerdiesel_rate, 0) AS powerdiesel_rate, "
                 + "COALESCE(pd.total_testing, 0) AS powerdiesel_total_testing, "
-                + "COALESCE(pd.total_sell, 0) AS powerdiesel_total_sell, "
+                + "COALESCE(pd.powerdiesel_total_sell, 0) AS powerdiesel_total_sell, "
                 + "COALESCE(pdg.power_dieselgatt_Total, 0) AS power_dieselgatt_Total, "
 
-                + "COALESCE(o.total_price, 0) AS oil_total_price, "
+                + "COALESCE(o.oil_total_price, 0) AS oil_total_price, "
                 + "COALESCE(k.Kharch_Total, 0) AS Kharch_Total, "
                 + "COALESCE(loc.locl_balance_Total, 0) AS locl_balance_Total, "
                 + "COALESCE(pp.petrol_sku_number, '') AS petrol_sku_number, "
-                + "COALESCE(pp.petrol_quantity, 0) AS Petrol_Quantity, "
-                + "COALESCE(pp.petrol_total, 0) AS Petrol_Total, "
-                + "COALESCE(pp.petrol_vat, 0) AS Petrol_Vat, "
-                + "COALESCE(pp.petrol_cess, 0) AS Petrol_Cess, "
-                + "COALESCE(pp.petrol_jtcpercentage, 0) AS Petrol_Jtcpercentage, "
-                + "COALESCE(pp.petrol_total_purchase, 0) AS Petrol_Total_Purchase, "
+                + "COALESCE(pp.Petrol_Quantity, 0) AS Petrol_Quantity, "
+                + "COALESCE(pp.Petrol_Total, 0) AS Petrol_Total, "
+                + "COALESCE(pp.Petrol_Vat, 0) AS Petrol_Vat, "
+                + "COALESCE(pp.Petrol_Cess, 0) AS Petrol_Cess, "
+                + "COALESCE(pp.Petrol_Jtcpercentage, 0) AS Petrol_Jtcpercentage, "
+                + "COALESCE(pp.Petrol_Total_Purchase, 0) AS Petrol_Total_Purchase, "
                 + "COALESCE(dp.diesel_sku_number, '') AS diesel_sku_number, "
-                + "COALESCE(dp.diesel_quantity, 0) AS Diesel_Quantity, "
-                + "COALESCE(dp.diesel_total, 0) AS Diesel_Total, "
-                + "COALESCE(dp.diesel_vat, 0) AS Diesel_Vat, "
-                + "COALESCE(dp.diesel_cess, 0) AS Diesel_Cess, "
-                + "COALESCE(dp.diesel_jtcpercentage, 0) AS Diesel_Jtcpercentage, "
-                + "COALESCE(dp.diesel_total_purchase, 0) AS Diesel_Total_Purchase, "
-                + "COALESCE(ol.oil_quantity, 0) AS Oil_Quantity, "
-                + "COALESCE(ol.oil_net_total, 0) AS Oil_Net_Total, "
-                + "COALESCE(ol.oil_gst_amount, 0) AS Oil_Gst_Amount, "
-                + "COALESCE(ol.oil_cess_amount, 0) AS Oil_Cess_Amount, "
-                + "COALESCE(ol.oil_gst_percentage, 0) AS Oil_Gst_Percentage, "
-                + "COALESCE(ol.oil_net_amount, 0) AS Oil_Net_Amount, "
-                + "COALESCE(ol.hsn, '') AS Oil_Hsn, "
-                + "COALESCE(ol.mrp, 0) AS Oil_Mrp, "
-                + "COALESCE(ol.qty_ltr_or_kg, 0) AS Oil_Qty_Ltr_Or_Kg, "
-                + "COALESCE(ol.rate, 0) AS Oil_Rate, "
-                + "COALESCE(ol.sku_name, '') AS Oil_Sku_Name, "
-                + "COALESCE(ol.sku_number, '') AS Oil_Sku_Number, "
-                + "COALESCE(ol.taxable_value, 0) AS Oil_Taxable_Value, "
-                + "COALESCE(ol.unit, '') AS Oil_Unit, "
-                + "COALESCE(ol.vendor_name, '') AS Oil_Vendor_Name, "
-                + "COALESCE(ol.cess_percentage, 0) AS Oil_Cess_Percentage, "
-                + "COALESCE(ol.discount, 0) AS Oil_Discount, "
-                + "COALESCE(ol.type, '') AS Oil_Type, "
-                + "COALESCE(ol.date, '') AS Oil_Date, "
+                + "COALESCE(dp.Diesel_Quantity, 0) AS Diesel_Quantity, "
+                + "COALESCE(dp.Diesel_Total, 0) AS Diesel_Total, "
+                + "COALESCE(dp.Diesel_Vat, 0) AS Diesel_Vat, "
+                + "COALESCE(dp.Diesel_Cess, 0) AS Diesel_Cess, "
+                + "COALESCE(dp.Diesel_Jtcpercentage, 0) AS Diesel_Jtcpercentage, "
+                + "COALESCE(dp.Diesel_Total_Purchase, 0) AS Diesel_Total_Purchase, "
+                + "COALESCE(ol.Oil_Quantity, 0) AS Oil_Quantity, "
+                + "COALESCE(ol.Oil_Net_Total, 0) AS Oil_Net_Total, "
+                + "COALESCE(ol.Oil_Gst_Amount, 0) AS Oil_Gst_Amount, "
+                + "COALESCE(ol.Oil_Cess_Amount, 0) AS Oil_Cess_Amount, "
+                + "COALESCE(ol.Oil_Gst_Percentage, 0) AS Oil_Gst_Percentage, "
+                + "COALESCE(ol.Oil_Net_Amount, 0) AS Oil_Net_Amount, "
+                + "COALESCE(ol.Oil_Hsn, '') AS Oil_Hsn, "
+                + "COALESCE(ol.Oil_Mrp, 0) AS Oil_Mrp, "
+                + "COALESCE(ol.Oil_Qty_Ltr_Or_Kg, 0) AS Oil_Qty_Ltr_Or_Kg, "
+                + "COALESCE(ol.Oil_Rate, 0) AS Oil_Rate, "
+                + "COALESCE(ol.Oil_Sku_Name, '') AS Oil_Sku_Name, "
+                + "COALESCE(ol.Oil_Sku_Number, '') AS Oil_Sku_Number, "
+                + "COALESCE(ol.Oil_Taxable_Value, 0) AS Oil_Taxable_Value, "
+                + "COALESCE(ol.Oil_Unit, '') AS Oil_Unit, "
+                + "COALESCE(ol.Oil_Vendor_Name, '') AS Oil_Vendor_Name, "
+                + "COALESCE(ol.Oil_Cess_Percentage, 0) AS Oil_Cess_Percentage, "
+                + "COALESCE(ol.Oil_Discount, 0) AS Oil_Discount, "
+                + "COALESCE(ol.Oil_Type, '') AS Oil_Type, "
+                + "COALESCE(ol.Oil_Date, '') AS Oil_Date, "
                 + "COALESCE(t.Amount_Total, 0) AS Amount_Total, "
                 + "COALESCE(j.Jama_Total, 0) AS Jama_Total, "
                 + "COALESCE(j.Baki_Total, 0) AS Baki_Total, "
@@ -3044,274 +3126,307 @@ public class PurchaseController {
                 + "COALESCE(pdp.powerdiesel_total_purchase, 0) AS powerdiesel_total_purchase, "
                 + "COALESCE(pdp.powerdiesel_vat, 0) AS powerdiesel_vat "
                 + "FROM "
+                + "(SELECT DISTINCT date FROM petrolsell WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM dieselsell WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM oilsell WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM kharch WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM purchase WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM oilpurchase WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM transaction WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM jamabakireport WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM xppetrol WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM powerdiesel WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM extrapurchases WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM petrolgatt WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM dieselgatt WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM xppetrolgatt WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM powerdieselgatt WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "UNION "
+                + "SELECT DISTINCT date FROM loclcredit WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ")) dates "
+                + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
-                + "SUM(close_meter) AS total_close_meter, "
-                + "SUM(open_meter) AS total_open_meter, "
-                + "SUM(total) AS total_sum, "
-                + "SUM(testing) AS total_testing, "
+                + "SUM(first_open) AS petrolTotalOpenMeter, "
+                + "SUM(last_close) AS petrolTotalCloseMeter, "
+                + "SUM(total) AS petrol_total_sum, "
+                + "SUM(testing) AS petrol_total_testing, "
+                + "SUM(petrol_ltr) AS petrol_ltr, "
+                + "MAX(rate) AS petrol_rate, "
+                + "SUM(total_sell) AS petrol_total_total_sell "
+                + "FROM ( "
+                + "SELECT "
+                + "date, "
+                + "pump, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(open_meter, '') ORDER BY id ASC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS first_open, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(close_meter, '') ORDER BY id DESC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS last_close, "
+                + "SUM(total) AS total, "
+                + "SUM(testing) AS testing, "
                 + "SUM(petrol_ltr) AS petrol_ltr, "
                 + "MAX(rate) AS rate, "
-                + "SUM(total_sell) AS total_total_sell "
-                + "FROM "
-                + "petrolsell "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) p "
+                + "SUM(total_sell) AS total_sell "
+                + "FROM petrolsell "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date, COALESCE(pump, '') "
+                + ") p_sub GROUP BY date) p "
+                + "ON dates.date = p.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
-                + "SUM(close_meter) AS total_close_meter, "
-                + "SUM(open_meter) AS total_open_meter, "
-                + "SUM(total) AS total_sum, "
-                + "SUM(testing) AS total_testing, "
+                + "SUM(first_open) AS dieselTotalOpenMeter, "
+                + "SUM(last_close) AS dieselTotalCloseMeter, "
+                + "SUM(total) AS diesel_total_sum, "
+                + "SUM(testing) AS diesel_total_testing, "
+                + "SUM(diesel_ltr) AS diesel_ltr, "
+                + "MAX(rate) AS diesel_rate, "
+                + "SUM(total_sell) AS diesel_total_total_sell "
+                + "FROM ( "
+                + "SELECT "
+                + "date, "
+                + "pump, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(open_meter, '') ORDER BY id ASC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS first_open, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(close_meter, '') ORDER BY id DESC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS last_close, "
+                + "SUM(total) AS total, "
+                + "SUM(testing) AS testing, "
                 + "SUM(diesel_ltr) AS diesel_ltr, "
                 + "MAX(rate) AS rate, "
-                + "SUM(total_sell) AS total_total_sell "
-                + "FROM "
-                + "dieselsell "
-                + "WHERE "
-                + "date BETWEEN  '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) d "
-                + "ON "
-                + "p.date = d.date "
+                + "SUM(total_sell) AS total_sell "
+                + "FROM dieselsell "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date, COALESCE(pump, '') "
+                + ") d_sub GROUP BY date) d "
+                + "ON dates.date = d.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
-                + "SUM(price) AS total_price "
-                + "FROM "
-                + "oilsell "
-                + "WHERE "
-                + "date BETWEEN  '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) o "
-                + "ON "
-                + "p.date = o.date "
+                + "SUM(price) AS oil_total_price "
+                + "FROM oilsell "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) o "
+                + "ON dates.date = o.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(price) AS Kharch_Total "
-                + "FROM "
-                + "kharch "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) k "
-                + "ON "
-                + "p.date = k.date "
+                + "FROM kharch "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) k "
+                + "ON dates.date = k.date "
                 + "LEFT JOIN "
                 + "(SELECT "
-                + "date, type, "
-                + "sku_number AS petrol_sku_number, "
-                + "quantity AS petrol_quantity, "
-                + "total AS petrol_total, "
-                + "vat AS petrol_vat, "
-                + "cess AS petrol_cess, "
-                + "jtcpercentage AS petrol_jtcpercentage, "
-                + "total_purchase AS petrol_total_purchase "
-                + "FROM "
-                + "purchase "
-                + "WHERE "
-                + "type = 'petrol' AND user_id = '" + userId + "') pp " // Filter by userId
-                + "ON "
-                + "p.date = pp.date "
+                + "date, "
+                + "MAX(sku_number) AS petrol_sku_number, "
+                + "SUM(quantity) AS Petrol_Quantity, "
+                + "SUM(total) AS Petrol_Total, "
+                + "SUM(vat) AS Petrol_Vat, "
+                + "SUM(cess) AS Petrol_Cess, "
+                + "SUM(jtcpercentage) AS Petrol_Jtcpercentage, "
+                + "SUM(total_purchase) AS Petrol_Total_Purchase "
+                + "FROM purchase "
+                + "WHERE type = 'petrol' AND date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) pp "
+                + "ON dates.date = pp.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(amount) AS Amount_Total "
-                + "FROM "
-                + "transaction "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) t "
-                + "ON "
-                + "p.date = t.date "
+                + "FROM transaction "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) t "
+                + "ON dates.date = t.date "
                 + "LEFT JOIN "
                 + "(SELECT "
-                + "date, type, "
-                + "sku_number AS diesel_sku_number, "
-                + "quantity AS diesel_quantity, "
-                + "total AS diesel_total, "
-                + "vat AS diesel_vat, "
-                + "cess AS diesel_cess, "
-                + "jtcpercentage AS diesel_jtcpercentage, "
-                + "total_purchase AS diesel_total_purchase "
-                + "FROM "
-                + "purchase "
-                + "WHERE "
-                + "type = 'diesel'  AND user_id = '" + userId + "') dp " // Filter by userId
-                + "ON "
-                + "d.date = dp.date "
+                + "date, "
+                + "MAX(sku_number) AS diesel_sku_number, "
+                + "SUM(quantity) AS Diesel_Quantity, "
+                + "SUM(total) AS Diesel_Total, "
+                + "SUM(vat) AS Diesel_Vat, "
+                + "SUM(cess) AS Diesel_Cess, "
+                + "SUM(jtcpercentage) AS Diesel_Jtcpercentage, "
+                + "SUM(total_purchase) AS Diesel_Total_Purchase "
+                + "FROM purchase "
+                + "WHERE type = 'diesel' AND date BETWEEN '" + startDate + "' AND '" + endDate + "' AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) dp "
+                + "ON dates.date = dp.date "
                 + "LEFT JOIN "
                 + "(SELECT "
-                + "id, quantity AS oil_quantity, `date`, `type`, user_id, "
-                + "gst_percentage AS oil_gst_percentage, hsn, mrp, "
-                + "net_amount AS oil_net_amount, net_total AS oil_net_total, "
-                + "qty_ltr_or_kg, rate, sku_name, sku_number, taxable_value, "
-                + "unit, vendor_name, cess_amount AS oil_cess_amount, cess_percentage, "
-                + "discount, gst_amount AS oil_gst_amount "
-                + "FROM "
-                + "oilpurchase "
-                + "WHERE "
-                + "type = 'Oil' AND user_id = '" + userId + "') ol " // Filter by userId
-                + "ON "
-                + "p.date = ol.date "
+                + "date, "
+                + "SUM(quantity) AS Oil_Quantity, "
+                + "SUM(net_total) AS Oil_Net_Total, "
+                + "SUM(gst_amount) AS Oil_Gst_Amount, "
+                + "SUM(cess_amount) AS Oil_Cess_Amount, "
+                + "MAX(gst_percentage) AS Oil_Gst_Percentage, "
+                + "SUM(net_amount) AS Oil_Net_Amount, "
+                + "MAX(hsn) AS Oil_Hsn, "
+                + "MAX(mrp) AS Oil_Mrp, "
+                + "SUM(qty_ltr_or_kg) AS Oil_Qty_Ltr_Or_Kg, "
+                + "MAX(rate) AS Oil_Rate, "
+                + "MAX(sku_name) AS Oil_Sku_Name, "
+                + "MAX(sku_number) AS Oil_Sku_Number, "
+                + "SUM(taxable_value) AS Oil_Taxable_Value, "
+                + "MAX(unit) AS Oil_Unit, "
+                + "MAX(vendor_name) AS Oil_Vendor_Name, "
+                + "MAX(cess_percentage) AS Oil_Cess_Percentage, "
+                + "SUM(discount) AS Oil_Discount, "
+                + "MAX(type) AS Oil_Type, "
+                + "MAX(date) AS Oil_Date "
+                + "FROM oilpurchase "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) ol "
+                + "ON dates.date = ol.date "
                 + "LEFT JOIN ("
                 + "SELECT date, "
-                + "sku_number AS xppetrol_sku_number, "
-                + "extra_cess AS xppetrol_cess, "
-                + "extra_jtcpercentage AS xppetrol_jtcpercentage, "
-                + "extra_quantity AS xppetrol_quantity, "
-                + "extra_total AS xppetrol_total, "
-                + "extra_total_purchase AS xppetrol_total_purchase, "
-                + "extra_vat AS xppetrol_vat "
+                + "MAX(sku_number) AS xppetrol_sku_number, "
+                + "SUM(extra_cess) AS xppetrol_cess, "
+                + "SUM(extra_jtcpercentage) AS xppetrol_jtcpercentage, "
+                + "SUM(extra_quantity) AS xppetrol_quantity, "
+                + "SUM(extra_total) AS xppetrol_total, "
+                + "SUM(extra_total_purchase) AS xppetrol_total_purchase, "
+                + "SUM(extra_vat) AS xppetrol_vat "
                 + "FROM extrapurchases "
                 + "WHERE extra_type = 'XP Petrol' "
-                + "AND user_id = '" + userId + "' "
-                + "AND date BETWEEN '" + startDate + "' AND '" + endDate + "'"
-                + ") xpp ON p.date = xpp.date "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "AND date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "GROUP BY date"
+                + ") xpp ON dates.date = xpp.date "
                 + "LEFT JOIN ("
                 + "SELECT date, "
-                + "sku_number AS powerdiesel_sku_number, "
-                + "extra_cess AS powerdiesel_cess, "
-                + "extra_jtcpercentage AS powerdiesel_jtcpercentage, "
-                + "extra_quantity AS powerdiesel_quantity, "
-                + "extra_total AS powerdiesel_total, "
-                + "extra_total_purchase AS powerdiesel_total_purchase, "
-                + "extra_vat AS powerdiesel_vat "
+                + "MAX(sku_number) AS powerdiesel_sku_number, "
+                + "SUM(extra_cess) AS powerdiesel_cess, "
+                + "SUM(extra_jtcpercentage) AS powerdiesel_jtcpercentage, "
+                + "SUM(extra_quantity) AS powerdiesel_quantity, "
+                + "SUM(extra_total) AS powerdiesel_total, "
+                + "SUM(extra_total_purchase) AS powerdiesel_total_purchase, "
+                + "SUM(extra_vat) AS powerdiesel_vat "
                 + "FROM extrapurchases "
                 + "WHERE extra_type = 'Power Diesel' "
-                + "AND user_id = '" + userId + "' "
-                + "AND date BETWEEN '" + startDate + "' AND '" + endDate + "'"
-                + ") pdp ON p.date = pdp.date "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "AND date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "GROUP BY date"
+                + ") pdp ON dates.date = pdp.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(jama) AS Jama_Total, "
                 + "SUM(baki) AS Baki_Total "
-                + "FROM "
-                + "jamabakireport "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) j "
-                + "ON "
-                + " p.date = j.date "
+                + "FROM jamabakireport "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) j "
+                + "ON dates.date = j.date "
                 + "LEFT JOIN (SELECT date, "
-                + "SUM(close_meter) AS total_close_meter, "
-                + "SUM(open_meter) AS total_open_meter, "
+                + "SUM(first_open) AS xppetrolOpenMeter, "
+                + "SUM(last_close) AS xppetrolCloseMeter, "
                 + "SUM(xppetrol_ltr) AS xppetrol_ltr, "
                 + "SUM(testing) AS total_testing, "
-                + "SUM(total) AS total_sum, "
-                + "SUM(total_sell) AS total_sell, "
-                + "MAX(rate) AS rate "
+                + "SUM(total) AS xppetrol_total_sum, "
+                + "SUM(total_sell) AS xppetrol_total_sell, "
+                + "MAX(rate) AS xppetrol_rate "
+                + "FROM ( "
+                + "SELECT "
+                + "date, "
+                + "pump, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(open_meter, '') ORDER BY id ASC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS first_open, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(close_meter, '') ORDER BY id DESC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS last_close, "
+                + "SUM(total) AS total, "
+                + "SUM(testing) AS testing, "
+                + "SUM(xppetrol_ltr) AS xppetrol_ltr, "
+                + "MAX(rate) AS rate, "
+                + "SUM(total_sell) AS total_sell "
                 + "FROM xppetrol "
                 + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' "
-                + "GROUP BY date) xp ON p.date = xp.date "
-                // ✅ LEFT JOIN powerdiesel
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date, COALESCE(pump, '') "
+                + ") xp_sub GROUP BY date) xp ON dates.date = xp.date "
                 + "LEFT JOIN (SELECT date, "
-                + "SUM(close_meter) AS total_close_meter, "
-                + "SUM(open_meter) AS total_open_meter, "
+                + "SUM(first_open) AS powerdieselOpenMeter, "
+                + "SUM(last_close) AS powerdieselCloseMeter, "
                 + "SUM(powerdiesel_ltr) AS powerdiesel_ltr, "
                 + "SUM(testing) AS total_testing, "
-                + "SUM(total) AS total_sum, "
-                + "SUM(total_sell) AS total_sell, "
-                + "MAX(rate) AS rate "
+                + "SUM(total) AS powerdiesel_total_sum, "
+                + "SUM(total_sell) AS powerdiesel_total_sell, "
+                + "MAX(rate) AS powerdiesel_rate "
+                + "FROM ( "
+                + "SELECT "
+                + "date, "
+                + "pump, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(open_meter, '') ORDER BY id ASC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS first_open, "
+                + "CAST(REPLACE(SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(close_meter, '') ORDER BY id DESC SEPARATOR '||'), '||', 1), ',', '') AS DECIMAL(15,2)) AS last_close, "
+                + "SUM(total) AS total, "
+                + "SUM(testing) AS testing, "
+                + "SUM(powerdiesel_ltr) AS powerdiesel_ltr, "
+                + "MAX(rate) AS rate, "
+                + "SUM(total_sell) AS total_sell "
                 + "FROM powerdiesel "
                 + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' "
-                + "GROUP BY date) pd ON p.date = pd.date "
-
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date, COALESCE(pump, '') "
+                + ") pd_sub GROUP BY date) pd ON dates.date = pd.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(petrolgatt) AS petrolgatt_Total "
-                + "FROM "
-                + "petrolgatt "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) pg "
-                + "ON "
-                + "p.date = pg.date "
-
+                + "FROM petrolgatt "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) pg "
+                + "ON dates.date = pg.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(dieselgatt) AS dieselgatt_Total "
-                + "FROM "
-                + "dieselgatt "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) dg "
-                + "ON "
-                + "p.date = dg.date "
-
+                + "FROM dieselgatt "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) dg "
+                + "ON dates.date = dg.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(xppetrolgatt) AS xppetrolgatt_Total "
-                + "FROM "
-                + "xppetrolgatt "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) xpg "
-                + "ON "
-                + "p.date = xpg.date "
-
+                + "FROM xppetrolgatt "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) xpg "
+                + "ON dates.date = xpg.date "
                 + "LEFT JOIN "
                 + "(SELECT "
                 + "date, "
                 + "SUM(power_dieselgatt) AS power_dieselgatt_Total "
-                + "FROM "
-                + "powerdieselgatt "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' " // Filter by userId
-                + "GROUP BY "
-                + "date) pdg "
-                + "ON "
-                + "p.date = pdg.date "
-
+                + "FROM powerdieselgatt "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
+                + "GROUP BY date) pdg "
+                + "ON dates.date = pdg.date "
                 + "LEFT JOIN (SELECT "
                 + "date, "
                 + "SUM(balance) AS locl_balance_Total "
-                + "FROM "
-                + "loclcredit "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' "
+                + "FROM loclcredit "
+                + "WHERE date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                + "AND user_id IN (" + userIdsIn + ") "
                 + "GROUP BY date) loc "
-                + "ON p.date = loc.date "
-
-                + "LEFT JOIN (SELECT "
-                + "date, "
-                + "SUM(price) AS Kharch_Total " // ✅ Removed `expenses` from SELECT
-                + "FROM "
-                + "kharch "
-                + "WHERE "
-                + "date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-                + "AND user_id = '" + userId + "' "
-                + "GROUP BY date) ep " // ✅ Removed `expenses` from GROUP BY
-                + "ON p.date = ep.date "
-
+                + "ON dates.date = loc.date "
                 + "ORDER BY "
-                + "p.date;";
+                + "dates.date ASC;";
 
         return jdbcTemplate.queryForList(sql);
     }
@@ -4333,9 +4448,21 @@ public class PurchaseController {
     public List<kharch> getExpenses(
             @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate,
-            @RequestParam("expense") String expense,
+            @RequestParam(value = "expense", required = false) String expense,
             @RequestParam("userId") String userId) {
-        return kharchrepository.findByDateBetweenAndExpensesLikeAndUserId(startDate, endDate, expense, userId);
+        List<String> userIds = getEmployeeUserIds(userId);
+        if (userIds == null || userIds.isEmpty()) {
+            userIds = Collections.singletonList(userId);
+        }
+        boolean isAllExpense = (expense == null || expense.trim().isEmpty()
+                || "All".equalsIgnoreCase(expense.trim())
+                || "All Expenses".equalsIgnoreCase(expense.trim()));
+
+        if (isAllExpense) {
+            return kharchrepository.findByDateBetweenAndUserIds(startDate, endDate, userIds);
+        } else {
+            return kharchrepository.findByDateBetweenAndExpensesLikeAndUserIds(startDate, endDate, expense.trim(), userIds);
+        }
     }
 
     @GetMapping(value = "/XPpetrolList")
@@ -4867,8 +4994,11 @@ public class PurchaseController {
             @RequestParam String startDate,
             @RequestParam String endDate,
             @RequestParam String userId) {
-        List<Object[]> list = loclcreditRepository.findReportBycredit(startDate, endDate, userId);
-        return list;
+        List<String> userIds = getEmployeeUserIds(userId);
+        if (userIds == null || userIds.isEmpty()) {
+            userIds = Collections.singletonList(userId);
+        }
+        return loclcreditRepository.findReportBycreditForUsers(startDate, endDate, userIds);
     }
 
     // ==========================================

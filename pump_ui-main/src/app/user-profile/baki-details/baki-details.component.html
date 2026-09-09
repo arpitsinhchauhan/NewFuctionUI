@@ -1,55 +1,175 @@
-<div class="row">
-    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-        <div class="card">
-            <div class="card-body">
-                <div *ngIf="bakiList.length > 0">
-                    <div class="button-group">
-                        <button mat-raised-button (click)="exportExcel()">
-                            <mat-icon>file_download</mat-icon>
-                            Export to Excel
-                        </button>
-                        <button mat-raised-button (click)="pdf()">
-                            <mat-icon>picture_as_pdf</mat-icon>
-                            PDF
-                        </button>
-                        <button mat-raised-button (click)="cancel()">
-                            <mat-icon>cancel</mat-icon>
-                            Cancel
-                        </button>
-                    </div>
+<div class="modal-dialog-wrapper">
 
-                    <table id="bakiListTable">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Rate</th>
-                                <th>LTR</th>
-                                <th>Baki</th>
-                                <th>Note</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr *ngFor="let b of bakiList">
-                                <td>{{ b[0] | date:'dd-MM-yyyy' }}</td>
-                                <td>{{ b[1] }}</td>
-                                <td>{{ b[2] }}</td>
-                                <td>{{ b[3] }}</td>
-                                <td>{{ b[4] }}</td>
-                                <td>{{ b[5] }}</td>
-                                <td>{{ b[6] }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </div>
-                <div *ngIf="bakiList.length === 0">
-                    No data available.
-                </div>
-
-            </div>
+  <!-- ========================================================================
+       1. Top Header Toolbar
+       ======================================================================== -->
+  <div class="modal-header-bar">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>list_alt</mat-icon>
+      </div>
+      <div class="header-title-group">
+        <div class="title-row">
+          <h3 class="modal-main-title">Customer Baki Transaction Audit Log</h3>
+          <span class="badge-scope">Credit Slips</span>
         </div>
+        <div class="header-meta">
+          <span class="meta-pill date-pill">
+            <mat-icon>event</mat-icon>
+            <span>{{ startDate }}</span>
+            <span class="arrow-sep">➔</span>
+            <span>{{ endDate }}</span>
+          </span>
+          <span class="meta-pill count-pill">
+            <mat-icon>receipt_long</mat-icon>
+            <span>{{ bakiList.length }} Transactions</span>
+          </span>
+        </div>
+      </div>
     </div>
+
+    <div class="header-actions">
+      <button *ngIf="bakiList.length > 0" class="btn-modern btn-excel" (click)="exportExcel()" title="Export transactions to Excel">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+      <button *ngIf="bakiList.length > 0" class="btn-modern btn-pdf" (click)="pdf()" title="Print PDF audit sheet">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Print PDF</span>
+      </button>
+      <button class="btn-modern btn-close-modal" (click)="cancel()" title="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       2. Executive KPI Overview Banner
+       ======================================================================== -->
+  <div class="kpi-banner" *ngIf="bakiList.length > 0">
+    <!-- Card 1: Total Volume Dispensed -->
+    <div class="kpi-card kpi-fuel">
+      <div class="kpi-icon-wrap">
+        <mat-icon>local_gas_station</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Volume Dispensed on Credit</div>
+        <div class="kpi-value">{{ getTotalLtr() | number:'1.2-2' }} <span class="kpi-unit">LTR</span></div>
+        <div class="kpi-sub">Total fuel delivered on credit basis</div>
+      </div>
+    </div>
+
+    <!-- Card 2: Total Baki Dues -->
+    <div class="kpi-card kpi-baki">
+      <div class="kpi-icon-wrap">
+        <mat-icon>trending_up</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Baki Credit Amount</div>
+        <div class="kpi-value">₹ {{ getTotalBakiAmount() | number:'1.2-2' }}</div>
+        <div class="kpi-sub">Total amount receivable from credit slips</div>
+      </div>
+    </div>
+
+    <!-- Card 3: Total Slips -->
+    <div class="kpi-card kpi-slips">
+      <div class="kpi-icon-wrap">
+        <mat-icon>receipt</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Transactions Logged</div>
+        <div class="kpi-value">{{ bakiList.length }} <span class="kpi-unit">Entries</span></div>
+        <div class="kpi-sub">Itemized credit transactions recorded</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       3. Main Data Table
+       ======================================================================== -->
+  <div class="table-scroll-container" *ngIf="bakiList.length > 0">
+    <table class="baki-log-table" id="bakiListTable">
+      <thead>
+        <tr>
+          <th class="col-center">Date</th>
+          <th>Customer Name</th>
+          <th class="col-center">Fuel Type</th>
+          <th class="col-num">Rate (₹)</th>
+          <th class="col-num">Volume (LTR)</th>
+          <th class="col-num">Baki Amount (₹)</th>
+          <th class="col-center">Note / Slip Remark</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let b of bakiList">
+          <td class="col-date">{{ b[0] }}</td>
+          <td>
+            <div class="customer-cell">
+              <div class="avatar-badge">{{ b[1] ? b[1].charAt(0).toUpperCase() : 'C' }}</div>
+              <span class="customer-name">{{ b[1] }}</span>
+            </div>
+          </td>
+          <td class="col-center">
+            <span class="fuel-badge" [ngClass]="b[2]?.toLowerCase().includes('petrol') ? 'fuel-petrol' : 'fuel-diesel'">
+              {{ b[2] }}
+            </span>
+          </td>
+          <td class="col-num">₹ {{ (b[3] || 0) | number:'1.2-2' }}</td>
+          <td class="col-num font-weight-bold">{{ (b[4] || 0) | number:'1.2-2' }} L</td>
+          <td class="col-num baki-amount-val">₹ {{ (b[5] || 0) | number:'1.2-2' }}</td>
+          <td class="col-center">
+            <span class="note-pill">{{ b[6] || 'Credit' }}</span>
+          </td>
+        </tr>
+      </tbody>
+
+      <!-- Sticky Totals Footer -->
+      <tfoot>
+        <tr>
+          <td class="total-label-cell" colspan="4">TOTAL CUMULATIVE</td>
+          <td class="col-num total-grand-ltr">{{ getTotalLtr() | number:'1.2-2' }} L</td>
+          <td class="col-num total-grand-baki">₹ {{ getTotalBakiAmount() | number:'1.2-2' }}</td>
+          <td class="col-center">
+            <span class="text-white small">{{ bakiList.length }} Slips</span>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ========================================================================
+       4. Empty State
+       ======================================================================== -->
+  <div class="empty-state-wrap" *ngIf="bakiList.length === 0">
+    <div class="empty-icon-wrap">
+      <mat-icon>receipt_long</mat-icon>
+    </div>
+    <h4>No Customer Baki Transactions Found</h4>
+    <p>There are no itemized Baki credit slips recorded for the period from {{ startDate }} to {{ endDate }}.</p>
+    <button class="btn-modern btn-secondary" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Return</span>
+    </button>
+  </div>
+
+  <!-- ========================================================================
+       5. Bottom Action Bar
+       ======================================================================== -->
+  <div class="modal-bottom-bar" *ngIf="bakiList.length > 0">
+    <div class="bottom-info">
+      <mat-icon>verified</mat-icon>
+      <span>Itemized credit slips verified from pump register ({{ bakiList.length }} records)</span>
+    </div>
+    <div class="bottom-actions">
+      <button class="btn-modern btn-secondary" (click)="cancel()">
+        <span>Close</span>
+      </button>
+      <button class="btn-modern btn-excel" (click)="exportExcel()">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+    </div>
+  </div>
+
 </div>

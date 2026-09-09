@@ -41,42 +41,39 @@ export class PumpTotalBakiDetailsComponent implements OnInit {
   }
 
   getTotalBakiDetails(): void {
-    if (this.managerId && this.employeeIds && this.employeeIds.length > 0) {
-      // PUMP MANAGER: forkJoin for each employee, then merge by customer name
-      const requests = this.employeeIds.map(empId =>
-        this.use.getTotalBakiReport(this.startDate, this.endDate, empId.toString())
-          .pipe(catchError(() => of([] as any[])))
-      );
-      forkJoin(requests).subscribe((results: any[][]) => {
-        const flat = results.flat();
-        // Merge by customer name: sum total_baki, total_jama, baki_total
-        const merged: { [name: string]: any } = {};
-        flat.forEach(r => {
-          const name = r[0];
-          if (!merged[name]) {
-            merged[name] = { name: r[0], total_baki: Number(r[1]) || 0, total_jama: Number(r[2]) || 0, baki_total: Number(r[3]) || 0 };
-          } else {
-            merged[name].total_baki += Number(r[1]) || 0;
-            merged[name].total_jama += Number(r[2]) || 0;
-            merged[name].baki_total += Number(r[3]) || 0;
-          }
-        });
-        this.reportList = Object.values(merged);
+    const allTargetIds = (this.managerId && this.employeeIds && this.employeeIds.length > 0)
+      ? Array.from(new Set([this.managerId, ...this.employeeIds].filter(Boolean)))
+      : [this.userId!];
+
+    const requests = allTargetIds.map(empId =>
+      this.use.getTotalBakiReport(this.startDate, this.endDate, empId.toString())
+        .pipe(catchError(() => of([] as any[])))
+    );
+    forkJoin(requests).subscribe((results: any[][]) => {
+      const flat = results.flat();
+      // Merge by customer name: sum total_baki, total_jama, baki_total
+      const merged: { [name: string]: any } = {};
+      flat.forEach(r => {
+        const name = r[0];
+        if (!name) return;
+        if (!merged[name]) {
+          merged[name] = {
+            name: r[0],
+            total_baki: Number(r[1]) || 0,
+            total_jama: Number(r[2]) || 0,
+            baki_total: Number(r[3]) || 0
+          };
+        } else {
+          merged[name].total_baki += Number(r[1]) || 0;
+          merged[name].total_jama += Number(r[2]) || 0;
+          merged[name].baki_total += Number(r[3]) || 0;
+        }
       });
-    } else {
-      this.use.getTotalBakiReport(this.startDate, this.endDate, this.userId!)
-        .subscribe((res: any[]) => {
-          this.reportList = res.map(r => ({
-            name: r[0], total_baki: r[1], total_jama: r[2], baki_total: r[3],
-          }));
-        });
-    }
+      this.reportList = Object.values(merged);
+    });
   }
 
-
-
   exportExcel(): void {
-
     const excelData = this.reportList.map(b => ({
       Name: b.name,
       Total_Baki: b.total_baki,
@@ -103,7 +100,19 @@ export class PumpTotalBakiDetailsComponent implements OnInit {
   }
 
   pdf(): void {
-    this.exportService.printElement('bakiListTable', 'Baki Report');
+    this.exportService.printElement('bakiListTable', 'Customer Outstanding Baki Report');
+  }
+
+  getTotalDues(): number {
+    return this.reportList.reduce((sum, b) =>
+      sum + (Number(b.total_baki) || 0), 0
+    );
+  }
+
+  getTotalJama(): number {
+    return this.reportList.reduce((sum, b) =>
+      sum + (Number(b.total_jama) || 0), 0
+    );
   }
 
   getTotalBaki(): number {

@@ -93,4 +93,28 @@ public interface kharchrepository extends JpaRepository<kharch, Integer> {
             @Param("startDate") String startDate,
             @Param("endDate") String endDate,
             @Param("userId") String userId);
+
+    @Query(value = "SELECT date, expenses, SUM(price) AS total_price " +
+            "FROM kharch " +
+            "WHERE user_id IN (:userIds) " +
+            "AND date BETWEEN :startDate AND :endDate " +
+            "GROUP BY date, expenses " +
+            "ORDER BY date, expenses", nativeQuery = true)
+    List<Object[]> getExpenseSummaryForUsers(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            @Param("userIds") List<String> userIds);
+
+    @Query("SELECT j FROM kharch j WHERE j.date BETWEEN :startDate AND :endDate AND j.userId IN (:userIds) ORDER BY j.date ASC")
+    List<kharch> findByDateBetweenAndUserIds(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            @Param("userIds") List<String> userIds);
+
+    @Query("SELECT j FROM kharch j WHERE j.date BETWEEN :startDate AND :endDate AND (LOWER(j.expenses) LIKE LOWER(CONCAT('%', :expenses, '%'))) AND j.userId IN (:userIds) ORDER BY j.date ASC")
+    List<kharch> findByDateBetweenAndExpensesLikeAndUserIds(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            @Param("expenses") String expense,
+            @Param("userIds") List<String> userIds);
 }

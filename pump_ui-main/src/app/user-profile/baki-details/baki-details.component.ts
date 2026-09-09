@@ -42,23 +42,20 @@ export class BakiDetailsComponent implements OnInit {
   }
 
   getBakiDetails() {
-    if (this.managerId && this.employeeIds && this.employeeIds.length > 0) {
-      // PUMP MANAGER: DB stores baki by employee user_id — forkJoin each employee
-      const requests = this.employeeIds.map(empId =>
-        this.use.getBakiReport(this.startDate, this.endDate, empId.toString())
-          .pipe(catchError(() => of([] as any[])))
-      );
-      forkJoin(requests).subscribe((results: any[][]) => {
-        this.bakiList = results.flat();
-      });
-    } else {
-      this.use.getBakiReport(this.startDate, this.endDate, this.userId)
-        .subscribe((res) => { this.bakiList = res; });
-    }
+    const allTargetIds = (this.managerId && this.employeeIds && this.employeeIds.length > 0)
+      ? Array.from(new Set([this.managerId, ...this.employeeIds].filter(Boolean)))
+      : [this.userId];
+
+    const requests = allTargetIds.map(empId =>
+      this.use.getBakiReport(this.startDate, this.endDate, empId ? empId.toString() : '')
+        .pipe(catchError(() => of([] as any[])))
+    );
+    forkJoin(requests).subscribe((results: any[][]) => {
+      this.bakiList = results.flat();
+    });
   }
 
   exportExcel() {
-
     const excelData = this.bakiList.map(b => ({
       Date: b[0],
       Name: b[1],
@@ -81,7 +78,19 @@ export class BakiDetailsComponent implements OnInit {
   }
 
   pdf(): void {
-    this.exportService.printElement('bakiListTable', 'Baki Report');
+    this.exportService.printElement('bakiListTable', 'Customer Baki Details Log');
+  }
+
+  getTotalLtr(): number {
+    return this.bakiList.reduce((sum, b) =>
+      sum + (Number(b[4]) || 0), 0
+    );
+  }
+
+  getTotalBakiAmount(): number {
+    return this.bakiList.reduce((sum, b) =>
+      sum + (Number(b[5]) || 0), 0
+    );
   }
 
   cancel() {

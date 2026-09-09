@@ -27,36 +27,29 @@ export class ExpensesExcelComponent implements OnInit {
   allSelected: boolean = true;
 
   fetchExpence(): void {
-    if (this.data.managerId && this.data.employeeIds && this.data.employeeIds.length > 0) {
-      const requests = this.data.employeeIds.map((empId: number) =>
-        this.user.getExpenses(this.data.expense, this.data.startDate, this.data.endDate, empId.toString())
-          .pipe(catchError(() => of([] as any[])))
-      );
-      forkJoin(requests).subscribe((results: any[][]) => {
-        const flat = results.flat();
-        this.expenseList = flat.map(item => ({
-          date: item.date,
-          expenses: item.expenses,
-          price: item.price,
-          note: item.notes,
-          selected: true
-        }));
-        this.allSelected = true;
-      });
-    } else {
-      this.user.getExpenses(this.data.expense, this.data.startDate, this.data.endDate).subscribe((data: any[]) => {
-        if (Array.isArray(data)) {
-          this.expenseList = data.map(item => ({
-            date: item.date,
-            expenses: item.expenses,
-            price: item.price,
-            note: item.notes,
-            selected: true
-          }));
-          this.allSelected = true;
-        }
-      });
-    }
+    const expenseParam = (!this.data.expense || this.data.expense.trim() === '' || this.data.expense === 'All Expenses')
+      ? '%'
+      : this.data.expense;
+
+    const allTargetIds = (this.data.managerId && this.data.employeeIds && this.data.employeeIds.length > 0)
+      ? Array.from(new Set([this.data.managerId, ...this.data.employeeIds].filter(Boolean)))
+      : [this.data.managerId || localStorage.getItem('userId') || ''];
+
+    const requests = allTargetIds.map((empId: any) =>
+      this.user.getExpenses(expenseParam, this.data.startDate, this.data.endDate, empId.toString())
+        .pipe(catchError(() => of([] as any[])))
+    );
+    forkJoin(requests).subscribe((results: any[][]) => {
+      const flat = results.flat();
+      this.expenseList = flat.map(item => ({
+        date: item.date,
+        expenses: item.expenses,
+        price: Number(item.price) || 0,
+        note: item.notes,
+        selected: true
+      }));
+      this.allSelected = true;
+    });
   }
 
   toggleSelectAll(event: any) {

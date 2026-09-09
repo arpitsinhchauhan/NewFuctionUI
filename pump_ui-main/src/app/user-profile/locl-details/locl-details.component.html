@@ -1,51 +1,145 @@
-<div class="row">
-    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-        <div class="card">
-            <div class="card-body">
-                <div *ngIf="creditList.length > 0">
-                    <div class="button-group">
-                        <button mat-raised-button (click)="exportExcel()">
-                            <mat-icon>file_download</mat-icon>
-                            Export to Excel
-                        </button>
-                        <button mat-raised-button (click)="pdf()">
-                            <mat-icon>picture_as_pdf</mat-icon>
-                            PDF
-                        </button>
-                        <button mat-raised-button (click)="cancel()">
-                            <mat-icon>cancel</mat-icon>
-                            Cancel
-                        </button>
-                    </div>
-                    <table id="creditListTable">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Credit</th>
-                                <th>Remark</th>
-                                <th>Balance</th>
-                            </tr>
-                        </thead>
+<div class="modal-dialog-wrapper">
 
-                        <tbody>
-                            <tr *ngFor="let r of creditList">
-                                <td>{{ r.date }}</td>
-                                <td>{{ r.credit }}</td>
-                                <td>{{ r.remark }}</td>
-                                <td>{{ r.balance }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" style="text-align: right;"><strong>Total Balance:</strong></td>
-                                <td style="background-color: #d0b6b6;"><strong>{{ getTotalBalance() | number:'1.2-2'
-                                        }}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div *ngIf="creditList.length === 0">
-                    No data available.
-                </div>
-            </div>
+  <!-- ========================================================================
+       1. Top Header Toolbar
+       ======================================================================== -->
+  <div class="modal-header-bar">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>account_balance</mat-icon>
+      </div>
+      <div class="header-title-group">
+        <div class="title-row">
+          <h3 class="modal-main-title">Indirect Incomes & Credit Note Ledger</h3>
+          <span class="badge-scope">Credit Ledger</span>
         </div>
+        <div class="header-meta">
+          <span class="meta-pill date-pill">
+            <mat-icon>event</mat-icon>
+            <span>{{ startDate }}</span>
+            <span class="arrow-sep">➔</span>
+            <span>{{ endDate }}</span>
+          </span>
+          <span class="meta-pill count-pill">
+            <mat-icon>receipt_long</mat-icon>
+            <span>{{ creditList.length }} Credit Entries</span>
+          </span>
+        </div>
+      </div>
     </div>
+
+    <div class="header-actions">
+      <button *ngIf="creditList.length > 0" class="btn-modern btn-excel" (click)="exportExcel()" title="Export credit ledger to Excel">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+      <button *ngIf="creditList.length > 0" class="btn-modern btn-pdf" (click)="pdf()" title="Print PDF summary">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Print PDF</span>
+      </button>
+      <button class="btn-modern btn-close-modal" (click)="cancel()" title="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       2. Executive KPI Overview Banner
+       ======================================================================== -->
+  <div class="kpi-banner" *ngIf="creditList.length > 0">
+    <div class="kpi-card kpi-credit">
+      <div class="kpi-icon-wrap">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Credit Balance</div>
+        <div class="kpi-value">₹ {{ getTotalBalance() | number:'1.2-2' }}</div>
+        <div class="kpi-sub">Total credit amounts recorded across period</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-count">
+      <div class="kpi-icon-wrap">
+        <mat-icon>receipt</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Transactions</div>
+        <div class="kpi-value">{{ creditList.length }} Entries</div>
+        <div class="kpi-sub">Verified credit ledger records</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       3. Main Data Table
+       ======================================================================== -->
+  <div class="table-scroll-container" *ngIf="creditList.length > 0">
+    <table class="credit-report-table" id="creditListTable">
+      <thead>
+        <tr>
+          <th class="col-date">Date</th>
+          <th>Credit Source / Account</th>
+          <th>Remark / Transaction Note</th>
+          <th class="col-num">Credit Balance (₹)</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let r of creditList">
+          <td class="col-date">{{ r.date }}</td>
+          <td>
+            <span class="credit-source-pill">
+              <mat-icon style="font-size:14px;width:14px;height:14px;">storefront</mat-icon>
+              {{ r.credit }}
+            </span>
+          </td>
+          <td>{{ r.remark || 'Credit note' }}</td>
+          <td class="col-num credit-balance-val">₹ {{ (r.balance || 0) | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+
+      <!-- Sticky Totals Footer -->
+      <tfoot>
+        <tr>
+          <td class="total-label-cell" colspan="3">TOTAL CREDIT BALANCE</td>
+          <td class="col-num total-grand-balance">₹ {{ getTotalBalance() | number:'1.2-2' }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ========================================================================
+       4. Empty State
+       ======================================================================== -->
+  <div class="empty-state-wrap" *ngIf="creditList.length === 0">
+    <div class="empty-icon-wrap">
+      <mat-icon>account_balance</mat-icon>
+    </div>
+    <h4>No Credit Records Found</h4>
+    <p>There are no indirect income or credit note entries registered for the period from {{ startDate }} to {{ endDate }}.</p>
+    <button class="btn-modern btn-secondary" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Return</span>
+    </button>
+  </div>
+
+  <!-- ========================================================================
+       5. Bottom Action Bar
+       ======================================================================== -->
+  <div class="modal-bottom-bar" *ngIf="creditList.length > 0">
+    <div class="bottom-info">
+      <mat-icon>verified</mat-icon>
+      <span>Consolidated credit ledger ({{ creditList.length }} entries)</span>
+    </div>
+    <div class="bottom-actions">
+      <button class="btn-modern btn-secondary" (click)="cancel()">
+        <span>Close</span>
+      </button>
+      <button class="btn-modern btn-excel" (click)="exportExcel()">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+    </div>
+  </div>
+
 </div>

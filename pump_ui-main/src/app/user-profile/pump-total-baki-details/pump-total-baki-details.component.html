@@ -1,53 +1,186 @@
-<div class="row">
-    <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
-        <div class="card">
-            <div class="card-body">
-                <div *ngIf="reportList.length > 0">
-                    <div class="button-group">
-                        <button mat-raised-button (click)="exportExcel()">
-                            <mat-icon>file_download</mat-icon>
-                            Export to Excel
-                        </button>
-                        <button mat-raised-button (click)="pdf()">
-                            <mat-icon>picture_as_pdf</mat-icon>
-                            PDF
-                        </button>
-                        <button mat-raised-button (click)="cancel()">
-                            <mat-icon>cancel</mat-icon>
-                            Cancel
-                        </button>
-                    </div>
+<div class="modal-dialog-wrapper">
 
-                    <table id="bakiListTable">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Baki</th>
-                                <th>Jama</th>
-                                <th>Total_Baki</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr *ngFor="let r of reportList">
-                                <td>{{ r.name }}</td>
-                                <td>{{ r.total_baki }}</td>
-                                <td>{{ r.total_jama }}</td>
-                                <td>{{ r.baki_total }}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" style="text-align: right;"><strong>Total Baki:</strong></td>
-                                <td style="background-color: #d0b6b6;"><strong>{{ getTotalBaki() | number:'1.2-2'
-                                        }}</strong></td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                </div>
-                <div *ngIf="reportList.length === 0">
-                    No data available.
-                </div>
-            </div>
+  <!-- ========================================================================
+       1. Top Header Toolbar
+       ======================================================================== -->
+  <div class="modal-header-bar">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>account_balance_wallet</mat-icon>
+      </div>
+      <div class="header-title-group">
+        <div class="title-row">
+          <h3 class="modal-main-title">Customer Outstanding Balance Summary</h3>
+          <span class="badge-scope">Credit Ledger</span>
         </div>
+        <div class="header-meta">
+          <span class="meta-pill date-pill">
+            <mat-icon>event</mat-icon>
+            <span>{{ startDate }}</span>
+            <span class="arrow-sep">➔</span>
+            <span>{{ endDate }}</span>
+          </span>
+          <span class="meta-pill count-pill">
+            <mat-icon>groups</mat-icon>
+            <span>{{ reportList.length }} Accounts Recorded</span>
+          </span>
+        </div>
+      </div>
     </div>
+
+    <div class="header-actions">
+      <button *ngIf="reportList.length > 0" class="btn-modern btn-excel" (click)="exportExcel()" title="Export to Excel spreadsheet">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+      <button *ngIf="reportList.length > 0" class="btn-modern btn-pdf" (click)="pdf()" title="Print PDF summary">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Print PDF</span>
+      </button>
+      <button class="btn-modern btn-close-modal" (click)="cancel()" title="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       2. Executive KPI Overview Banner
+       ======================================================================== -->
+  <div class="kpi-banner" *ngIf="reportList.length > 0">
+    <!-- Card 1: Total Customer Baki (Dues) -->
+    <div class="kpi-card kpi-dues">
+      <div class="kpi-icon-wrap">
+        <mat-icon>trending_up</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Customer Dues (Baki)</div>
+        <div class="kpi-value">₹ {{ getTotalDues() | number:'1.2-2' }}</div>
+        <div class="kpi-sub">Total credit dispensed across period</div>
+      </div>
+    </div>
+
+    <!-- Card 2: Total Received (Jama) -->
+    <div class="kpi-card kpi-jama">
+      <div class="kpi-icon-wrap">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Credit Received (Jama)</div>
+        <div class="kpi-value">₹ {{ getTotalJama() | number:'1.2-2' }}</div>
+        <div class="kpi-sub">Payments collected & deposited</div>
+      </div>
+    </div>
+
+    <!-- Card 3: Net Customer Position -->
+    <div class="kpi-card" [ngClass]="getTotalBaki() <= 0 ? 'kpi-net-advance' : 'kpi-net-due'">
+      <div class="kpi-icon-wrap">
+        <mat-icon>{{ getTotalBaki() <= 0 ? 'check_circle' : 'warning' }}</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Net Outstanding Position</div>
+        <div class="kpi-value">₹ {{ getTotalBaki() | number:'1.2-2' }}</div>
+        <div class="kpi-sub">
+          <strong>{{ getTotalBaki() < 0 ? 'Net Advance Balance (Surplus)' : (getTotalBaki() > 0 ? 'Net Receivable Outstanding' : 'Fully Settled') }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       3. Main Data Table
+       ======================================================================== -->
+  <div class="table-scroll-container" *ngIf="reportList.length > 0">
+    <table class="baki-summary-table" id="bakiListTable">
+      <thead>
+        <tr>
+          <th>Customer Name</th>
+          <th class="col-num">Total Baki (Dues ₹)</th>
+          <th class="col-num">Total Jama (Paid ₹)</th>
+          <th class="col-num">Net Outstanding (₹)</th>
+          <th class="col-center">Account Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let r of reportList">
+          <td>
+            <div class="customer-cell">
+              <div class="avatar-badge">{{ r.name ? r.name.charAt(0).toUpperCase() : 'C' }}</div>
+              <span class="customer-name">{{ r.name }}</span>
+            </div>
+          </td>
+          <td class="col-num baki-val">₹ {{ (r.total_baki || 0) | number:'1.2-2' }}</td>
+          <td class="col-num jama-val">₹ {{ (r.total_jama || 0) | number:'1.2-2' }}</td>
+          <td class="col-num font-weight-bold" [ngClass]="r.baki_total < 0 ? 'text-success' : (r.baki_total > 0 ? 'text-danger' : 'text-muted')">
+            ₹ {{ (r.baki_total || 0) | number:'1.2-2' }}
+          </td>
+          <td class="col-center">
+            <span *ngIf="r.baki_total < 0" class="badge-pill badge-advance">
+              <mat-icon style="font-size:13px;width:13px;height:13px;">verified</mat-icon>
+              Advance Balance
+            </span>
+            <span *ngIf="r.baki_total > 0" class="badge-pill badge-due">
+              <mat-icon style="font-size:13px;width:13px;height:13px;">error_outline</mat-icon>
+              Due Pending
+            </span>
+            <span *ngIf="r.baki_total === 0" class="badge-pill badge-settled">
+              Settled
+            </span>
+          </td>
+        </tr>
+      </tbody>
+
+      <!-- Sticky Summary Footer -->
+      <tfoot>
+        <tr>
+          <td class="total-label-cell">TOTAL ACCUMULATED</td>
+          <td class="col-num total-grand-due">₹ {{ getTotalDues() | number:'1.2-2' }}</td>
+          <td class="col-num total-grand-jama">₹ {{ getTotalJama() | number:'1.2-2' }}</td>
+          <td class="col-num">
+            <span class="total-net-pill" [ngClass]="getTotalBaki() <= 0 ? 'advance' : 'due'">
+              ₹ {{ getTotalBaki() | number:'1.2-2' }}
+            </span>
+          </td>
+          <td class="col-center">
+            <span class="text-white small">{{ getTotalBaki() < 0 ? 'Net Advance Surplus' : 'Net Dues Receivable' }}</span>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ========================================================================
+       4. Empty State
+       ======================================================================== -->
+  <div class="empty-state-wrap" *ngIf="reportList.length === 0">
+    <div class="empty-icon-wrap">
+      <mat-icon>account_balance_wallet</mat-icon>
+    </div>
+    <h4>No Customer Outstanding Records Found</h4>
+    <p>There are no customer credit/jama records registered for the period from {{ startDate }} to {{ endDate }}.</p>
+    <button class="btn-modern btn-secondary" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Return</span>
+    </button>
+  </div>
+
+  <!-- ========================================================================
+       5. Bottom Action Bar
+       ======================================================================== -->
+  <div class="modal-bottom-bar" *ngIf="reportList.length > 0">
+    <div class="bottom-info">
+      <mat-icon>verified</mat-icon>
+      <span>Consolidated ledger aggregated across all customer balances</span>
+    </div>
+    <div class="bottom-actions">
+      <button class="btn-modern btn-secondary" (click)="cancel()">
+        <span>Close</span>
+      </button>
+      <button class="btn-modern btn-excel" (click)="exportExcel()">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+    </div>
+  </div>
+
 </div>

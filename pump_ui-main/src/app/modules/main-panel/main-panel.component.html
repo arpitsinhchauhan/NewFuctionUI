@@ -71,7 +71,7 @@
               <mat-label>Employee</mat-label>
               <mat-select [(ngModel)]="selectedEmployeeIdForView" name="selectedEmployeeIdForView"
                 (selectionChange)="onManagerViewChange()">
-                <mat-option value="ALL">All Employees (Aggregated)</mat-option>
+                <mat-option value="ALL">All Employees</mat-option>
                 <mat-option *ngFor="let emp of managerEmployeeList" [value]="emp.id">
                   {{ emp.username }}
                 </mat-option>
@@ -455,6 +455,12 @@
           <button class="btn-premium btn-export-pdf btn-md" (click)="downloadPDF()">
             <mat-icon>picture_as_pdf</mat-icon>
             <span>Download PDF</span>
+          </button>
+          <button
+            *ngIf="userRole !== 'EMPLOYEE' && userRole !== 'employee'"
+            class="btn-premium btn-export-excel btn-md ml-2" (click)="exportManagerReports()">
+            <mat-icon>table_view</mat-icon>
+            <span>Export Excel</span>
           </button>
           <button
             *ngIf="userRole === 'EMPLOYEE' || userRole === 'employee' || userRole === 'PUMP_MANAGER' || userRole === 'pumpmanager' || userRole === 'user'"

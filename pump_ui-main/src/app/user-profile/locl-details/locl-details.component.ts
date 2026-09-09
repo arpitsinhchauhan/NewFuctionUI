@@ -41,27 +41,23 @@ export class LoclDetailsComponent implements OnInit {
   }
 
   getTotalCreditDetails(): void {
-    if (this.managerId && this.employeeIds && this.employeeIds.length > 0) {
-      // PUMP MANAGER: fetch credit details for each employee and merge
-      const requests = this.employeeIds.map(empId =>
-        this.use.getTotalLoclReport(this.startDate, this.endDate, empId.toString())
-          .pipe(catchError(() => of([] as any[])))
-      );
-      forkJoin(requests).subscribe((results: any[][]) => {
-        const flat = results.flat();
-        this.creditList = flat.map(r => ({
-          date: r[0], balance: r[1], credit: r[2], remark: r[3],
-        }));
-      });
-    } else {
-      // SINGLE USER
-      this.use.getTotalLoclReport(this.startDate, this.endDate, this.userId!)
-        .subscribe((res: any[]) => {
-          this.creditList = res.map(r => ({
-            date: r[0], balance: r[1], credit: r[2], remark: r[3],
-          }));
-        });
-    }
+    const allTargetIds = (this.managerId && this.employeeIds && this.employeeIds.length > 0)
+      ? Array.from(new Set([this.managerId, ...this.employeeIds].filter(Boolean)))
+      : [this.userId!];
+
+    const requests = allTargetIds.map(empId =>
+      this.use.getTotalLoclReport(this.startDate, this.endDate, empId.toString())
+        .pipe(catchError(() => of([] as any[])))
+    );
+    forkJoin(requests).subscribe((results: any[][]) => {
+      const flat = results.flat();
+      this.creditList = flat.map(r => ({
+        date: r[0],
+        balance: Number(r[1]) || 0,
+        credit: r[2],
+        remark: r[3],
+      }));
+    });
   }
 
 

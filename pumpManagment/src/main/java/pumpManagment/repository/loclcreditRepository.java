@@ -40,6 +40,17 @@ public interface loclcreditRepository extends JpaRepository<loclcredit, Integer>
             @Param("userId") String userId
     );
 
+    @Query(value = "SELECT l.date, l.balance, l.credit, l.remark " +
+                    "FROM loclcredit l " +
+                    "WHERE l.date BETWEEN :startDate AND :endDate " +
+                    "AND l.user_id IN (:userIds) " +
+                    "ORDER BY l.date DESC", nativeQuery = true)
+    List<Object[]> findReportBycreditForUsers(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            @Param("userIds") List<String> userIds
+    );
+
     @Query(value = "SELECT SUM(l.balance) " +
         "FROM loclcredit l " +
         "WHERE l.date BETWEEN :startDate AND :endDate " +

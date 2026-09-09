@@ -20,6 +20,8 @@ public interface DailyReportRepository extends JpaRepository<DailyReport, Long> 
     List<DailyReport> findByPumpIdAndReportDate(Long pumpId, String reportDate);
     List<DailyReport> findByEmployeeIdInAndReportDate(List<Long> employeeIds, String reportDate);
     List<DailyReport> findByEmployeeIdIn(List<Long> employeeIds);
+    List<DailyReport> findByPumpIdAndEmployeeId(Long pumpId, Long employeeId);
+    List<DailyReport> findByPumpIdAndEmployeeIdAndReportDate(Long pumpId, Long employeeId, String reportDate);
     Optional<DailyReport> findByReportIdAndEmployeeIdAndPumpId(Long reportId, Long employeeId, Long pumpId);
 
     @Query("SELECT r FROM DailyReport r WHERE r.pumpId = :pumpId AND (r.managerId = :managerId OR (r.managerId IS NULL AND r.employeeId IN :employeeIds))")

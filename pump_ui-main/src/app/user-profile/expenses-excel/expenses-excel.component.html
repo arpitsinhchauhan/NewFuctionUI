@@ -1,62 +1,152 @@
-<div class="export-dialog-wrapper">
-  <div class="card-header-modern mb-4">
-    <div class="header-text">
-      <h4 class="card-title">Expense (Kharch) Report</h4>
-      <p class="card-subtitle">Select records for PDF/Excel export</p>
+<div class="modal-dialog-wrapper">
+
+  <!-- ========================================================================
+       1. Top Header Toolbar
+       ======================================================================== -->
+  <div class="modal-header-bar">
+    <div class="header-left">
+      <div class="header-icon-box">
+        <mat-icon>receipt</mat-icon>
+      </div>
+      <div class="header-title-group">
+        <div class="title-row">
+          <h3 class="modal-main-title">Indirect Expenses (Kharch) Audit Report</h3>
+          <span class="badge-scope">{{ data.expense ? data.expense : 'All Categories' }}</span>
+        </div>
+        <div class="header-meta">
+          <span class="meta-pill date-pill">
+            <mat-icon>event</mat-icon>
+            <span>{{ data.startDate }}</span>
+            <span class="arrow-sep">➔</span>
+            <span>{{ data.endDate }}</span>
+          </span>
+          <span class="meta-pill count-pill">
+            <mat-icon>receipt_long</mat-icon>
+            <span>{{ expenseList.length }} Entries Found</span>
+          </span>
+        </div>
+      </div>
     </div>
+
     <div class="header-actions">
-      <button mat-flat-button color="primary" (click)="exportToExcel()" class="me-2">
+      <button *ngIf="expenseList.length > 0" class="btn-modern btn-excel" (click)="exportToExcel()" title="Export expenses to Excel">
         <mat-icon>file_download</mat-icon>
-        <span>Excel</span>
+        <span>Export to Excel</span>
       </button>
-      <button mat-flat-button color="accent" (click)="printTable()" class="me-2">
+      <button *ngIf="expenseList.length > 0" class="btn-modern btn-pdf" (click)="printTable()" title="Print PDF summary">
         <mat-icon>picture_as_pdf</mat-icon>
-        <span>PDF</span>
+        <span>Print PDF</span>
       </button>
-      <button mat-icon-button (click)="cancel()" color="warn">
+      <button class="btn-modern btn-close-modal" (click)="cancel()" title="Close dialog">
         <mat-icon>close</mat-icon>
       </button>
     </div>
   </div>
 
-  <div class="table-responsive-modern">
-    <table id="ExpenseTable" class="modern-report-table">
+  <!-- ========================================================================
+       2. Executive KPI Overview Banner
+       ======================================================================== -->
+  <div class="kpi-banner" *ngIf="expenseList.length > 0">
+    <div class="kpi-card kpi-expense">
+      <div class="kpi-icon-wrap">
+        <mat-icon>trending_down</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Total Selected Expenses</div>
+        <div class="kpi-value">₹ {{ getTotalPrice() | number:'1.2-2' }}</div>
+        <div class="kpi-sub">Total indirect operational costs incurred</div>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-count">
+      <div class="kpi-icon-wrap">
+        <mat-icon>receipt</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="kpi-label">Itemized Expense Vouchers</div>
+        <div class="kpi-value">{{ expenseList.length }} Records</div>
+        <div class="kpi-sub">Audited vouchers registered in period</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       3. Main Data Table
+       ======================================================================== -->
+  <div class="table-scroll-container" *ngIf="expenseList.length > 0">
+    <table class="expense-report-table" id="ExpenseTable">
       <thead>
         <tr>
-          <th style="width: 40px;" class="text-center">
-            <mat-checkbox [checked]="allSelected" (change)="toggleSelectAll($event)"></mat-checkbox>
+          <th style="width: 44px;" class="col-center">
+            <mat-checkbox [checked]="allSelected" (change)="toggleSelectAll($event)" title="Select/Deselect All"></mat-checkbox>
           </th>
-          <th>Date</th>
+          <th class="col-date">Date</th>
           <th>Expense Category</th>
-          <th class="text-right">Total Amount (₹)</th>
-          <th>Note</th>
+          <th class="col-num">Expense Amount (₹)</th>
+          <th>Voucher Note / Remarks</th>
         </tr>
       </thead>
+
       <tbody>
         <tr *ngFor="let item of expenseList" [class.row-selected]="item.selected">
-          <td class="text-center">
+          <td class="col-center">
             <mat-checkbox [(ngModel)]="item.selected" (change)="checkIfAllSelected()"></mat-checkbox>
           </td>
-          <td>{{ item.date | date: 'dd-MM-yyyy'}}</td>
-          <td>{{ item.expenses }}</td>
-          <td class="text-right font-weight-bold text-danger">₹{{ item.price | number:'1.2-2' }}</td>
-          <td>{{ item.note }}</td>
+          <td class="col-date">{{ item.date }}</td>
+          <td>
+            <span class="category-pill">
+              <mat-icon style="font-size:13px;width:13px;height:13px;">label</mat-icon>
+              {{ item.expenses }}
+            </span>
+          </td>
+          <td class="col-num expense-amount-val">₹ {{ (item.price || 0) | number:'1.2-2' }}</td>
+          <td>{{ item.note || '-' }}</td>
         </tr>
       </tbody>
+
+      <!-- Sticky Totals Footer -->
       <tfoot>
-        <tr class="footer-row">
-          <td colspan="3" class="text-right"><strong>Grand Total Expenses:</strong></td>
-          <td class="text-right text-danger font-weight-bold h5 mb-0">
-            ₹{{ getTotalPrice() | number:'1.2-2' }}
-          </td>
+        <tr>
+          <td colspan="3" class="total-label-cell">TOTAL SELECTED EXPENSES</td>
+          <td class="col-num total-grand-expense">₹ {{ getTotalPrice() | number:'1.2-2' }}</td>
           <td></td>
         </tr>
       </tfoot>
     </table>
   </div>
 
-  <div *ngIf="expenseList.length === 0" class="no-data-msg">
-    <mat-icon>info</mat-icon>
-    <p>No expense records found.</p>
+  <!-- ========================================================================
+       4. Empty State
+       ======================================================================== -->
+  <div class="empty-state-wrap" *ngIf="expenseList.length === 0">
+    <div class="empty-icon-wrap">
+      <mat-icon>receipt</mat-icon>
+    </div>
+    <h4>No Expense Records Found</h4>
+    <p>No indirect expense vouchers found for category "{{ data.expense || 'All' }}" from {{ data.startDate }} to {{ data.endDate }}.</p>
+    <button class="btn-modern btn-secondary" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Return</span>
+    </button>
   </div>
+
+  <!-- ========================================================================
+       5. Bottom Action Bar
+       ======================================================================== -->
+  <div class="modal-bottom-bar" *ngIf="expenseList.length > 0">
+    <div class="bottom-info">
+      <mat-icon>verified</mat-icon>
+      <span>Indirect expense audit records verified from database ({{ expenseList.length }} entries)</span>
+    </div>
+    <div class="bottom-actions">
+      <button class="btn-modern btn-secondary" (click)="cancel()">
+        <span>Close</span>
+      </button>
+      <button class="btn-modern btn-excel" (click)="exportToExcel()">
+        <mat-icon>file_download</mat-icon>
+        <span>Export to Excel</span>
+      </button>
+    </div>
+  </div>
+
 </div>

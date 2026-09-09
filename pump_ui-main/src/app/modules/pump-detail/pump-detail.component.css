@@ -1,18 +1,806 @@
-/* purchase.component.css */
-table {
-    width: 100%;
-    border-collapse: collapse;
+/* ==========================================================================
+   Pump Excel Details Dialog - Executive Antigravity Modern Theme
+   ========================================================================== */
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.pump-modal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(90vh - 12px);
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1e293b;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   1. Modal Header
+   -------------------------------------------------------------------------- */
+.modal-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.header-icon-box i {
+  font-size: 24px;
+}
+
+.header-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-main-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1.25;
+}
+
+.badge-audit {
+  background: rgba(79, 70, 229, 0.3);
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  color: #c7d2fe;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.meta-pill i {
+  font-size: 14px;
+}
+
+.date-pill {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.date-pill .arrow-sep {
+  opacity: 0.6;
+  font-size: 11px;
+}
+
+.count-pill {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Action Buttons
+   -------------------------------------------------------------------------- */
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  white-space: nowrap;
+}
+
+.btn-excel {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  padding: 8px 18px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.btn-excel:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-excel:active {
+  transform: translateY(0);
+}
+
+.btn-close-modal {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #94a3b8 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.btn-close-modal:hover {
+  background: rgba(239, 68, 68, 0.9) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  transform: rotate(90deg);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 8px 18px;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* --------------------------------------------------------------------------
+   3. Executive KPI Overview Banner
+   -------------------------------------------------------------------------- */
+.kpi-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 14px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.kpi-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.kpi-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon-wrap i {
+  font-size: 20px;
+}
+
+.kpi-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.kpi-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sub-amt {
+  font-weight: 700;
+  color: #059669;
+}
+
+.sub-amt.sub-danger {
+  color: #e11d48;
+}
+
+.sub-sep {
+  opacity: 0.4;
+  font-size: 9px;
+}
+
+.sub-info {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Card Themes */
+.kpi-petrol {
+  border-left: 4px solid #f59e0b;
+}
+.kpi-petrol .kpi-icon-wrap {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.kpi-diesel {
+  border-left: 4px solid #3b82f6;
+}
+.kpi-diesel .kpi-icon-wrap {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.kpi-oil {
+  border-left: 4px solid #8b5cf6;
+}
+.kpi-oil .kpi-icon-wrap {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.kpi-settlement {
+  border-left: 4px solid #10b981;
+}
+.kpi-settlement .kpi-icon-wrap {
+  background: #d1fae5;
+  color: #047857;
+}
+
+/* --------------------------------------------------------------------------
+   4. Scrollable Table Viewport
+   -------------------------------------------------------------------------- */
+.table-scroll-container {
+  flex: 1;
+  overflow: auto;
+  min-height: 250px;
+  background: #ffffff;
+  position: relative;
+}
+
+/* Custom Slim Scrollbars */
+.table-scroll-container::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: 2px solid #f1f5f9;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   5. Modern Grouped Table
+   -------------------------------------------------------------------------- */
+.pump-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+/* Tier 1: Category Header Band */
+.tier1-header th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+}
+
+/* Tier 2: Column Sub-Headers */
+.tier2-header th {
+  position: sticky;
+  top: 32px;
+  z-index: 9;
+  padding: 8px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #475569;
+  background: #f8fafc;
+  border-bottom: 2px solid #cbd5e1;
+  border-right: 1px solid #e2e8f0;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.tier2-header th.col-txt {
+  text-align: left;
+}
+
+.tier2-header th.col-center {
+  text-align: center;
+}
+
+/* Category Color Accents for Headers */
+.grp-petrol {
+  background: #fffbeb;
+  color: #92400e;
+  border-left: 1px solid #fde68a;
+  border-right: 1px solid #fde68a;
+}
+
+.grp-diesel {
+  background: #eff6ff;
+  color: #1e40af;
+  border-left: 1px solid #bfdbfe;
+  border-right: 1px solid #bfdbfe;
+}
+
+.grp-oil-exp {
+  background: #faf5ff;
+  color: #6b21a8;
+  border-left: 1px solid #e9d5ff;
+  border-right: 1px solid #e9d5ff;
+}
+
+.grp-petrol-pur {
+  background: #fef3c7;
+  color: #78350f;
+  border-left: 1px solid #fcd34d;
+  border-right: 1px solid #fcd34d;
+}
+
+.grp-diesel-pur {
+  background: #dbeafe;
+  color: #1e3a8a;
+  border-left: 1px solid #93c5fd;
+  border-right: 1px solid #93c5fd;
+}
+
+.grp-oil-inv {
+  background: #ede9fe;
+  color: #581c87;
+  border-left: 1px solid #ddd6fe;
+  border-right: 1px solid #ddd6fe;
+}
+
+.grp-settlement {
+  background: #ecfdf5;
+  color: #065f46;
+  border-left: 1px solid #a7f3d0;
+  border-right: 1px solid #a7f3d0;
+}
+
+.grp-expenses {
+  background: #fff1f2;
+  color: #9f1239;
+  border-left: 1px solid #fecdd3;
+  border-right: 1px solid #fecdd3;
+}
+
+.grp-xp-sale {
+  background: #fefce8;
+  color: #854d0e;
+  border-left: 1px solid #fef08a;
+  border-right: 1px solid #fef08a;
+}
+
+.grp-power-sale {
+  background: #fff7ed;
+  color: #9a3412;
+  border-left: 1px solid #fed7aa;
+  border-right: 1px solid #fed7aa;
+}
+
+.grp-xp-pur {
+  background: #fef9c3;
+  color: #713f12;
+  border-left: 1px solid #fde047;
+  border-right: 1px solid #fde047;
+}
+
+.grp-power-pur {
+  background: #ffedd5;
+  color: #7c2d12;
+  border-left: 1px solid #fdba74;
+  border-right: 1px solid #fdba74;
+}
+
+.grp-total {
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  border-left: 2px solid #0284c7;
+  text-align: right !important;
+}
+
+/* Sticky First Column: Date */
+.sticky-date-th {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 15 !important;
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+  border-right: 2px solid #94a3b8 !important;
+  text-align: center !important;
+  vertical-align: middle;
+  min-width: 105px;
+  font-weight: 800 !important;
+}
+
+.sticky-date-td {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: #ffffff;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: center;
+  border-right: 2px solid #cbd5e1 !important;
+  min-width: 105px;
+}
+
+/* Sticky Total Column on Right */
+.sticky-total-col {
+  position: sticky;
+  right: 0;
+  top: 0;
+  z-index: 15 !important;
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  border-left: 2px solid #0284c7 !important;
+  text-align: right !important;
+  vertical-align: middle;
+  min-width: 110px;
+  font-weight: 800 !important;
+}
+
+.sticky-total-td {
+  position: sticky;
+  right: 0;
+  z-index: 4;
+  background: #f0fdf4;
+  font-weight: 700;
+  color: #047857;
+  text-align: right;
+  border-left: 2px solid #86efac !important;
+  min-width: 110px;
+}
+
+/* --------------------------------------------------------------------------
+   6. Data Rows & Cells
+   -------------------------------------------------------------------------- */
+.pump-data-table tbody td {
+  padding: 7px 11px;
+  border-bottom: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+  white-space: nowrap;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: #334155;
+  text-align: right;
+}
+
+.pump-data-table tbody td.col-txt {
+  text-align: left;
+}
+
+.pump-data-table tbody td.col-center {
+  text-align: center;
+}
+
+/* Zebra Striping */
+.pump-data-table tbody tr:nth-child(even) td {
+  background-color: #fbfcfe;
+}
+
+.pump-data-table tbody tr:nth-child(even) td.sticky-date-td {
+  background-color: #fbfcfe;
+}
+
+.pump-data-table tbody tr:nth-child(even) td.sticky-total-td {
+  background-color: #ecfdf5;
+}
+
+/* Row Hover */
+.pump-data-table tbody tr:hover td {
+  background-color: #eff6ff !important;
+}
+
+.pump-data-table tbody tr:hover td.sticky-date-td {
+  background-color: #eff6ff !important;
+}
+
+.pump-data-table tbody tr:hover td.sticky-total-td {
+  background-color: #d1fae5 !important;
+}
+
+/* Key Highlight Cells */
+.cell-highlight-green {
+  font-weight: 600;
+  color: #059669 !important;
+}
+
+.cell-highlight-blue {
+  font-weight: 600;
+  color: #2563eb !important;
+}
+
+.cell-highlight-amber {
+  font-weight: 600;
+  color: #d97706 !important;
+}
+
+.cell-highlight-purple {
+  font-weight: 600;
+  color: #7c3aed !important;
+}
+
+.cell-dim {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Sticky Totals Footer
+   -------------------------------------------------------------------------- */
+.pump-data-table tfoot tr {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #0f172a;
+  border-top: 2px solid #334155;
+}
+
+.pump-data-table tfoot td {
+  padding: 9px 11px;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #f8fafc;
+  background: #0f172a;
+  text-align: right;
+}
+
+.sticky-date-footer {
+  position: sticky;
+  left: 0;
+  z-index: 12;
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  font-weight: 800;
+  text-align: center !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-right: 2px solid #334155 !important;
+  min-width: 105px;
+}
+
+.sticky-total-footer {
+  position: sticky;
+  right: 0;
+  z-index: 12;
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 13px;
+  text-align: right !important;
+  border-left: 2px solid #38bdf8 !important;
+  min-width: 110px;
+}
+
+/* --------------------------------------------------------------------------
+   8. Modal Footer Toolbar
+   -------------------------------------------------------------------------- */
+.modal-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  z-index: 15;
+}
+
+.bottom-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.bottom-info i {
+  font-size: 16px;
+  color: #4f46e5;
+}
+
+.bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   9. Empty State Card
+   -------------------------------------------------------------------------- */
+.empty-state-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin: 32px;
+  border: 1px dashed #cbd5e1;
+}
+
+.empty-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.empty-icon-wrap i {
+  font-size: 32px;
+}
+
+.empty-state-wrap h4 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.empty-state-wrap p {
+  font-size: 13px;
+  color: #64748b;
+  max-width: 440px;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   10. Responsiveness
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .kpi-banner {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+}
+
+@media (max-width: 768px) {
+  .modal-header-bar {
+    padding: 12px 16px;
   }
-  
-  th {
-    background-color: #f2f2f2;
-    text-align: left;
+  .modal-main-title {
+    font-size: 16px;
   }
-  .petrol{
-    background-color: rgb(92, 127, 131);
+  .kpi-banner {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
   }
+  .modal-bottom-bar {
+    padding: 10px 16px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}

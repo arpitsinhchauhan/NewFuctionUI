@@ -711,8 +711,9 @@ export class UserServiceService {
     userIdOverride?: string
   ): Observable<any[]> {
     const userId = userIdOverride || localStorage.getItem("userId");
+    const exp = (!expense || expense.trim() === '' || expense === 'All Expenses') ? '%' : expense;
     let params = new HttpParams()
-      .set("expense", expense || '')
+      .set("expense", exp)
       .set("startDate", startDate)
       .set("endDate", endDate)
       .set("userId", userId);
@@ -903,11 +904,15 @@ export class UserServiceService {
     return this.http.get<any[]>(`${API_REPORT}/employees/manager/${managerId}`);
   }
 
+  getEmployeesByPump(pumpId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${API_REPORT}/employees/pump/${pumpId}`);
+  }
+
   getManagerReports(managerId: number): Observable<any> {
     return this.http.get<any>(`${API_GET_MANAGER_REPORTS}/${managerId}`);
   }
 
-  getManagerDailyReports(pumpId: number, date: string, managerId?: number): Observable<any[]> {
+  getManagerDailyReports(pumpId: number, date: string, managerId?: number, employeeId?: string): Observable<any[]> {
     let params = new HttpParams();
     if (managerId) {
       params = params.set('managerId', managerId.toString());
@@ -915,8 +920,22 @@ export class UserServiceService {
     if (pumpId) {
       params = params.set('pumpId', pumpId.toString());
     }
-    params = params.set('date', date);
+    if (employeeId && employeeId !== 'ALL') {
+      params = params.set('employeeId', employeeId.toString());
+    }
+    if (date) {
+      params = params.set('date', date);
+    }
     return this.http.get<any[]>(API_MANAGER_DAILY_REPORTS, { params });
+  }
+
+  getDailyReportFiltered(pumpId?: number, employeeId?: string, date?: string, managerId?: number): Observable<any[]> {
+    let params = new HttpParams();
+    if (pumpId) params = params.set('pumpId', pumpId.toString());
+    if (employeeId && employeeId !== 'ALL') params = params.set('employeeId', employeeId.toString());
+    if (date) params = params.set('date', date);
+    if (managerId) params = params.set('managerId', managerId.toString());
+    return this.http.get<any[]>(API_DAILY_REPORT_SUBMIT, { params });
   }
 
   updateDailyReport(id: number, data: any): Observable<any> {

@@ -200,21 +200,20 @@ public class HierarchyControllerIsolationTest {
     public void testManagerEndpoints_ForbiddenForEmployee() {
         authenticateUser("NC_11", "EMPLOYEE");
 
-        ResponseEntity<?> pumpResponse = hierarchyController.getPumpReports(1L);
-        assertEquals(HttpStatus.FORBIDDEN, pumpResponse.getStatusCode());
+        // Requesting reports of another employee
+        ResponseEntity<?> response = hierarchyController.getDailyReports(1L, "22", null, null);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 
-        ResponseEntity<?> managerResponse = hierarchyController.getManagerReports(100L);
+        // Requesting manager report endpoint as employee
+        ResponseEntity<?> managerResponse = hierarchyController.getManagerReports(100L, null, null, null);
         assertEquals(HttpStatus.FORBIDDEN, managerResponse.getStatusCode());
-
-        ResponseEntity<?> eodResponse = hierarchyController.getManagerDailyReports(100L, 1L, "2026-09-05");
-        assertEquals(HttpStatus.FORBIDDEN, eodResponse.getStatusCode());
     }
 
     @Test
     public void testManagerEndpoints_PumpManagerCanViewEmployeesOfOwnPump() {
         authenticateUser("pumpmanager", "PUMP_MANAGER");
 
-        when(userRepository.findByManagerId(100L)).thenReturn(Arrays.asList(employee1, employee2));
+        when(userRepository.findByManagerIdAndRole(100L, "EMPLOYEE")).thenReturn(Arrays.asList(employee1, employee2));
 
         DailyReport r1 = new DailyReport();
         r1.setReportId(1L);
@@ -226,13 +225,60 @@ public class HierarchyControllerIsolationTest {
         r2.setEmployeeId(22L);
         r2.setPumpId(1L);
 
-        when(dailyReportRepository.findManagerReports(eq(1L), eq(100L), anyList()))
-                .thenReturn(Arrays.asList(r1, r2));
+        when(dailyReportRepository.findByPumpId(1L)).thenReturn(Arrays.asList(r1, r2));
 
-        ResponseEntity<?> response = hierarchyController.getManagerReports(100L);
+        ResponseEntity<?> response = hierarchyController.getManagerReports(100L, 1L, "ALL", null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<?> reports = (List<?>) response.getBody();
         assertEquals(2, reports.size());
+    }
+
+    @Test
+    public void testManagerEndpoints_SpecificEmployeeFilter() {
+        authenticateUser("pumpmanager", "PUMP_MANAGER");
+
+        when(userRepository.findByManagerIdAndRole(100L, "EMPLOYEE")).thenReturn(Arrays.asList(employee1, employee2));
+
+        DailyReport r1 = new DailyReport();
+        r1.setReportId(1L);
+        r1.setEmployeeId(11L);
+        r1.setPumpId(1L);
+
+        when(dailyReportRepository.findByEmployeeIdAndPumpId(11L, 1L)).thenReturn(Collections.singletonList(r1));
+
+        ResponseEntity<?> response = hierarchyController.getDailyReports(1L, "11", null, 100L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<?> reports = (List<?>) response.getBody();
+        assertEquals(1, reports.size());
+    }
+
+    @Test
+    public void testManagerEndpoints_SpecificEmployeeEmptyReturnsEmptyList() {
+        authenticateUser("pumpmanager", "PUMP_MANAGER");
+
+        when(userRepository.findByManagerIdAndRole(100L, "EMPLOYEE")).thenReturn(Arrays.asList(employee1, employee2));
+
+        // Employee 22 (emp2) has NO records
+        when(dailyReportRepository.findByEmployeeIdAndPumpId(22L, 1L)).thenReturn(Collections.emptyList());
+
+        ResponseEntity<?> response = hierarchyController.getDailyReports(1L, "22", null, 100L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<?> reports = (List<?>) response.getBody();
+        assertTrue(reports.isEmpty());
+    }
+
+    @Test
+    public void testManagerEndpoints_CrossPumpEmployeeAccessForbidden() {
+        authenticateUser("pumpmanager", "PUMP_MANAGER");
+
+        when(userRepository.findByManagerIdAndRole(100L, "EMPLOYEE")).thenReturn(Arrays.asList(employee1, employee2));
+
+        // Employee 999 belongs to another pump
+        ResponseEntity<?> response = hierarchyController.getDailyReports(1L, "999", null, 100L);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 }
