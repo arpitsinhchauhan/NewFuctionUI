@@ -321,8 +321,13 @@
           </div>
         </div>
         <div class="chart-container mt-4" style="position: relative; height: 320px;">
-          <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions" [plugins]="doughnutPlugins">
+          <canvas *ngIf="totalDistributionSum > 0" baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions" [plugins]="doughnutPlugins">
           </canvas>
+          <div *ngIf="totalDistributionSum === 0" class="d-flex flex-column align-items-center justify-content-center h-100 text-muted" style="min-height: 250px;">
+            <mat-icon style="font-size: 48px; width: 48px; height: 48px; opacity: 0.4;">donut_large</mat-icon>
+            <h5 class="text-muted mt-3 mb-1">No Distribution Data Recorded</h5>
+            <p class="text-muted small m-0 text-center">No sales, fuel stock, or credit records found for this pump yet.</p>
+          </div>
         </div>
 
         <!-- Premium Custom Legend (Infographic Style) -->

@@ -98,7 +98,10 @@ public class HierarchyController {
             return null;
         }
         String username = auth.getName();
-        return userRepository.findByUsername(username);
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
+        return userRepository.findByUsername(username.trim());
     }
 
     @PostMapping("/dailyReport")

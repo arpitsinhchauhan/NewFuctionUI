@@ -106,6 +106,7 @@ export class DashboardComponent implements OnInit {
   public pieChartType: ChartType = 'doughnut';
   public pieChartDetails: any[] = [];
   public distributionData: any = null;
+  public totalDistributionSum: number = 0;
   public doughnutPlugins: any[] = [
     {
       id: 'doughnutSliceLabels',
@@ -836,25 +837,25 @@ export class DashboardComponent implements OnInit {
     const textColor = isDark ? "#ffffff" : "#1e293b";
     const borderColor = isDark ? "#1e293b" : "#ffffff";
 
-    // Values from API distribution endpoint or parsed fallbacks matching MNCPETRO.xlsx Dashboard sheet
-    const digitalVal = this.distributionData?.digitalPayments != null && Number(this.distributionData.digitalPayments) > 0
-      ? Number(this.distributionData.digitalPayments) : 50000;
+    // Real values from distribution endpoint or live dashboard metrics for THIS pump only
+    const digitalVal = this.parseChartValue(this.distributionData?.digitalPayments);
     const oilStockVal = this.distributionData?.oilStock != null && Number(this.distributionData.oilStock) > 0
-      ? Number(this.distributionData.oilStock) : (this.parseChartValue(this.oilPurchaseLabel) || 50000);
-    const expensesVal = this.distributionData?.indirectExpenses != null && Number(this.distributionData.indirectExpenses) > 0
-      ? Number(this.distributionData.indirectExpenses) : 25000;
+      ? Number(this.distributionData.oilStock)
+      : this.parseChartValue(this.oilPurchaseLabel);
+    const expensesVal = this.parseChartValue(this.distributionData?.indirectExpenses);
     const dieselStockVal = this.distributionData?.dieselStock != null && Number(this.distributionData.dieselStock) > 0
-      ? Number(this.distributionData.dieselStock) : (this.dieselCurrentStock || 12000);
+      ? Number(this.distributionData.dieselStock)
+      : (this.dieselCurrentStock || 0);
     const petrolStockVal = this.distributionData?.petrolStock != null && Number(this.distributionData.petrolStock) > 0
-      ? Number(this.distributionData.petrolStock) : (this.petrolCurrentStock || 8000);
+      ? Number(this.distributionData.petrolStock)
+      : (this.petrolCurrentStock || 0);
     const bakiVal = this.distributionData?.cousterBillBaki != null && Number(this.distributionData.cousterBillBaki) > 0
-      ? Number(this.distributionData.cousterBillBaki) : (this.parseChartValue(this.jamabakilabel) || 5000);
-    const jamaVal = this.distributionData?.customerDepositsJama != null && Number(this.distributionData.customerDepositsJama) > 0
-      ? Number(this.distributionData.customerDepositsJama) : 4000;
-    const lubeSalesVal = this.distributionData?.lubeOilSales != null && Number(this.distributionData.lubeOilSales) > 0
-      ? Number(this.distributionData.lubeOilSales) : 1000;
+      ? Number(this.distributionData.cousterBillBaki)
+      : this.parseChartValue(this.jamabakilabel);
+    const jamaVal = this.parseChartValue(this.distributionData?.customerDepositsJama);
+    const lubeSalesVal = this.parseChartValue(this.distributionData?.lubeOilSales);
 
-    // Excel MNCPETRO dashboard exact items & colors
+    // Items for this pump only
     const items = [
       { name: 'Digital Payments', value: digitalVal, color: '#26466d', desc: 'UPI, ATM & digital payments' },
       { name: 'Oil Stock', value: oilStockVal, color: '#8da843', desc: 'Lubricants inventory value' },
@@ -867,6 +868,7 @@ export class DashboardComponent implements OnInit {
     ];
 
     const totalSum = items.reduce((sum, it) => sum + it.value, 0);
+    this.totalDistributionSum = totalSum;
 
     const labels: string[] = [];
     const data: number[] = [];

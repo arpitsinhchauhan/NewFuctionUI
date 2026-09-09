@@ -1848,11 +1848,7 @@ export class MainPanelComponent implements OnInit {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     const apiUrl = `${API_BACKPAGE}?date=${formattedDate}&userId=${userId}`;
 
-    this.http.get<BackPageResponse>(apiUrl, {
-      headers: {
-        'Authorization': `Bearer ${userId}`
-      }
-    }).subscribe(
+    this.http.get<BackPageResponse>(apiUrl).subscribe(
       response => {
         this.kharchSellSummary = response.kharchSellSummary || [];
         this.transactionSellSummary = response.transactionSellSummary || [];
@@ -2484,9 +2480,7 @@ export class MainPanelComponent implements OnInit {
     // 14. Back page ledgers
     const backpageCalls = empIds.map(id => {
       const apiUrl = `${API_BACKPAGE}?date=${formatted}&userId=${id}`;
-      return this.http.get<BackPageResponse>(apiUrl, {
-        headers: { 'Authorization': `Bearer ${id}` }
-      }).pipe(catchError(() => of({ kharchSellSummary: [], transactionSellSummary: [], jamaSummary: [], bakiSummary: [], loclcredit: [] } as any)));
+      return this.http.get<BackPageResponse>(apiUrl).pipe(catchError(() => of({ kharchSellSummary: [], transactionSellSummary: [], jamaSummary: [], bakiSummary: [], loclcredit: [] } as any)));
     });
     forkJoin(backpageCalls).subscribe((results: BackPageResponse[]) => {
       this.kharchSellSummary = [];

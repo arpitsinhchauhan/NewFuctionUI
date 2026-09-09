@@ -10,6 +10,7 @@ import { Observable, throwError } from 'rxjs';
 import { finalize, catchError, retry, timeout } from 'rxjs/operators';
 import { LoaderService } from './loader.service';
 import { NotificationService } from './notification.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class MyHeaderInterceptor implements HttpInterceptor {
@@ -17,7 +18,8 @@ export class MyHeaderInterceptor implements HttpInterceptor {
 
   constructor(
     private loaderService: LoaderService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -25,11 +27,19 @@ export class MyHeaderInterceptor implements HttpInterceptor {
     this.activeRequests++;
     this.loaderService.display(true);
 
-    // Clone request to add Bypass-Tunnel-Reminder header
+    // Retrieve token from localStorage
+    const token = localStorage.getItem('token');
+    const headersConfig: { [key: string]: string } = {
+      'Bypass-Tunnel-Reminder': 'true'
+    };
+
+    if (token) {
+      headersConfig['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Clone request to add Bypass-Tunnel-Reminder and Authorization headers
     const clonedRequest = req.clone({
-      setHeaders: {
-        'Bypass-Tunnel-Reminder': 'true'
-      }
+      setHeaders: headersConfig
     });
 
     // Process request with timeout, retry, global error handling, and loader cleanup
@@ -71,6 +81,14 @@ export class MyHeaderInterceptor implements HttpInterceptor {
           'COMPANY_DEACTIVATED',
           'USER_NOT_FOUND'
         ].includes(errorCode);
+
+        // If 401 Unauthorized occurs on an authenticated endpoint, token is missing or expired
+        if (error.status === 401 && !req.url.includes('/authenticate')) {
+          this.notificationService.failure(errorMessage || 'Session expired or unauthenticated. Please log in again.');
+          localStorage.removeItem('token');
+          this.router.navigate(['/']);
+          return throwError(() => error);
+        }
 
         if (!isBusinessError) {
           this.notificationService.failure(errorMessage);

@@ -422,11 +422,7 @@ export class UserProfileComponent implements OnInit {
 
     // Send the HTTP GET request with the userId in the headers
     this.http
-      .get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${userId}`, // Adjust the header key if necessary
-        },
-      })
+      .get(apiUrl)
       .subscribe(
         (response) => {
           this.dialog.open(BackPageComponent, {

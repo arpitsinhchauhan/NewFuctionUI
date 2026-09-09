@@ -1814,6 +1814,14 @@ public class PurchaseController {
                         }
                     }
                 }
+                if (user.getPumpId() != null) {
+                    List<DAOUser> pumpUsers = userRepository.findByPumpId(user.getPumpId());
+                    for (DAOUser pu : pumpUsers) {
+                        if (pu.getId() != null && !userIds.contains(String.valueOf(pu.getId()))) {
+                            userIds.add(String.valueOf(pu.getId()));
+                        }
+                    }
+                }
             }
         } catch (Exception e) {
             // Fallback
@@ -2402,7 +2410,22 @@ public class PurchaseController {
 
     @GetMapping("/dashboard-distribution")
     public Map<String, Object> getDashboardDistribution(@RequestParam String userId) {
-        List<String> userIds = getEmployeeUserIds(userId);
+        DAOUser authUser = null;
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                authUser = userRepository.findByUsername(auth.getName());
+            }
+        } catch (Exception ignored) {}
+
+        String effectiveUserId = userId;
+        if (authUser != null && ("PUMP_MANAGER".equalsIgnoreCase(authUser.getRole())
+                || "user".equalsIgnoreCase(authUser.getRole())
+                || "EMPLOYEE".equalsIgnoreCase(authUser.getRole()))) {
+            effectiveUserId = String.valueOf(authUser.getId());
+        }
+
+        List<String> userIds = getEmployeeUserIds(effectiveUserId);
 
         // 1. Digital Payments (ATM/UPI Transactions)
         double digitalPayments = 0.0;
@@ -2499,16 +2522,16 @@ public class PurchaseController {
             }
         }
 
-        // Baseline defaults matching MNCPETRO.xlsx Dashboard sheet if live data is 0
+        // Real live data for this manager / pump only (no foreign pump baseline defaults)
         Map<String, Object> result = new HashMap<>();
-        result.put("digitalPayments", digitalPayments > 0 ? digitalPayments : 50000.0);
-        result.put("oilStock", oilStock > 0 ? oilStock : 50000.0);
-        result.put("indirectExpenses", indirectExpenses > 0 ? indirectExpenses : 25000.0);
-        result.put("dieselStock", dieselStock > 0 ? dieselStock : 12000.0);
-        result.put("petrolStock", petrolStock > 0 ? petrolStock : 8000.0);
-        result.put("cousterBillBaki", cousterBillBaki > 0 ? cousterBillBaki : 5000.0);
-        result.put("customerDepositsJama", customerDepositsJama > 0 ? customerDepositsJama : 4000.0);
-        result.put("lubeOilSales", lubeOilSales > 0 ? lubeOilSales : 1000.0);
+        result.put("digitalPayments", digitalPayments);
+        result.put("oilStock", oilStock);
+        result.put("indirectExpenses", indirectExpenses);
+        result.put("dieselStock", dieselStock);
+        result.put("petrolStock", petrolStock);
+        result.put("cousterBillBaki", cousterBillBaki);
+        result.put("customerDepositsJama", customerDepositsJama);
+        result.put("lubeOilSales", lubeOilSales);
 
         return result;
     }
