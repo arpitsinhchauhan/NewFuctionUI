@@ -79,6 +79,12 @@
             </mat-form-field>
           </div>
 
+          <div class="meta-item d-flex align-items-center no-print" *ngIf="isAdmin">
+            <mat-checkbox [(ngModel)]="isOverrideAllowed" color="warn" class="font-weight-bold" style="font-size: 13px;">
+              Override Opening Meter
+            </mat-checkbox>
+          </div>
+
           <!-- ERP Action Buttons -->
           <div class="meta-item d-flex align-items-center gap-2 flex-nowrap no-print">
             <button type="button" class="btn btn-sm btn-info text-nowrap" (click)="openShiftReportModal()">
@@ -130,10 +136,12 @@
                 <td>
                   <input type="number" class="report-input" [class.border-danger]="petrol.warningMismatch"
                     [(ngModel)]="petrol.openingMeter" (input)="calculatePetrol(i); checkOpeningMismatch(petrol)"
-                    [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                    [readonly]="isDayLocked || (petrol.hasInheritedOpening && !isAdmin && !isOverrideAllowed)" placeholder="0">
+                  <span *ngIf="petrol.hasInheritedOpening" class="badge badge-info ml-1" style="font-size: 9px;">Auto</span>
+                  <span *ngIf="petrol.isSuggested && !petrol.hasInheritedOpening" class="badge badge-secondary ml-1" style="font-size: 9px;" title="Suggested from previous day final closing">Suggested</span>
                   <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
                     *ngIf="petrol.warningMismatch">
-                    ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ petrol.autoOpeningMeter }})
+                    ⚠️ Opening Meter must match previous Closing Meter. Expected: {{ petrol.autoOpeningMeter }}, Entered: {{ petrol.openingMeter }}
                   </small>
                 </td>
                 <td><input type="number" class="report-input" [(ngModel)]="petrol.testing" (input)="calculatePetrol(i)"
@@ -162,10 +170,12 @@
                   <td>
                     <input type="number" class="report-input" [class.border-danger]="xp.warningMismatch"
                       [(ngModel)]="xp.openingMeter" (input)="calculateXpPetrol(i); checkOpeningMismatch(xp)"
-                      [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                      [readonly]="isDayLocked || (xp.hasInheritedOpening && !isAdmin && !isOverrideAllowed)" placeholder="0">
+                    <span *ngIf="xp.hasInheritedOpening" class="badge badge-info ml-1" style="font-size: 9px;">Auto</span>
+                    <span *ngIf="xp.isSuggested && !xp.hasInheritedOpening" class="badge badge-secondary ml-1" style="font-size: 9px;" title="Suggested from previous day final closing">Suggested</span>
                     <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
                       *ngIf="xp.warningMismatch">
-                      ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ xp.autoOpeningMeter }})
+                      ⚠️ Opening Meter must match previous Closing Meter. Expected: {{ xp.autoOpeningMeter }}, Entered: {{ xp.openingMeter }}
                     </small>
                   </td>
                   <td><input type="number" class="report-input" [(ngModel)]="xp.testing" (input)="calculateXpPetrol(i)"
@@ -195,10 +205,12 @@
                 <td>
                   <input type="number" class="report-input" [class.border-danger]="diesel.warningMismatch"
                     [(ngModel)]="diesel.openingMeter" (input)="calculateDiesel(i); checkOpeningMismatch(diesel)"
-                    [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                    [readonly]="isDayLocked || (diesel.hasInheritedOpening && !isAdmin && !isOverrideAllowed)" placeholder="0">
+                  <span *ngIf="diesel.hasInheritedOpening" class="badge badge-info ml-1" style="font-size: 9px;">Auto</span>
+                  <span *ngIf="diesel.isSuggested && !diesel.hasInheritedOpening" class="badge badge-secondary ml-1" style="font-size: 9px;" title="Suggested from previous day final closing">Suggested</span>
                   <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
                     *ngIf="diesel.warningMismatch">
-                    ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ diesel.autoOpeningMeter }})
+                    ⚠️ Opening Meter must match previous Closing Meter. Expected: {{ diesel.autoOpeningMeter }}, Entered: {{ diesel.openingMeter }}
                   </small>
                 </td>
                 <td><input type="number" class="report-input" [(ngModel)]="diesel.testing" (input)="calculateDiesel(i)"
@@ -227,10 +239,12 @@
                   <td>
                     <input type="number" class="report-input" [class.border-danger]="pd.warningMismatch"
                       [(ngModel)]="pd.openingMeter" (input)="calculatepowerDiesel(i); checkOpeningMismatch(pd)"
-                      [readonly]="isDayLocked && !isAdmin" placeholder="0">
+                      [readonly]="isDayLocked || (pd.hasInheritedOpening && !isAdmin && !isOverrideAllowed)" placeholder="0">
+                    <span *ngIf="pd.hasInheritedOpening" class="badge badge-info ml-1" style="font-size: 9px;">Auto</span>
+                    <span *ngIf="pd.isSuggested && !pd.hasInheritedOpening" class="badge badge-secondary ml-1" style="font-size: 9px;" title="Suggested from previous day final closing">Suggested</span>
                     <small class="text-danger font-weight-bold d-block mt-1" style="font-size: 10px;"
                       *ngIf="pd.warningMismatch">
-                      ⚠️ Opening Meter does not match previous shift Closing Meter (Prev: {{ pd.autoOpeningMeter }})
+                      ⚠️ Opening Meter must match previous Closing Meter. Expected: {{ pd.autoOpeningMeter }}, Entered: {{ pd.openingMeter }}
                     </small>
                   </td>
                   <td><input type="number" class="report-input" [(ngModel)]="pd.testing"

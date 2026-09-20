@@ -1,12 +1,184 @@
 .tank-config-modal {
-  padding: 10px 5px;
+  padding: 4px 2px;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+}
+
+.tank-list-container {
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  margin-bottom: 8px;
+}
+
+/* Custom modern scrollbar */
+.tank-list-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tank-list-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.tank-list-container::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+
+.tank-list-container::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 .tank-edit-card {
-  border-left: 4px solid #1e88e5;
-  background: #fdfdfd;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #2563eb;
+  background: #ffffff;
+  transition: box-shadow 0.2s ease-in-out;
 }
 
-.form-label {
-  margin-bottom: 2px;
+.tank-edit-card:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.tank-edit-card.diesel-card {
+  border-left-color: #2563eb;
+}
+
+.tank-edit-card.petrol-card {
+  border-left-color: #059669;
+}
+
+.fuel-pill {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fuel-pill.petrol {
+  background: #059669;
+}
+
+.fuel-pill.diesel {
+  background: #2563eb;
+}
+
+.fuel-pill.xp {
+  background: #db2777;
+}
+
+.fuel-pill.power {
+  background: #0d9488;
+}
+
+.form-label-custom {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.input-custom {
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.input-custom:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+.input-warning {
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.input-warning:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.input-critical {
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+
+.input-critical:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.threshold-strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.threshold-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.tag-critical {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.tag-warning {
+  background: #fef3c7;
+  color: #d97706;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.tag-normal {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.threshold-val {
+  color: #334155;
+}
+
+.threshold-divider {
+  color: #cbd5e1;
 }

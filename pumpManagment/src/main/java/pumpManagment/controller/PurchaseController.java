@@ -732,6 +732,22 @@ public class PurchaseController {
 
     @PostMapping("/updatePetrolsell")
     public ResponseEntity<ApiResponse> updatePetrolsell(@RequestBody PetrolSell petrolSell) {
+        if (petrolSell.getId() != null) {
+            Optional<PetrolSell> existingOpt = petrolSellRepository.findById(petrolSell.getId());
+            if (existingOpt.isPresent()) {
+                PetrolSell oldRecord = existingOpt.get();
+                String oldClose = oldRecord.getClose_meter();
+                String newClose = petrolSell.getClose_meter();
+                if (oldClose != null && newClose != null && !oldClose.trim().equals(newClose.trim())) {
+                    List<String> userIds = getPumpStationUserIds(oldRecord.getUserId());
+                    int sOrder = getShiftOrder(oldRecord.getShift());
+                    Optional<PetrolSell> subsequent = petrolSellRepository.findSubsequentRecord(oldRecord.getPump(), oldRecord.getDate(), sOrder, oldRecord.getId(), userIds);
+                    if (subsequent.isPresent()) {
+                        return ResponseEntity.badRequest().body(new ApiResponse("Cannot edit Closing Meter because subsequent meter entries depend on it. Please adjust or delete subsequent entries first to maintain meter continuity."));
+                    }
+                }
+            }
+        }
         petrolSellRepository.save(petrolSell);
         ApiResponse response = new ApiResponse("PetrolSell updated and saved successfully");
         return ResponseEntity.ok(response);
@@ -802,6 +818,22 @@ public class PurchaseController {
 
     @PostMapping("/updateDieselsell")
     public ResponseEntity<ApiResponse> Updatedieselsell(@RequestBody Dieselsell dieselsell) {
+        if (dieselsell.getId() != null) {
+            Optional<Dieselsell> existingOpt = dieselSellRepository.findById(dieselsell.getId());
+            if (existingOpt.isPresent()) {
+                Dieselsell oldRecord = existingOpt.get();
+                String oldClose = oldRecord.getClose_meter();
+                String newClose = dieselsell.getClose_meter();
+                if (oldClose != null && newClose != null && !oldClose.trim().equals(newClose.trim())) {
+                    List<String> userIds = getPumpStationUserIds(oldRecord.getUserId());
+                    int sOrder = getShiftOrder(oldRecord.getShift());
+                    Optional<Dieselsell> subsequent = dieselSellRepository.findSubsequentRecord(oldRecord.getPump(), oldRecord.getDate(), sOrder, oldRecord.getId(), userIds);
+                    if (subsequent.isPresent()) {
+                        return ResponseEntity.badRequest().body(new ApiResponse("Cannot edit Closing Meter because subsequent meter entries depend on it. Please adjust or delete subsequent entries first to maintain meter continuity."));
+                    }
+                }
+            }
+        }
         dieselSellRepository.save(dieselsell);
         ApiResponse response = new ApiResponse("Dieselsell updated and saved successfully");
         return ResponseEntity.ok(response);
@@ -866,6 +898,22 @@ public class PurchaseController {
 
     @PostMapping("/updateXpPetrolsell")
     public ResponseEntity<ApiResponse> updateXPPetrolsell(@RequestBody xpPetrol xpPetrol) {
+        if (xpPetrol.getId() != null) {
+            Optional<xpPetrol> existingOpt = xpPetorlRepository.findById(xpPetrol.getId());
+            if (existingOpt.isPresent()) {
+                xpPetrol oldRecord = existingOpt.get();
+                String oldClose = oldRecord.getClose_meter();
+                String newClose = xpPetrol.getClose_meter();
+                if (oldClose != null && newClose != null && !oldClose.trim().equals(newClose.trim())) {
+                    List<String> userIds = getPumpStationUserIds(oldRecord.getUserId());
+                    int sOrder = getShiftOrder(oldRecord.getShift());
+                    Optional<xpPetrol> subsequent = xpPetorlRepository.findSubsequentRecord(oldRecord.getPump(), oldRecord.getDate(), sOrder, oldRecord.getId(), userIds);
+                    if (subsequent.isPresent()) {
+                        return ResponseEntity.badRequest().body(new ApiResponse("Cannot edit Closing Meter because subsequent meter entries depend on it. Please adjust or delete subsequent entries first to maintain meter continuity."));
+                    }
+                }
+            }
+        }
         xpPetorlRepository.save(xpPetrol);
         ApiResponse response = new ApiResponse("XPPetrol updated and saved successfully");
         return ResponseEntity.ok(response);
@@ -930,6 +978,22 @@ public class PurchaseController {
 
     @PostMapping("/updatepowerDiesel")
     public ResponseEntity<ApiResponse> updatepowerDiesel(@RequestBody powerDiesel powerDiesel) {
+        if (powerDiesel.getId() != null) {
+            Optional<powerDiesel> existingOpt = powerDieselRepository.findById(powerDiesel.getId());
+            if (existingOpt.isPresent()) {
+                powerDiesel oldRecord = existingOpt.get();
+                String oldClose = oldRecord.getClose_meter();
+                String newClose = powerDiesel.getClose_meter();
+                if (oldClose != null && newClose != null && !oldClose.trim().equals(newClose.trim())) {
+                    List<String> userIds = getPumpStationUserIds(oldRecord.getUserId());
+                    int sOrder = getShiftOrder(oldRecord.getShift());
+                    Optional<powerDiesel> subsequent = powerDieselRepository.findSubsequentRecord(oldRecord.getPump(), oldRecord.getDate(), sOrder, oldRecord.getId(), userIds);
+                    if (subsequent.isPresent()) {
+                        return ResponseEntity.badRequest().body(new ApiResponse("Cannot edit Closing Meter because subsequent meter entries depend on it. Please adjust or delete subsequent entries first to maintain meter continuity."));
+                    }
+                }
+            }
+        }
         powerDieselRepository.save(powerDiesel);
         ApiResponse response = new ApiResponse("PowerDiesel updated and saved successfully");
         return ResponseEntity.ok(response);
@@ -1763,54 +1827,67 @@ public class PurchaseController {
         return userIdStr;
     }
 
+    public DAOUser getAuthenticatedUser() {
+        try {
+            org.springframework.security.core.Authentication auth =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                return userRepository.findByUsername(auth.getName());
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
     private List<String> getTargetUserIds(String userIdStr) {
         List<String> userIds = new ArrayList<>();
         if (userIdStr == null || userIdStr.trim().isEmpty() || "null".equalsIgnoreCase(userIdStr.trim())) {
             return userIds;
         }
 
-        // Security check: If authenticated caller is an EMPLOYEE, lock to their own ID
-        try {
-            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-                DAOUser authUser = userRepository.findByUsername(auth.getName());
-                if (authUser != null) {
-                    if ("EMPLOYEE".equalsIgnoreCase(authUser.getRole())) {
+        // Security check: If authenticated caller is an EMPLOYEE, lock strictly to their own ID
+        DAOUser authUser = getAuthenticatedUser();
+        if (authUser != null) {
+            if ("EMPLOYEE".equalsIgnoreCase(authUser.getRole())) {
+                userIds.add(String.valueOf(authUser.getId()));
+                return userIds;
+            } else if ("PUMP_MANAGER".equalsIgnoreCase(authUser.getRole()) || "user".equalsIgnoreCase(authUser.getRole())) {
+                Long requestedId = null;
+                try { requestedId = Long.valueOf(userIdStr.trim()); } catch (Exception ignored) {}
+                if (requestedId != null && !authUser.getId().equals(requestedId)) {
+                    DAOUser targetUser = userRepository.findById(requestedId).orElse(null);
+                    if (targetUser != null && (targetUser.getPumpId() == null || !authUser.getPumpId().equals(targetUser.getPumpId()))) {
+                        // Block cross-pump access attempt, lock to own ID
                         userIds.add(String.valueOf(authUser.getId()));
                         return userIds;
-                    } else if ("PUMP_MANAGER".equalsIgnoreCase(authUser.getRole()) || "user".equalsIgnoreCase(authUser.getRole())) {
-                        Long requestedId = null;
-                        try { requestedId = Long.valueOf(userIdStr.trim()); } catch (Exception ignored) {}
-                        if (requestedId != null && !authUser.getId().equals(requestedId)) {
-                            DAOUser targetUser = userRepository.findById(requestedId).orElse(null);
-                            if (targetUser != null && (targetUser.getPumpId() == null || !authUser.getPumpId().equals(targetUser.getPumpId()))) {
-                                // Block cross-pump access attempt, lock to own ID
-                                userIds.add(String.valueOf(authUser.getId()));
-                                return userIds;
-                            }
-                        }
                     }
                 }
             }
-        } catch (Exception ignored) {}
+        }
 
         userIds.add(userIdStr.trim());
+        DAOUser user = null;
         try {
             Long userId = Long.valueOf(userIdStr.trim());
-            Optional<DAOUser> userOpt = userRepository.findById(userId);
-            if (userOpt.isPresent()) {
-                DAOUser user = userOpt.get();
-                // If user is EMPLOYEE, only return their own ID (NEVER expand to sibling employees)
-                if ("EMPLOYEE".equalsIgnoreCase(user.getRole())) {
-                    return userIds;
+            user = userRepository.findById(userId).orElse(null);
+        } catch (Exception e) {
+            user = userRepository.findByUsername(userIdStr.trim());
+        }
+
+        if (user != null) {
+            if ("EMPLOYEE".equalsIgnoreCase(user.getRole())) {
+                if (user.getId() != null && !userIds.contains(String.valueOf(user.getId()))) {
+                    userIds.add(String.valueOf(user.getId()));
                 }
-                Long managerId = null;
-                if ("PUMP_MANAGER".equalsIgnoreCase(user.getRole()) || "OWNER".equalsIgnoreCase(user.getRole())
-                        || "user".equalsIgnoreCase(user.getRole())) {
-                    managerId = userId;
-                }
-                if (managerId != null) {
-                    List<DAOUser> employees = userRepository.findByManagerId(managerId);
+                return userIds;
+            }
+            Long managerId = null;
+            if ("PUMP_MANAGER".equalsIgnoreCase(user.getRole()) || "OWNER".equalsIgnoreCase(user.getRole())
+                    || "user".equalsIgnoreCase(user.getRole())) {
+                managerId = user.getId();
+            }
+            if (managerId != null) {
+                List<DAOUser> employees = userRepository.findByManagerId(managerId);
+                if (employees != null) {
                     for (DAOUser emp : employees) {
                         if (emp.getId() != null && !userIds.contains(String.valueOf(emp.getId()))) {
                             userIds.add(String.valueOf(emp.getId()));
@@ -1826,8 +1903,6 @@ public class PurchaseController {
                     }
                 }
             }
-        } catch (Exception e) {
-            // Fallback
         }
         return userIds;
     }
@@ -1845,44 +1920,62 @@ public class PurchaseController {
         } catch (Exception ignored) {}
 
         if (user == null) {
-            try {
-                org.springframework.security.core.Authentication auth =
-                        org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-                if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-                    user = userRepository.findByUsername(auth.getName());
-                }
-            } catch (Exception ignored) {}
+            user = userRepository.findByUsername(userIdStr.trim());
+        }
+
+        if (user == null) {
+            user = getAuthenticatedUser();
         }
 
         if (user != null) {
             userIds.add(String.valueOf(user.getId()));
-            Long managerId = null;
-            if ("EMPLOYEE".equalsIgnoreCase(user.getRole())) {
-                managerId = user.getManagerId();
-            } else if ("PUMP_MANAGER".equalsIgnoreCase(user.getRole()) || "OWNER".equalsIgnoreCase(user.getRole())
-                    || "user".equalsIgnoreCase(user.getRole())) {
+            if (user.getUsername() != null && !user.getUsername().trim().isEmpty()) {
+                userIds.add(user.getUsername().trim());
+            }
+            if (user.getUserId() != null && !user.getUserId().trim().isEmpty()) {
+                userIds.add(user.getUserId().trim());
+            }
+
+            Long targetPumpId = user.getPumpId();
+            Long managerId = user.getManagerId();
+
+            if ("PUMP_MANAGER".equalsIgnoreCase(user.getRole()) || "OWNER".equalsIgnoreCase(user.getRole())
+                    || "USER".equalsIgnoreCase(user.getRole())) {
                 managerId = user.getId();
             }
 
-            if (managerId != null) {
-                userIds.add(String.valueOf(managerId));
-                List<DAOUser> employees = userRepository.findByManagerId(managerId);
-                if (employees != null) {
-                    for (DAOUser emp : employees) {
-                        if (emp.getId() != null) {
-                            userIds.add(String.valueOf(emp.getId()));
-                        }
+            if (targetPumpId == null && managerId != null) {
+                DAOUser mgr = userRepository.findById(managerId).orElse(null);
+                if (mgr != null && mgr.getPumpId() != null) {
+                    targetPumpId = mgr.getPumpId();
+                }
+            }
+
+            // Strictly collect users belonging to the same pumpId
+            if (targetPumpId != null) {
+                List<DAOUser> pumpUsers = userRepository.findByPumpId(targetPumpId);
+                if (pumpUsers != null) {
+                    for (DAOUser pu : pumpUsers) {
+                        if (pu.getId() != null) userIds.add(String.valueOf(pu.getId()));
+                        if (pu.getUsername() != null) userIds.add(pu.getUsername().trim());
+                        if (pu.getUserId() != null) userIds.add(pu.getUserId().trim());
                     }
                 }
             }
 
-            if (user.getPumpId() != null) {
-                List<DAOUser> pumpUsers = userRepository.findByPumpId(user.getPumpId());
-                if (pumpUsers != null) {
-                    for (DAOUser pu : pumpUsers) {
-                        if (pu.getId() != null) {
-                            userIds.add(String.valueOf(pu.getId()));
-                        }
+            // Also collect users under the manager
+            if (managerId != null) {
+                userIds.add(String.valueOf(managerId));
+                DAOUser mgr = userRepository.findById(managerId).orElse(null);
+                if (mgr != null && mgr.getUsername() != null) {
+                    userIds.add(mgr.getUsername().trim());
+                }
+                List<DAOUser> employees = userRepository.findByManagerId(managerId);
+                if (employees != null) {
+                    for (DAOUser emp : employees) {
+                        if (emp.getId() != null) userIds.add(String.valueOf(emp.getId()));
+                        if (emp.getUsername() != null) userIds.add(emp.getUsername().trim());
+                        if (emp.getUserId() != null) userIds.add(emp.getUserId().trim());
                     }
                 }
             }
@@ -3908,7 +4001,134 @@ public class PurchaseController {
     // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
     // .body("Failed to save fuel data: " + e.getMessage());
     // }
-    // }
+    public boolean isDayClosed(String date, String userId) {
+        if (dayClosingRepository == null || date == null || userId == null) return false;
+        List<String> userIds = getPumpStationUserIds(userId);
+        for (String uid : userIds) {
+            Optional<DayClosing> dc = dayClosingRepository.findByBusinessDateAndUserId(date, uid);
+            if (dc.isPresent() && "CLOSED".equalsIgnoreCase(dc.get().getStatus())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void validateAndCheckMeter(
+            String fuelType,
+            Map<String, Object> data,
+            boolean isOverrideAllowed) {
+        String pump = (String) data.get("pump");
+        String date = (String) data.get("date");
+        String userId = (String) data.get("user_id");
+        String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
+
+        String openMeterStr = data.get("open_meter") != null ? String.valueOf(data.get("open_meter")).trim() : "";
+        String closeMeterStr = data.get("close_meter") != null ? String.valueOf(data.get("close_meter")).trim() : "";
+        String testingStr = data.get("testing") != null ? String.valueOf(data.get("testing")).trim() : "";
+        String rateStr = data.get("rate") != null ? String.valueOf(data.get("rate")).trim() : "";
+
+        if (openMeterStr.isEmpty() && closeMeterStr.isEmpty()) return;
+
+        double openM = 0;
+        double closeM = 0;
+        double testing = 0;
+        double rate = 0;
+
+        try {
+            openM = Double.parseDouble(openMeterStr);
+            closeM = Double.parseDouble(closeMeterStr);
+            if (!testingStr.isEmpty()) testing = Double.parseDouble(testingStr);
+            if (!rateStr.isEmpty()) rate = Double.parseDouble(rateStr);
+        } catch (NumberFormatException nfe) {
+            throw new IllegalArgumentException("Invalid numeric readings for nozzle: " + pump);
+        }
+
+        if (openM < 0) {
+            throw new IllegalArgumentException("Opening meter cannot be negative on " + pump);
+        }
+        if (closeM < 0) {
+            throw new IllegalArgumentException("Closing meter cannot be negative on " + pump);
+        }
+        if (testing < 0) {
+            throw new IllegalArgumentException("Testing cannot be negative on " + pump);
+        }
+        if (rate < 0) {
+            throw new IllegalArgumentException("Rate cannot be negative on " + pump);
+        }
+        if (closeM <= openM) {
+            throw new IllegalArgumentException("Closing Meter (" + closeM + ") must be greater than Opening Meter (" + openM + ") on " + pump);
+        }
+        if ((closeM - openM) - testing < 0) {
+            throw new IllegalArgumentException("Net Sale cannot be negative on " + pump);
+        }
+
+        // Concurrency re-check: Verify Opening Meter matches latest completed DB Closing Meter
+        if (!isOverrideAllowed) {
+            Map<String, Object> latestDetails = fetchOpeningMeterDetails(fuelType, pump, date, shift, null, userId);
+            boolean hasPrev = Boolean.TRUE.equals(latestDetails.get("hasPreviousData"));
+            if (hasPrev) {
+                String expectedCloseStr = (String) latestDetails.get("openingMeter");
+                if (expectedCloseStr != null && !expectedCloseStr.trim().isEmpty()) {
+                    double expectedOpen = Double.parseDouble(expectedCloseStr.trim());
+                    if (Math.abs(openM - expectedOpen) > 0.01) {
+                        throw new IllegalStateException("Opening Meter must match previous Closing Meter for " + pump + ". Expected Opening: " + expectedOpen + ", Entered Opening: " + openM);
+                    }
+                }
+            }
+
+            // Check if Closing is changed and subsequent records already exist on a future date/shift
+            List<String> stationUserIds = getPumpStationUserIds(userId);
+            int sOrder = getShiftOrder(shift);
+            if (!stationUserIds.isEmpty()) {
+                if ("petrol".equalsIgnoreCase(fuelType)) {
+                    Optional<PetrolSell> subOpt = petrolSellRepository.findSubsequentRecord(pump, date, sOrder, null, stationUserIds);
+                    if (subOpt.isPresent()) {
+                        PetrolSell sub = subOpt.get();
+                        if (sub.getOpen_meter() != null && !sub.getOpen_meter().trim().isEmpty()) {
+                            double nextOpen = Double.parseDouble(sub.getOpen_meter().trim());
+                            if (Math.abs(closeM - nextOpen) > 0.01) {
+                                throw new IllegalStateException("Cannot change Closing Meter to " + closeM + " because subsequent record exists on " + sub.getDate() + " with Opening Meter " + nextOpen + ". Modify subsequent record first or request override.");
+                            }
+                        }
+                    }
+                } else if ("diesel".equalsIgnoreCase(fuelType)) {
+                    Optional<Dieselsell> subOpt = dieselSellRepository.findSubsequentRecord(pump, date, sOrder, null, stationUserIds);
+                    if (subOpt.isPresent()) {
+                        Dieselsell sub = subOpt.get();
+                        if (sub.getOpen_meter() != null && !sub.getOpen_meter().trim().isEmpty()) {
+                            double nextOpen = Double.parseDouble(sub.getOpen_meter().trim());
+                            if (Math.abs(closeM - nextOpen) > 0.01) {
+                                throw new IllegalStateException("Cannot change Closing Meter to " + closeM + " because subsequent record exists on " + sub.getDate() + " with Opening Meter " + nextOpen + ". Modify subsequent record first or request override.");
+                            }
+                        }
+                    }
+                } else if ("xppetrol".equalsIgnoreCase(fuelType) || "xp_petrol".equalsIgnoreCase(fuelType)) {
+                    Optional<xpPetrol> subOpt = xpPetorlRepository.findSubsequentRecord(pump, date, sOrder, null, stationUserIds);
+                    if (subOpt.isPresent()) {
+                        xpPetrol sub = subOpt.get();
+                        if (sub.getOpen_meter() != null && !sub.getOpen_meter().trim().isEmpty()) {
+                            double nextOpen = Double.parseDouble(sub.getOpen_meter().trim());
+                            if (Math.abs(closeM - nextOpen) > 0.01) {
+                                throw new IllegalStateException("Cannot change Closing Meter to " + closeM + " because subsequent record exists on " + sub.getDate() + " with Opening Meter " + nextOpen + ". Modify subsequent record first or request override.");
+                            }
+                        }
+                    }
+                } else if ("powerdiesel".equalsIgnoreCase(fuelType) || "power_diesel".equalsIgnoreCase(fuelType)) {
+                    Optional<powerDiesel> subOpt = powerDieselRepository.findSubsequentRecord(pump, date, sOrder, null, stationUserIds);
+                    if (subOpt.isPresent()) {
+                        powerDiesel sub = subOpt.get();
+                        if (sub.getOpen_meter() != null && !sub.getOpen_meter().trim().isEmpty()) {
+                            double nextOpen = Double.parseDouble(sub.getOpen_meter().trim());
+                            if (Math.abs(closeM - nextOpen) > 0.01) {
+                                throw new IllegalStateException("Cannot change Closing Meter to " + closeM + " because subsequent record exists on " + sub.getDate() + " with Opening Meter " + nextOpen + ". Modify subsequent record first or request override.");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @PostMapping("/saveFuelReport")
     public ResponseEntity<ApiResponse> saveFuelData(@RequestBody Map<String, Object> payload) {
         List<Map<String, Object>> petrolData = (List<Map<String, Object>>) payload.get("petrolInputData");
@@ -3920,6 +4140,31 @@ public class PurchaseController {
         }
 
         try {
+            boolean isOverrideAllowed = payload.get("overrideReason") != null && !String.valueOf(payload.get("overrideReason")).trim().isEmpty();
+
+            // Check Day Closing status
+            String targetDate = (petrolData != null && !petrolData.isEmpty()) ? (String) petrolData.get(0).get("date") :
+                    ((dieselData != null && !dieselData.isEmpty()) ? (String) dieselData.get(0).get("date") : null);
+            String targetUser = (petrolData != null && !petrolData.isEmpty()) ? (String) petrolData.get(0).get("user_id") :
+                    ((dieselData != null && !dieselData.isEmpty()) ? (String) dieselData.get(0).get("user_id") : null);
+
+            if (targetDate != null && targetUser != null && !isOverrideAllowed && isDayClosed(targetDate, targetUser)) {
+                return ResponseEntity.badRequest().body(new ApiResponse("Business day " + targetDate + " is closed. Normal users cannot modify closed day reports."));
+            }
+
+            // Pre-validation and Concurrency verification for petrol items
+            if (petrolData != null) {
+                for (Map<String, Object> pItem : petrolData) {
+                    validateAndCheckMeter("petrol", pItem, isOverrideAllowed);
+                }
+            }
+            // Pre-validation and Concurrency verification for diesel items
+            if (dieselData != null) {
+                for (Map<String, Object> dItem : dieselData) {
+                    validateAndCheckMeter("diesel", dItem, isOverrideAllowed);
+                }
+            }
+
             // 🚀 **Save or Update Petrol Data**
             if (petrolData != null && !petrolData.isEmpty()) {
                 List<PetrolSell> petrolEntities = petrolData.stream()
@@ -3929,8 +4174,8 @@ public class PurchaseController {
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
                             String employeeName = data.get("employee_name") != null
-                                    ? String.valueOf(data.get("employee_name"))
-                                    : "";
+                                     ? String.valueOf(data.get("employee_name"))
+                                     : "";
 
                             List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<PetrolSell> existingPetrol = Optional.empty();
@@ -3989,8 +4234,8 @@ public class PurchaseController {
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
                             String employeeName = data.get("employee_name") != null
-                                    ? String.valueOf(data.get("employee_name"))
-                                    : "";
+                                     ? String.valueOf(data.get("employee_name"))
+                                     : "";
 
                             List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<Dieselsell> existingDiesel = Optional.empty();
@@ -4040,8 +4285,10 @@ public class PurchaseController {
                 dieselSellRepository.saveAll(dieselEntities);
             }
 
-            ApiResponse response = new ApiResponse("Data saved/updated successfully!");
+            ApiResponse response = new ApiResponse(true, "Data saved/updated successfully!", null);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage()));
         } catch (Exception e) {
             ApiResponse response = new ApiResponse("Failed to save fuel data: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -4059,6 +4306,31 @@ public class PurchaseController {
         }
 
         try {
+            boolean isOverrideAllowed = payload.get("overrideReason") != null && !String.valueOf(payload.get("overrideReason")).trim().isEmpty();
+
+            // Check Day Closing status
+            String targetDate = (xpPetrol != null && !xpPetrol.isEmpty()) ? (String) xpPetrol.get(0).get("date") :
+                    ((powerdiesel != null && !powerdiesel.isEmpty()) ? (String) powerdiesel.get(0).get("date") : null);
+            String targetUser = (xpPetrol != null && !xpPetrol.isEmpty()) ? (String) xpPetrol.get(0).get("user_id") :
+                    ((powerdiesel != null && !powerdiesel.isEmpty()) ? (String) powerdiesel.get(0).get("user_id") : null);
+
+            if (targetDate != null && targetUser != null && !isOverrideAllowed && isDayClosed(targetDate, targetUser)) {
+                return ResponseEntity.badRequest().body(new ApiResponse("Business day " + targetDate + " is closed. Normal users cannot modify closed day reports."));
+            }
+
+            // Pre-validation and Concurrency verification for xp items
+            if (xpPetrol != null) {
+                for (Map<String, Object> xItem : xpPetrol) {
+                    validateAndCheckMeter("xppetrol", xItem, isOverrideAllowed);
+                }
+            }
+            // Pre-validation and Concurrency verification for power diesel items
+            if (powerdiesel != null) {
+                for (Map<String, Object> pdItem : powerdiesel) {
+                    validateAndCheckMeter("powerdiesel", pdItem, isOverrideAllowed);
+                }
+            }
+
             if (xpPetrol != null && !xpPetrol.isEmpty()) {
                 List<xpPetrol> xppetrolEntities = xpPetrol.stream()
                         .map(data -> {
@@ -4067,8 +4339,8 @@ public class PurchaseController {
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
                             String employeeName = data.get("employee_name") != null
-                                    ? String.valueOf(data.get("employee_name"))
-                                    : "";
+                                     ? String.valueOf(data.get("employee_name"))
+                                     : "";
 
                             List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<xpPetrol> existingPetrol = Optional.empty();
@@ -4126,8 +4398,8 @@ public class PurchaseController {
                             String pump = (String) data.get("pump");
                             String shift = data.get("shift") != null ? String.valueOf(data.get("shift")) : "Morning";
                             String employeeName = data.get("employee_name") != null
-                                    ? String.valueOf(data.get("employee_name"))
-                                    : "";
+                                     ? String.valueOf(data.get("employee_name"))
+                                     : "";
 
                             List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<powerDiesel> existingDiesel = Optional.empty();
@@ -4177,8 +4449,10 @@ public class PurchaseController {
                 powerDieselRepository.saveAll(powerdieselEntities);
             }
 
-            ApiResponse response = new ApiResponse("Data saved/updated successfully!");
+            ApiResponse response = new ApiResponse(true, "Data saved/updated successfully!", null);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage()));
         } catch (Exception e) {
             ApiResponse response = new ApiResponse("Failed to save fuel data: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -4558,8 +4832,22 @@ public class PurchaseController {
         List<Double> openstockList = dailyskockRepository.findOpenstockByDateAndUserId(date, userId);
 
         Map<String, Object> response = new HashMap<>();
-        // For example, return the first petrol stock or null if empty
-        Double petrol = openstockList.isEmpty() ? null : openstockList.get(0);
+        Double petrol = (openstockList != null && !openstockList.isEmpty()) ? openstockList.get(0) : null;
+        if (petrol == null) {
+            try {
+                List<String> targetUserIds = getTargetUserIds(userId);
+                if (!targetUserIds.isEmpty()) {
+                    String inSql = targetUserIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(","));
+                    List<Double> fallback = jdbcTemplate.query(
+                        "SELECT openstock FROM dailystock WHERE user_id IN (" + inSql + ") AND date <= '" + date + "' ORDER BY date DESC LIMIT 1",
+                        (rs, rowNum) -> rs.getDouble("openstock")
+                    );
+                    if (fallback != null && !fallback.isEmpty()) {
+                        petrol = fallback.get(0);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
         response.put("petrol", petrol);
         return response;
@@ -4570,8 +4858,22 @@ public class PurchaseController {
         List<Double> openstockList = dailydieselstockRepository.findOpenstockByDateAndUserId(date, userId);
 
         Map<String, Object> response = new HashMap<>();
-        // For example, return the first petrol stock or null if empty
-        Double diesel = openstockList.isEmpty() ? null : openstockList.get(0);
+        Double diesel = (openstockList != null && !openstockList.isEmpty()) ? openstockList.get(0) : null;
+        if (diesel == null) {
+            try {
+                List<String> targetUserIds = getTargetUserIds(userId);
+                if (!targetUserIds.isEmpty()) {
+                    String inSql = targetUserIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(","));
+                    List<Double> fallback = jdbcTemplate.query(
+                        "SELECT dieselopenstock FROM dailydieselstock WHERE user_id IN (" + inSql + ") AND date <= '" + date + "' ORDER BY date DESC LIMIT 1",
+                        (rs, rowNum) -> rs.getDouble("dieselopenstock")
+                    );
+                    if (fallback != null && !fallback.isEmpty()) {
+                        diesel = fallback.get(0);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
         response.put("diesel", diesel);
         return response;
@@ -4582,8 +4884,22 @@ public class PurchaseController {
         List<Double> XPopenstockList = xpdailystockRepository.findOpenstockByDateAndUserId(date, userId);
 
         Map<String, Object> response = new HashMap<>();
-        // For example, return the first petrol stock or null if empty
-        Double Xppetrol = XPopenstockList.isEmpty() ? null : XPopenstockList.get(0);
+        Double Xppetrol = (XPopenstockList != null && !XPopenstockList.isEmpty()) ? XPopenstockList.get(0) : null;
+        if (Xppetrol == null) {
+            try {
+                List<String> targetUserIds = getTargetUserIds(userId);
+                if (!targetUserIds.isEmpty()) {
+                    String inSql = targetUserIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(","));
+                    List<Double> fallback = jdbcTemplate.query(
+                        "SELECT xp_ugadto_stock FROM xpdailystock WHERE user_id IN (" + inSql + ") AND date <= '" + date + "' ORDER BY date DESC LIMIT 1",
+                        (rs, rowNum) -> rs.getDouble("xp_ugadto_stock")
+                    );
+                    if (fallback != null && !fallback.isEmpty()) {
+                        Xppetrol = fallback.get(0);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
         response.put("Xppetrol", Xppetrol);
         return response;
@@ -4594,8 +4910,22 @@ public class PurchaseController {
         List<Double> poweropenstockList = powerdieseldailystockRepository.findOpenstockByDateAndUserId(date, userId);
 
         Map<String, Object> response = new HashMap<>();
-        // For example, return the first petrol stock or null if empty
-        Double powerdiesel = poweropenstockList.isEmpty() ? null : poweropenstockList.get(0);
+        Double powerdiesel = (poweropenstockList != null && !poweropenstockList.isEmpty()) ? poweropenstockList.get(0) : null;
+        if (powerdiesel == null) {
+            try {
+                List<String> targetUserIds = getTargetUserIds(userId);
+                if (!targetUserIds.isEmpty()) {
+                    String inSql = targetUserIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(","));
+                    List<Double> fallback = jdbcTemplate.query(
+                        "SELECT power_ugadto_stock FROM powerdieseldailystock WHERE user_id IN (" + inSql + ") AND date <= '" + date + "' ORDER BY date DESC LIMIT 1",
+                        (rs, rowNum) -> rs.getDouble("power_ugadto_stock")
+                    );
+                    if (fallback != null && !fallback.isEmpty()) {
+                        powerdiesel = fallback.get(0);
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
 
         response.put("Powerdiesel", powerdiesel);
         return response;
@@ -5005,40 +5335,191 @@ public class PurchaseController {
     // MULTI-SHIFT METER ERP REST ENDPOINTS
     // ==========================================
 
+    public int getShiftOrder(String shift) {
+        if (shift == null || shift.trim().isEmpty()) return 0;
+        String s = shift.trim().toLowerCase();
+        if (s.contains("morn")) return 1;
+        if (s.contains("after") || s.contains("noon")) return 2;
+        if (s.contains("night") || s.contains("eve")) return 3;
+        return 0;
+    }
+
+    public Map<String, Object> fetchOpeningMeterDetails(
+            String fuelType,
+            String pump,
+            String date,
+            String shift,
+            Integer currentId,
+            String userId) {
+        Map<String, Object> res = new HashMap<>();
+
+        String effectiveUserId = userId;
+        try {
+            org.springframework.security.core.Authentication auth =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                DAOUser authUser = userRepository.findByUsername(auth.getName());
+                if (authUser != null && authUser.getId() != null) {
+                    effectiveUserId = String.valueOf(authUser.getId());
+                }
+            }
+        } catch (Exception ignored) {}
+
+        List<String> userIds = (effectiveUserId != null && !effectiveUserId.trim().isEmpty() && !"null".equalsIgnoreCase(effectiveUserId.trim()))
+                ? getPumpStationUserIds(effectiveUserId.trim())
+                : new ArrayList<>();
+
+        Integer safeCurrentId = (currentId != null) ? currentId : 999999999;
+        int shiftOrder = getShiftOrder(shift);
+
+        String openingMeter = "";
+        String sourceDate = null;
+        String sourceClosing = null;
+        String sourceEmployee = null;
+        String sourceShift = null;
+        String sourceRate = null;
+        boolean hasPreviousData = false;
+
+        if ("petrol".equalsIgnoreCase(fuelType)) {
+            Optional<PetrolSell> record = Optional.empty();
+            if (!userIds.isEmpty()) {
+                record = petrolSellRepository.findPreviousClosingRecord(pump, date, shiftOrder, safeCurrentId, userIds);
+            }
+            if (record.isPresent()) {
+                PetrolSell ps = record.get();
+                openingMeter = ps.getClose_meter() != null ? ps.getClose_meter() : "";
+                sourceDate = ps.getDate();
+                sourceClosing = ps.getClose_meter();
+                sourceEmployee = (ps.getEmployeeName() != null && !ps.getEmployeeName().trim().isEmpty()) ? ps.getEmployeeName() : ps.getUserId();
+                sourceShift = ps.getShift();
+                sourceRate = ps.getRate();
+                hasPreviousData = !openingMeter.isEmpty();
+            } else if (!userIds.isEmpty()) {
+                Optional<String> legacy = petrolSellRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
+                if (legacy.isPresent() && !legacy.get().isEmpty()) {
+                    openingMeter = legacy.get();
+                    sourceClosing = legacy.get();
+                    hasPreviousData = true;
+                }
+            }
+        } else if ("diesel".equalsIgnoreCase(fuelType)) {
+            Optional<Dieselsell> record = Optional.empty();
+            if (!userIds.isEmpty()) {
+                record = dieselSellRepository.findPreviousClosingRecord(pump, date, shiftOrder, safeCurrentId, userIds);
+            }
+            if (record.isPresent()) {
+                Dieselsell ds = record.get();
+                openingMeter = ds.getClose_meter() != null ? ds.getClose_meter() : "";
+                sourceDate = ds.getDate();
+                sourceClosing = ds.getClose_meter();
+                sourceEmployee = (ds.getEmployeeName() != null && !ds.getEmployeeName().trim().isEmpty()) ? ds.getEmployeeName() : ds.getUserId();
+                sourceShift = ds.getShift();
+                sourceRate = ds.getRate();
+                hasPreviousData = !openingMeter.isEmpty();
+            } else if (!userIds.isEmpty()) {
+                Optional<String> legacy = dieselSellRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
+                if (legacy.isPresent() && !legacy.get().isEmpty()) {
+                    openingMeter = legacy.get();
+                    sourceClosing = legacy.get();
+                    hasPreviousData = true;
+                }
+            }
+        } else if ("powerdiesel".equalsIgnoreCase(fuelType) || "power_diesel".equalsIgnoreCase(fuelType)) {
+            Optional<powerDiesel> record = Optional.empty();
+            if (!userIds.isEmpty()) {
+                record = powerDieselRepository.findPreviousClosingRecord(pump, date, shiftOrder, safeCurrentId, userIds);
+            }
+            if (record.isPresent()) {
+                powerDiesel pd = record.get();
+                openingMeter = pd.getClose_meter() != null ? pd.getClose_meter() : "";
+                sourceDate = pd.getDate();
+                sourceClosing = pd.getClose_meter();
+                sourceEmployee = (pd.getEmployeeName() != null && !pd.getEmployeeName().trim().isEmpty()) ? pd.getEmployeeName() : pd.getUserId();
+                sourceShift = pd.getShift();
+                sourceRate = pd.getRate();
+                hasPreviousData = !openingMeter.isEmpty();
+            } else if (!userIds.isEmpty()) {
+                Optional<String> legacy = powerDieselRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
+                if (legacy.isPresent() && !legacy.get().isEmpty()) {
+                    openingMeter = legacy.get();
+                    sourceClosing = legacy.get();
+                    hasPreviousData = true;
+                }
+            }
+        } else if ("xppetrol".equalsIgnoreCase(fuelType) || "xp_petrol".equalsIgnoreCase(fuelType)) {
+            Optional<xpPetrol> record = Optional.empty();
+            if (!userIds.isEmpty()) {
+                record = xpPetorlRepository.findPreviousClosingRecord(pump, date, shiftOrder, safeCurrentId, userIds);
+            }
+            if (record.isPresent()) {
+                xpPetrol xp = record.get();
+                openingMeter = xp.getClose_meter() != null ? xp.getClose_meter() : "";
+                sourceDate = xp.getDate();
+                sourceClosing = xp.getClose_meter();
+                sourceEmployee = (xp.getEmployeeName() != null && !xp.getEmployeeName().trim().isEmpty()) ? xp.getEmployeeName() : xp.getUserId();
+                sourceShift = xp.getShift();
+                sourceRate = xp.getRate();
+                hasPreviousData = !openingMeter.isEmpty();
+            } else if (!userIds.isEmpty()) {
+                Optional<String> legacy = xpPetorlRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
+                if (legacy.isPresent() && !legacy.get().isEmpty()) {
+                    openingMeter = legacy.get();
+                    sourceClosing = legacy.get();
+                    hasPreviousData = true;
+                }
+            }
+        }
+
+        boolean isSameDate = (sourceDate != null && date != null && sourceDate.trim().equals(date.trim()));
+
+        res.put("success", true);
+        res.put("openingMeter", openingMeter);
+        res.put("previousClosingMeter", openingMeter);
+        res.put("rate", sourceRate);
+        res.put("sourceDate", sourceDate);
+        res.put("sourceClosing", sourceClosing);
+        res.put("sourceEmployee", sourceEmployee);
+        res.put("sourceShift", sourceShift);
+        res.put("hasPreviousData", hasPreviousData);
+        res.put("isSameDate", isSameDate);
+        return res;
+    }
+
+    @GetMapping("/daily-report/opening-meter")
+    public ResponseEntity<Map<String, Object>> getOpeningMeterEndpoint(
+            @RequestParam String fuelType,
+            @RequestParam(required = false) String nozzle,
+            @RequestParam(required = false) String pump,
+            @RequestParam(required = false) String businessDate,
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String shift,
+            @RequestParam(required = false) Integer currentId,
+            @RequestParam(required = false) String userId) {
+        String effectivePump = (nozzle != null && !nozzle.trim().isEmpty()) ? nozzle : pump;
+        String effectiveDate = (businessDate != null && !businessDate.trim().isEmpty()) ? businessDate : date;
+        Map<String, Object> details = fetchOpeningMeterDetails(fuelType, effectivePump, effectiveDate, shift, currentId, userId);
+        return ResponseEntity.ok(details);
+    }
+
+    public ResponseEntity<Map<String, Object>> getPreviousClosingMeter(
+            String fuelType,
+            String pump,
+            String date,
+            Integer currentId,
+            String userId) {
+        return getPreviousClosingMeter(fuelType, pump, date, null, currentId, userId);
+    }
+
     @GetMapping("/shift/previousClosingMeter")
     public ResponseEntity<Map<String, Object>> getPreviousClosingMeter(
             @RequestParam String fuelType,
             @RequestParam String pump,
             @RequestParam String date,
+            @RequestParam(required = false) String shift,
             @RequestParam(required = false) Integer currentId,
             @RequestParam(required = false) String userId) {
-        Map<String, Object> res = new HashMap<>();
-        Optional<String> meter = Optional.empty();
-
-        List<String> userIds = (userId != null && !userId.trim().isEmpty() && !"null".equalsIgnoreCase(userId.trim()))
-                ? getPumpStationUserIds(userId.trim())
-                : new ArrayList<>();
-
-        if (userIds.isEmpty()) {
-            res.put("success", true);
-            res.put("previousClosingMeter", "");
-            return ResponseEntity.ok(res);
-        }
-
-        Integer safeCurrentId = (currentId != null) ? currentId : 999999999;
-
-        if ("petrol".equalsIgnoreCase(fuelType)) {
-            meter = petrolSellRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
-        } else if ("diesel".equalsIgnoreCase(fuelType)) {
-            meter = dieselSellRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
-        } else if ("powerdiesel".equalsIgnoreCase(fuelType) || "power_diesel".equalsIgnoreCase(fuelType)) {
-            meter = powerDieselRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
-        } else if ("xppetrol".equalsIgnoreCase(fuelType) || "xp_petrol".equalsIgnoreCase(fuelType)) {
-            meter = xpPetorlRepository.findPreviousClosingMeter(pump, date, safeCurrentId, userIds);
-        }
-        res.put("success", true);
-        res.put("previousClosingMeter", meter.orElse(""));
-        return ResponseEntity.ok(res);
+        Map<String, Object> details = fetchOpeningMeterDetails(fuelType, pump, date, shift, currentId, userId);
+        return ResponseEntity.ok(details);
     }
 
     @PostMapping("/shift/closeShift")
@@ -5467,6 +5948,48 @@ public class PurchaseController {
     // CURRENT TANK STOCK / LIVE MONITORING APIS
     // ==========================================
 
+    private Long resolveEffectivePumpId(DAOUser currentUser, String fallbackUserIdStr) {
+        if (currentUser != null) {
+            if (currentUser.getPumpId() != null) {
+                return currentUser.getPumpId();
+            }
+            if (currentUser.getManagerId() != null) {
+                Optional<DAOUser> mgrOpt = userRepository.findById(currentUser.getManagerId());
+                if (mgrOpt.isPresent() && mgrOpt.get().getPumpId() != null) {
+                    return mgrOpt.get().getPumpId();
+                }
+            }
+            if (currentUser.getId() != null) {
+                List<DAOUser> emps = userRepository.findByManagerId(currentUser.getId());
+                if (emps != null) {
+                    for (DAOUser emp : emps) {
+                        if (emp.getPumpId() != null) {
+                            return emp.getPumpId();
+                        }
+                    }
+                }
+            }
+        }
+        if (fallbackUserIdStr != null && !fallbackUserIdStr.trim().isEmpty() && !"null".equalsIgnoreCase(fallbackUserIdStr.trim())) {
+            try {
+                Long fId = Long.valueOf(fallbackUserIdStr.trim());
+                Optional<DAOUser> fUser = userRepository.findById(fId);
+                if (fUser.isPresent()) {
+                    if (fUser.get().getPumpId() != null) {
+                        return fUser.get().getPumpId();
+                    }
+                    if (fUser.get().getManagerId() != null) {
+                        Optional<DAOUser> mgrOpt = userRepository.findById(fUser.get().getManagerId());
+                        if (mgrOpt.isPresent() && mgrOpt.get().getPumpId() != null) {
+                            return mgrOpt.get().getPumpId();
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+        return 1L;
+    }
+
     @GetMapping("/dashboard/current-stock")
     public ResponseEntity<List<TankStockDTO>> getCurrentTankStock(
             @RequestParam String date,
@@ -5482,6 +6005,9 @@ public class PurchaseController {
             manager = userRepository.findById(managerId).orElse(null);
         } catch (Exception ignored) {}
 
+        DAOUser authUser = getAuthenticatedUser();
+        Long pumpId = resolveEffectivePumpId(authUser != null ? authUser : manager, effUserId);
+
         boolean hasPetrol = manager != null && isNozzleConfigured(manager.getPetrol_nozzle());
         boolean hasDiesel = manager != null && isNozzleConfigured(manager.getDiesel_nozzle());
         boolean hasXpPetrol = manager != null && isNozzleConfigured(manager.getXp_petrol_nozzle());
@@ -5495,25 +6021,35 @@ public class PurchaseController {
 
         // 1. Regular Petrol
         if (hasPetrol) {
-            result.add(buildTankStockDTO("petrol", "Petrol", "Petrol Tank", date, effUserId, targetUserIds));
+            result.add(buildTankStockDTO("petrol", "Petrol", "Petrol Tank", date, effUserId, targetUserIds, pumpId));
         }
 
         // 2. Diesel
         if (hasDiesel) {
-            result.add(buildTankStockDTO("diesel", "Diesel", "Diesel Tank", date, effUserId, targetUserIds));
+            result.add(buildTankStockDTO("diesel", "Diesel", "Diesel Tank", date, effUserId, targetUserIds, pumpId));
         }
 
         // 3. XP Petrol (Only if configured)
         if (hasXpPetrol) {
-            result.add(buildTankStockDTO("xppetrol", "XP Petrol", "XP Petrol Tank", date, effUserId, targetUserIds));
+            result.add(buildTankStockDTO("xppetrol", "XP Petrol", "XP Petrol Tank", date, effUserId, targetUserIds, pumpId));
         }
 
         // 4. Power Diesel (Only if configured)
         if (hasPowerDiesel) {
-            result.add(buildTankStockDTO("powerdiesel", "Power Diesel", "Power Diesel Tank", date, effUserId, targetUserIds));
+            result.add(buildTankStockDTO("powerdiesel", "Power Diesel", "Power Diesel Tank", date, effUserId, targetUserIds, pumpId));
         }
 
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/tank/status")
+    public ResponseEntity<List<TankStockDTO>> getTankStatus(
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) String userId) {
+        String effectiveDate = (date != null && !date.trim().isEmpty())
+                ? date.trim()
+                : new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+        return getCurrentTankStock(effectiveDate, userId != null ? userId : "");
     }
 
     private boolean isNozzleConfigured(String nozzleVal) {
@@ -5528,7 +6064,7 @@ public class PurchaseController {
         }
     }
 
-    private TankStockDTO buildTankStockDTO(String fuelType, String label, String tankName, String date, String effUserId, List<String> targetUserIds) {
+    private TankStockDTO buildTankStockDTO(String fuelType, String label, String tankName, String date, String effUserId, List<String> targetUserIds, Long pumpId) {
         TankStockDTO dto = new TankStockDTO();
         dto.setFuelType(fuelType);
         dto.setLabel(label);
@@ -5739,76 +6275,146 @@ public class PurchaseController {
         } catch (Exception ignored) {}
 
         // --- TANK CONFIGURATION ---
-        TankConfiguration config = tankConfigurationRepository.findByUserIdAndFuelType(effUserId, fuelType)
+        final Long safePumpId = pumpId != null ? pumpId : 1L;
+        TankConfiguration config = tankConfigurationRepository.findFirstByPumpIdAndFuelType(safePumpId, fuelType)
             .orElseGet(() -> {
+                TankConfiguration existingUserConfig = tankConfigurationRepository.findByUserIdAndFuelType(effUserId, fuelType).orElse(null);
+                if (existingUserConfig != null) {
+                    existingUserConfig.setPumpId(safePumpId);
+                    return tankConfigurationRepository.save(existingUserConfig);
+                }
                 double defCapacity = ("xppetrol".equalsIgnoreCase(fuelType) || "powerdiesel".equalsIgnoreCase(fuelType)) ? 10000.0 : 20000.0;
-                double defMinStock = 25.0;
-                double defAlertLevel = 15.0;
-                TankConfiguration tc = new TankConfiguration(effUserId, fuelType, tankName, defCapacity, defMinStock, defAlertLevel);
+                double defCritical = ("xppetrol".equalsIgnoreCase(fuelType) || "powerdiesel".equalsIgnoreCase(fuelType)) ? 1500.0 : 3000.0;
+                double defWarning = ("xppetrol".equalsIgnoreCase(fuelType) || "powerdiesel".equalsIgnoreCase(fuelType)) ? 3000.0 : 6000.0;
+                TankConfiguration tc = new TankConfiguration(safePumpId, fuelType, tankName, defCapacity, defCritical, defWarning);
+                tc.setUserId(effUserId);
                 return tankConfigurationRepository.save(tc);
             });
 
-        double capacity = (config.getCapacity() != null && config.getCapacity() > 0) ? config.getCapacity() : 20000.0;
-        double minStock = config.getMinStockLevel() != null ? config.getMinStockLevel() : 25.0;
-        double alertLevel = config.getAlertLevel() != null ? config.getAlertLevel() : 15.0;
+        double capacity = (config.getTankCapacity() != null && config.getTankCapacity() > 0) ? config.getTankCapacity() : 20000.0;
+        double criticalLimit = config.getCriticalLimit() != null ? config.getCriticalLimit() : 3000.0;
+        double warningLimit = config.getWarningLimit() != null ? config.getWarningLimit() : 6000.0;
 
         double percentage = capacity > 0 ? (currentStock / capacity) * 100.0 : 0.0;
-        if (percentage < 0) percentage = 0.0;
+        percentage = Math.round(percentage * 100.0) / 100.0;
 
         String status = "NORMAL";
-        if (percentage <= alertLevel) {
+        String statusLabel = "NORMAL";
+        boolean isStockExceeded = false;
+        String validationError = null;
+
+        if (currentStock > capacity) {
+            status = "EXCEEDED";
+            statusLabel = "STOCK EXCEEDED - VALIDATION ISSUE";
+            isStockExceeded = true;
+            validationError = "Current stock (" + (Math.round(currentStock * 100.0) / 100.0) + " L) exceeds maximum tank capacity (" + capacity + " L). Stock validation issue.";
+        } else if (currentStock <= criticalLimit) {
             status = "CRITICAL";
-        } else if (percentage <= minStock) {
-            status = "LOW";
+            statusLabel = "CRITICAL - LOW STOCK";
+        } else if (currentStock <= warningLimit) {
+            status = "WARNING";
+            statusLabel = "WARNING - LOW STOCK";
+        } else {
+            status = "NORMAL";
+            statusLabel = "NORMAL";
         }
 
-        boolean isLowStock = percentage <= minStock;
+        boolean isLowStock = currentStock <= warningLimit;
         Double lossGain = (physicalStock != null) ? (physicalStock - currentStock) : null;
 
-        dto.setOpeningStock(openingStock);
-        dto.setPurchaseQuantity(purchaseQuantity);
-        dto.setSalesQuantity(salesQuantity);
-        dto.setTestingQuantity(testingQuantity);
-        dto.setNetSalesQuantity(netSalesQuantity);
-        dto.setGatt(gatt);
-        dto.setCurrentStock(currentStock);
+        dto.setOpeningStock(Math.round(openingStock * 100.0) / 100.0);
+        dto.setPurchaseQuantity(Math.round(purchaseQuantity * 100.0) / 100.0);
+        dto.setSalesQuantity(Math.round(salesQuantity * 100.0) / 100.0);
+        dto.setTestingQuantity(Math.round(testingQuantity * 100.0) / 100.0);
+        dto.setNetSalesQuantity(Math.round(netSalesQuantity * 100.0) / 100.0);
+        dto.setGatt(Math.round(gatt * 100.0) / 100.0);
+        dto.setCurrentStock(Math.round(currentStock * 100.0) / 100.0);
         dto.setCapacity(capacity);
-        dto.setPercentage(Math.round(percentage * 10.0) / 10.0);
-        dto.setMinimumStock(minStock);
-        dto.setAlertLevel(alertLevel);
+        dto.setPercentage(percentage);
+        dto.setCriticalLimit(criticalLimit);
+        dto.setWarningLimit(warningLimit);
+        dto.setMinimumStock(warningLimit);
+        dto.setAlertLevel(criticalLimit);
         dto.setLowStock(isLowStock);
-        dto.setPhysicalStock(physicalStock);
+        dto.setStockExceeded(isStockExceeded);
+        dto.setValidationError(validationError);
+        dto.setPhysicalStock(physicalStock != null ? Math.round(physicalStock * 100.0) / 100.0 : null);
         dto.setDipMm(dipMm);
         dto.setLossGain(lossGain != null ? Math.round(lossGain * 100.0) / 100.0 : null);
         dto.setStatus(status);
+        dto.setStatusLabel(statusLabel);
 
         return dto;
     }
 
     @GetMapping("/tank/config")
-    public ResponseEntity<List<TankConfiguration>> getTankConfigurations(@RequestParam String userId) {
-        String effUserId = getEffectiveUserId(userId);
-        List<TankConfiguration> list = tankConfigurationRepository.findByUserId(effUserId);
+    public ResponseEntity<List<TankConfiguration>> getTankConfigurations(@RequestParam(required = false) String userId) {
+        DAOUser authUser = getAuthenticatedUser();
+        Long pumpId = resolveEffectivePumpId(authUser, userId);
+        List<TankConfiguration> list = tankConfigurationRepository.findByPumpId(pumpId);
+        if (list == null || list.isEmpty()) {
+            List<TankConfiguration> defaults = new ArrayList<>();
+            defaults.add(new TankConfiguration(pumpId, "petrol", "Petrol Tank", 20000.0, 3000.0, 6000.0));
+            defaults.add(new TankConfiguration(pumpId, "diesel", "Diesel Tank", 20000.0, 3000.0, 6000.0));
+            tankConfigurationRepository.saveAll(defaults);
+            list = tankConfigurationRepository.findByPumpId(pumpId);
+        }
         return ResponseEntity.ok(list);
     }
 
     @PostMapping("/tank/config")
     public ResponseEntity<ApiResponse> saveTankConfiguration(@RequestBody TankConfiguration config) {
-        if (config.getUserId() == null || config.getUserId().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(new ApiResponse(false, "User ID is required.", null));
+        if (config == null) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Tank configuration data is required.", null));
         }
-        String effUserId = getEffectiveUserId(config.getUserId());
-        config.setUserId(effUserId);
 
-        Optional<TankConfiguration> existingOpt = tankConfigurationRepository.findByUserIdAndFuelType(effUserId, config.getFuelType());
+        DAOUser authUser = getAuthenticatedUser();
+        Long pumpId = resolveEffectivePumpId(authUser, config.getUserId());
+        config.setPumpId(pumpId);
+        config.setUserId(String.valueOf(pumpId));
+
+        if (config.getFuelType() == null || config.getFuelType().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Fuel type is required.", null));
+        }
+
+        Double capacity = config.getTankCapacity();
+        Double critical = config.getCriticalLimit();
+        Double warning = config.getWarningLimit();
+
+        if (capacity == null || capacity <= 0) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Tank capacity must be greater than 0.", null));
+        }
+        if (critical == null || critical < 0) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Critical limit must be greater than or equal to 0.", null));
+        }
+        if (critical >= capacity) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Critical limit must be less than tank capacity.", null));
+        }
+        if (warning == null || warning <= critical) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Warning limit must be greater than critical limit.", null));
+        }
+        if (warning >= capacity) {
+            return ResponseEntity.badRequest().body(new ApiResponse(false, "Warning limit must be less than tank capacity.", null));
+        }
+
+        Optional<TankConfiguration> existingOpt = tankConfigurationRepository.findFirstByPumpIdAndFuelType(pumpId, config.getFuelType().trim().toLowerCase());
         if (existingOpt.isPresent()) {
             TankConfiguration existing = existingOpt.get();
-            if (config.getTankName() != null) existing.setTankName(config.getTankName());
-            if (config.getCapacity() != null) existing.setCapacity(config.getCapacity());
-            if (config.getMinStockLevel() != null) existing.setMinStockLevel(config.getMinStockLevel());
-            if (config.getAlertLevel() != null) existing.setAlertLevel(config.getAlertLevel());
+            if (config.getTankName() != null && !config.getTankName().trim().isEmpty()) {
+                existing.setTankName(config.getTankName());
+            }
+            existing.setTankCapacity(capacity);
+            existing.setCriticalLimit(critical);
+            existing.setWarningLimit(warning);
+            existing.setActive(config.isActive());
+            existing.setUserId(String.valueOf(pumpId));
             tankConfigurationRepository.save(existing);
         } else {
+            config.setFuelType(config.getFuelType().trim().toLowerCase());
+            config.setTankCapacity(capacity);
+            config.setCriticalLimit(critical);
+            config.setWarningLimit(warning);
+            config.setActive(true);
             tankConfigurationRepository.save(config);
         }
         return ResponseEntity.ok(new ApiResponse(true, "Tank configuration saved successfully.", null));

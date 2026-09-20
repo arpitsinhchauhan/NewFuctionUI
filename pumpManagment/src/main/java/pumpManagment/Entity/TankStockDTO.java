@@ -2,8 +2,8 @@ package pumpManagment.Entity;
 
 public class TankStockDTO {
     private String fuelType;       // 'petrol', 'diesel', 'xppetrol', 'powerdiesel'
-    private String label;          // 'Regular Petrol', 'Diesel', 'XP Petrol', 'Power Diesel'
-    private String tankName;       // 'Tank 1', etc.
+    private String label;          // 'Petrol', 'Diesel', 'XP Petrol', 'Power Diesel'
+    private String tankName;       // 'Petrol Tank', etc.
     private double openingStock;
     private double purchaseQuantity;
     private double salesQuantity;
@@ -13,13 +13,18 @@ public class TankStockDTO {
     private double currentStock;
     private double capacity;
     private double percentage;
-    private double minimumStock;
-    private double alertLevel;
+    private double criticalLimit;  // in Litres (e.g. 3000.0)
+    private double warningLimit;   // in Litres (e.g. 6000.0)
+    private double minimumStock;   // for backwards compatibility
+    private double alertLevel;     // for backwards compatibility
     private boolean isLowStock;
+    private boolean isStockExceeded;
+    private String validationError;
     private Double physicalStock;  // null if no dip reading today
     private String dipMm;          // null if no dip reading today
     private Double lossGain;       // physicalStock - currentStock
-    private String status;         // 'Normal', 'Low', 'Critical'
+    private String status;         // 'NORMAL', 'WARNING', 'CRITICAL', 'EXCEEDED'
+    private String statusLabel;    // 'NORMAL', 'Low Stock Warning', 'Low Stock / Critical', 'Stock Exceeds Capacity'
 
     public TankStockDTO() {
     }
@@ -120,20 +125,44 @@ public class TankStockDTO {
         this.percentage = percentage;
     }
 
+    public double getCriticalLimit() {
+        return criticalLimit;
+    }
+
+    public void setCriticalLimit(double criticalLimit) {
+        this.criticalLimit = criticalLimit;
+        this.alertLevel = criticalLimit;
+    }
+
+    public double getWarningLimit() {
+        return warningLimit;
+    }
+
+    public void setWarningLimit(double warningLimit) {
+        this.warningLimit = warningLimit;
+        this.minimumStock = warningLimit;
+    }
+
     public double getMinimumStock() {
-        return minimumStock;
+        return minimumStock > 0 ? minimumStock : warningLimit;
     }
 
     public void setMinimumStock(double minimumStock) {
         this.minimumStock = minimumStock;
+        if (this.warningLimit == 0) {
+            this.warningLimit = minimumStock;
+        }
     }
 
     public double getAlertLevel() {
-        return alertLevel;
+        return alertLevel > 0 ? alertLevel : criticalLimit;
     }
 
     public void setAlertLevel(double alertLevel) {
         this.alertLevel = alertLevel;
+        if (this.criticalLimit == 0) {
+            this.criticalLimit = alertLevel;
+        }
     }
 
     public boolean isLowStock() {
@@ -142,6 +171,22 @@ public class TankStockDTO {
 
     public void setLowStock(boolean lowStock) {
         isLowStock = lowStock;
+    }
+
+    public boolean isStockExceeded() {
+        return isStockExceeded;
+    }
+
+    public void setStockExceeded(boolean stockExceeded) {
+        isStockExceeded = stockExceeded;
+    }
+
+    public String getValidationError() {
+        return validationError;
+    }
+
+    public void setValidationError(String validationError) {
+        this.validationError = validationError;
     }
 
     public Double getPhysicalStock() {
@@ -174,5 +219,13 @@ public class TankStockDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getStatusLabel() {
+        return statusLabel;
+    }
+
+    public void setStatusLabel(String statusLabel) {
+        this.statusLabel = statusLabel;
     }
 }

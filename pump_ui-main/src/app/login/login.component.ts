@@ -37,9 +37,8 @@ export class LoginComponent implements OnInit {
     // Dismiss any leftover snackbar from the previous session (e.g. after logout)
     this.snackBar.dismiss();
     this.createForm();
-    if (localStorage.token) {
-      localStorage.removeItem("token");
-    }
+    localStorage.clear();
+    sessionStorage.clear();
   }
 
   // email: string = '';

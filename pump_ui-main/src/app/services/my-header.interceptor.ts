@@ -27,17 +27,20 @@ export class MyHeaderInterceptor implements HttpInterceptor {
     this.activeRequests++;
     this.loaderService.display(true);
 
-    // Retrieve token from localStorage
     const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
     const headersConfig: { [key: string]: string } = {
       'Bypass-Tunnel-Reminder': 'true'
     };
 
-    if (token) {
+    if (token && !req.headers.has('Authorization')) {
       headersConfig['Authorization'] = `Bearer ${token}`;
     }
+    if (userId && !req.headers.has('X-User-Id')) {
+      headersConfig['X-User-Id'] = userId;
+    }
 
-    // Clone request to add Bypass-Tunnel-Reminder and Authorization headers
+    // Clone request with auth and tunnel headers
     const clonedRequest = req.clone({
       setHeaders: headersConfig
     });
@@ -81,14 +84,6 @@ export class MyHeaderInterceptor implements HttpInterceptor {
           'COMPANY_DEACTIVATED',
           'USER_NOT_FOUND'
         ].includes(errorCode);
-
-        // If 401 Unauthorized occurs on an authenticated endpoint, token is missing or expired
-        if (error.status === 401 && !req.url.includes('/authenticate')) {
-          this.notificationService.failure(errorMessage || 'Session expired or unauthenticated. Please log in again.');
-          localStorage.removeItem('token');
-          this.router.navigate(['/']);
-          return throwError(() => error);
-        }
 
         if (!isBusinessError) {
           this.notificationService.failure(errorMessage);

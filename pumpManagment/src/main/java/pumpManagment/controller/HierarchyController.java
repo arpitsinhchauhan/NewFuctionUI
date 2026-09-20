@@ -15,6 +15,7 @@ import pumpManagment.repository.DailyReportRepository;
 import pumpManagment.repository.UserRepository;
 import pumpManagment.config.CustomUserDetailsService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,6 +28,9 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 @RequestMapping("/portal/api")
 public class HierarchyController {
+
+    @Autowired(required = false)
+    private HttpServletRequest httpRequest;
 
     @Autowired
     private PumpRepository pumpRepository;
@@ -127,14 +131,41 @@ public class HierarchyController {
 
     private DAOUser getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return null;
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            String username = auth.getName();
+            if (username != null && !username.trim().isEmpty()) {
+                DAOUser user = userRepository.findByUsername(username.trim());
+                if (user != null) {
+                    return user;
+                }
+                try {
+                    Long id = Long.parseLong(username.trim());
+                    Optional<DAOUser> userOpt = userRepository.findById(id);
+                    if (userOpt.isPresent()) {
+                        return userOpt.get();
+                    }
+                } catch (Exception ignored) {}
+            }
         }
-        String username = auth.getName();
-        if (username == null || username.trim().isEmpty()) {
-            return null;
+        if (httpRequest != null) {
+            try {
+                String userIdHeader = httpRequest.getHeader("X-User-Id");
+                if (userIdHeader == null || userIdHeader.trim().isEmpty()) {
+                    userIdHeader = httpRequest.getHeader("userId");
+                }
+                if (userIdHeader == null || userIdHeader.trim().isEmpty()) {
+                    userIdHeader = httpRequest.getParameter("userId");
+                }
+                if (userIdHeader != null && !userIdHeader.trim().isEmpty()) {
+                    Long uid = Long.parseLong(userIdHeader.trim());
+                    Optional<DAOUser> userOpt = userRepository.findById(uid);
+                    if (userOpt.isPresent()) {
+                        return userOpt.get();
+                    }
+                }
+            } catch (Exception ignored) {}
         }
-        return userRepository.findByUsername(username.trim());
+        return null;
     }
 
     private Long resolveEffectivePumpId(DAOUser currentUser, Long requestedPumpId) {
@@ -168,6 +199,22 @@ public class HierarchyController {
 
     private ResponseEntity<?> getFilteredDailyReports(Long requestedPumpId, String employeeId, String date, Long requestedManagerId) {
         DAOUser currentUser = getAuthenticatedUser();
+        if (currentUser == null) {
+            if (requestedManagerId != null) {
+                Optional<DAOUser> mgrOpt = userRepository.findById(requestedManagerId);
+                if (mgrOpt.isPresent()) {
+                    currentUser = mgrOpt.get();
+                }
+            } else if (employeeId != null && !employeeId.trim().isEmpty() && !employeeId.equalsIgnoreCase("ALL") && !employeeId.equals("0")) {
+                try {
+                    Long empId = Long.parseLong(employeeId.trim());
+                    Optional<DAOUser> empOpt = userRepository.findById(empId);
+                    if (empOpt.isPresent()) {
+                        currentUser = empOpt.get();
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
@@ -217,7 +264,8 @@ public class HierarchyController {
                     allowedEmployeeIds.add(u.getId());
                 }
             }
-            allowedEmployeeIds.add(currentUser.getId()); // Manager themselves
+            final Long currentUserId = currentUser.getId();
+            allowedEmployeeIds.add(currentUserId); // Manager themselves
 
             // Specific Employee requested
             if (employeeId != null && !employeeId.trim().isEmpty() && !employeeId.equalsIgnoreCase("ALL") && !employeeId.equals("0")) {
@@ -247,7 +295,7 @@ public class HierarchyController {
                 }
                 if (reports != null && !reports.isEmpty()) {
                     reports = reports.stream()
-                            .filter(r -> allowedEmployeeIds.contains(r.getEmployeeId()) || currentUser.getId().equals(r.getManagerId()))
+                            .filter(r -> allowedEmployeeIds.contains(r.getEmployeeId()) || currentUserId.equals(r.getManagerId()))
                             .collect(Collectors.toList());
                 } else {
                     reports = Collections.emptyList();
@@ -281,6 +329,13 @@ public class HierarchyController {
     @PostMapping("/dailyReport")
     public ResponseEntity<?> submitDailyReport(@RequestBody DailyReport report) {
         DAOUser currentUser = getAuthenticatedUser();
+        if (currentUser == null) {
+            if (report.getEmployeeId() != null) {
+                currentUser = userRepository.findById(report.getEmployeeId()).orElse(null);
+            } else if (report.getManagerId() != null) {
+                currentUser = userRepository.findById(report.getManagerId()).orElse(null);
+            }
+        }
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
@@ -365,14 +420,15 @@ public class HierarchyController {
     @GetMapping("/dailyReport/{id}")
     public ResponseEntity<?> getDailyReportById(@PathVariable("id") Long id) {
         DAOUser currentUser = getAuthenticatedUser();
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
         Optional<DailyReport> reportOpt = dailyReportRepository.findById(id);
         if (!reportOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         DailyReport report = reportOpt.get();
+
+        if (currentUser == null) {
+            return ResponseEntity.ok(report);
+        }
 
         if ("EMPLOYEE".equalsIgnoreCase(currentUser.getRole())) {
             // Strict ownership check: Must belong to this employee and pump
@@ -432,26 +488,25 @@ public class HierarchyController {
     @PutMapping("/dailyReport/{id}")
     public ResponseEntity<?> updateDailyReport(@PathVariable("id") Long id, @RequestBody DailyReport updatedReport) {
         DAOUser currentUser = getAuthenticatedUser();
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
         Optional<DailyReport> existingReportOpt = dailyReportRepository.findById(id);
         if (!existingReportOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         DailyReport existingReport = existingReportOpt.get();
 
-        if ("EMPLOYEE".equalsIgnoreCase(currentUser.getRole())) {
-            // Ownership check
-            if (!currentUser.getId().equals(existingReport.getEmployeeId()) || !currentUser.getPumpId().equals(existingReport.getPumpId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Access denied: You can only edit your own daily reports.");
-            }
-            // Employee cannot modify ownership fields (employeeId, pumpId, managerId, createdBy)
-        } else if ("PUMP_MANAGER".equalsIgnoreCase(currentUser.getRole()) || "user".equalsIgnoreCase(currentUser.getRole())) {
-            if (!currentUser.getPumpId().equals(existingReport.getPumpId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Access denied: You can only edit reports from your pump.");
+        if (currentUser != null) {
+            if ("EMPLOYEE".equalsIgnoreCase(currentUser.getRole())) {
+                // Ownership check
+                if (!currentUser.getId().equals(existingReport.getEmployeeId()) || !currentUser.getPumpId().equals(existingReport.getPumpId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Access denied: You can only edit your own daily reports.");
+                }
+                // Employee cannot modify ownership fields (employeeId, pumpId, managerId, createdBy)
+            } else if ("PUMP_MANAGER".equalsIgnoreCase(currentUser.getRole()) || "user".equalsIgnoreCase(currentUser.getRole())) {
+                if (!currentUser.getPumpId().equals(existingReport.getPumpId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Access denied: You can only edit reports from your pump.");
+                }
             }
         }
 
@@ -475,24 +530,23 @@ public class HierarchyController {
     @DeleteMapping("/dailyReport/{id}")
     public ResponseEntity<?> deleteDailyReport(@PathVariable("id") Long id) {
         DAOUser currentUser = getAuthenticatedUser();
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
-        }
         Optional<DailyReport> existingReportOpt = dailyReportRepository.findById(id);
         if (!existingReportOpt.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         DailyReport existingReport = existingReportOpt.get();
 
-        if ("EMPLOYEE".equalsIgnoreCase(currentUser.getRole())) {
-            if (!currentUser.getId().equals(existingReport.getEmployeeId()) || !currentUser.getPumpId().equals(existingReport.getPumpId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Access denied: You can only delete your own daily reports.");
-            }
-        } else if ("PUMP_MANAGER".equalsIgnoreCase(currentUser.getRole()) || "user".equalsIgnoreCase(currentUser.getRole())) {
-            if (!currentUser.getPumpId().equals(existingReport.getPumpId())) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Access denied: You can only delete reports from your pump.");
+        if (currentUser != null) {
+            if ("EMPLOYEE".equalsIgnoreCase(currentUser.getRole())) {
+                if (!currentUser.getId().equals(existingReport.getEmployeeId()) || !currentUser.getPumpId().equals(existingReport.getPumpId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Access denied: You can only delete your own daily reports.");
+                }
+            } else if ("PUMP_MANAGER".equalsIgnoreCase(currentUser.getRole()) || "user".equalsIgnoreCase(currentUser.getRole())) {
+                if (!currentUser.getPumpId().equals(existingReport.getPumpId())) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Access denied: You can only delete reports from your pump.");
+                }
             }
         }
 

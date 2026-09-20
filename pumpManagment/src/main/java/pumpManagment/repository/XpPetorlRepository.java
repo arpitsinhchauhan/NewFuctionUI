@@ -39,9 +39,26 @@ public interface XpPetorlRepository extends JpaRepository<xpPetrol, Integer> {
 
         List<xpPetrol> findByDateAndShift(String date, String shift);
 
-        @Query(value = "SELECT close_meter FROM xppetrol WHERE (pump = :pump OR pump = REPLACE(:pump, 'xpPetrol nozzle', 'xpPetrol Pump') OR pump = REPLACE(:pump, 'xpPetrol Pump', 'xpPetrol nozzle')) AND user_id IN (:userIds) AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, id DESC LIMIT 1", nativeQuery = true)
+        @Query(value = "SELECT close_meter FROM xppetrol WHERE (pump = :pump OR pump = REPLACE(:pump, 'xpPetrol nozzle', 'xpPetrol Pump') OR pump = REPLACE(:pump, 'xpPetrol Pump', 'xpPetrol nozzle')) AND user_id IN (:userIds) AND (date < :date OR (date = :date AND id < COALESCE(:currentId, 999999999))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, (CASE COALESCE(shift, 'Morning') WHEN 'Morning' THEN 1 WHEN 'Afternoon' THEN 2 WHEN 'Night' THEN 3 WHEN 'Evening' THEN 3 ELSE 1 END) DESC, id DESC LIMIT 1", nativeQuery = true)
         Optional<String> findPreviousClosingMeter(@Param("pump") String pump, @Param("date") String date,
                         @Param("currentId") Integer currentId, @Param("userIds") List<String> userIds);
+
+        @Query(value = "SELECT * FROM xppetrol WHERE (pump = :pump OR pump = REPLACE(:pump, 'xpPetrol nozzle', 'xpPetrol Pump') OR pump = REPLACE(:pump, 'xpPetrol Pump', 'xpPetrol nozzle')) AND user_id IN (:userIds) AND (date < :date OR (date = :date AND ((:shiftOrder > 0 AND (CASE COALESCE(shift, 'Morning') WHEN 'Morning' THEN 1 WHEN 'Afternoon' THEN 2 WHEN 'Night' THEN 3 WHEN 'Evening' THEN 3 ELSE 1 END) < :shiftOrder) OR (:shiftOrder <= 0 AND id < COALESCE(:currentId, 999999999)) OR (id < COALESCE(:currentId, 999999999) AND (CASE COALESCE(shift, 'Morning') WHEN 'Morning' THEN 1 WHEN 'Afternoon' THEN 2 WHEN 'Night' THEN 3 WHEN 'Evening' THEN 3 ELSE 1 END) <= :shiftOrder)))) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date DESC, (CASE COALESCE(shift, 'Morning') WHEN 'Morning' THEN 1 WHEN 'Afternoon' THEN 2 WHEN 'Night' THEN 3 WHEN 'Evening' THEN 3 ELSE 1 END) DESC, id DESC LIMIT 1", nativeQuery = true)
+        Optional<xpPetrol> findPreviousClosingRecord(
+                        @Param("pump") String pump,
+                        @Param("date") String date,
+                        @Param("shiftOrder") Integer shiftOrder,
+                        @Param("currentId") Integer currentId,
+                        @Param("userIds") List<String> userIds);
+
+
+        @Query(value = "SELECT * FROM xppetrol WHERE (pump = :pump OR pump = REPLACE(:pump, 'xpPetrol nozzle', 'xpPetrol Pump') OR pump = REPLACE(:pump, 'xpPetrol Pump', 'xpPetrol nozzle')) AND user_id IN (:userIds) AND (date > :date OR (date = :date AND ((:shiftOrder > 0 AND (CASE COALESCE(shift, 'Morning') WHEN 'Morning' THEN 1 WHEN 'Afternoon' THEN 2 WHEN 'Night' THEN 3 WHEN 'Evening' THEN 3 ELSE 1 END) > :shiftOrder) OR id > COALESCE(:currentId, 0)))) AND (:currentId IS NULL OR id != :currentId) AND close_meter IS NOT NULL AND close_meter != '' ORDER BY date ASC, (CASE COALESCE(shift, 'Morning') WHEN 'Morning' THEN 1 WHEN 'Afternoon' THEN 2 WHEN 'Night' THEN 3 WHEN 'Evening' THEN 3 ELSE 1 END) ASC, id ASC LIMIT 1", nativeQuery = true)
+        Optional<xpPetrol> findSubsequentRecord(
+                        @Param("pump") String pump,
+                        @Param("date") String date,
+                        @Param("shiftOrder") Integer shiftOrder,
+                        @Param("currentId") Integer currentId,
+                        @Param("userIds") List<String> userIds);
 
         // @Query(value = "SELECT SUM(p.xppetrol_ltr) FROM xppetrol p WHERE YEAR(p.date)
         // = YEAR(CURDATE()) AND p.user_id = :userId", nativeQuery = true)

@@ -16,10 +16,10 @@
       <span class="badge px-3 py-2 text-uppercase font-weight-bold"
             [ngClass]="{
               'badge-success': data.status === 'NORMAL',
-              'badge-warning': data.status === 'LOW',
-              'badge-danger': data.status === 'CRITICAL'
+              'badge-warning': data.status === 'WARNING' || data.status === 'LOW',
+              'badge-danger': data.status === 'CRITICAL' || data.status === 'EXCEEDED'
             }">
-        ● {{ data.status }} ({{ data.percentage | number:'1.1-1' }}%)
+        ● {{ data.statusLabel || data.status }} ({{ data.percentage | number:'1.1-2' }}%)
       </span>
       <button mat-icon-button (click)="close()" class="close-btn">
         <mat-icon>close</mat-icon>
@@ -133,19 +133,25 @@
     <div class="col-md-4">
       <div class="spec-box p-2 border rounded">
         <small class="text-muted d-block font-weight-bold">TANK CAPACITY</small>
-        <span class="font-weight-bold text-dark">{{ data.capacity | number:'1.0-0' }} L</span>
+        <span class="font-weight-bold text-dark">{{ (data.capacity || 20000) | number:'1.0-0' }} L</span>
       </div>
     </div>
     <div class="col-md-4">
       <div class="spec-box p-2 border rounded">
-        <small class="text-muted d-block font-weight-bold">LOW STOCK THRESHOLD</small>
-        <span class="font-weight-bold text-warning">{{ data.minimumStock }}% ({{ (data.capacity * data.minimumStock / 100) | number:'1.0-0' }} L)</span>
+        <small class="text-warning d-block font-weight-bold">WARNING STOCK LIMIT</small>
+        <span class="font-weight-bold text-warning">
+          {{ (data.warningLimit || 6000) | number:'1.0-0' }} L
+          <small class="text-muted">({{ ((data.warningLimit || 6000) / (data.capacity || 20000) * 100) | number:'1.1-1' }}%)</small>
+        </span>
       </div>
     </div>
     <div class="col-md-4">
       <div class="spec-box p-2 border rounded">
-        <small class="text-muted d-block font-weight-bold">CRITICAL ALERT LEVEL</small>
-        <span class="font-weight-bold text-danger">{{ data.alertLevel }}% ({{ (data.capacity * data.alertLevel / 100) | number:'1.0-0' }} L)</span>
+        <small class="text-danger d-block font-weight-bold">CRITICAL STOCK LIMIT</small>
+        <span class="font-weight-bold text-danger">
+          {{ (data.criticalLimit || 3000) | number:'1.0-0' }} L
+          <small class="text-muted">({{ ((data.criticalLimit || 3000) / (data.capacity || 20000) * 100) | number:'1.1-1' }}%)</small>
+        </span>
       </div>
     </div>
   </div>

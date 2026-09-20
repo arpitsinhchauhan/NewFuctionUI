@@ -338,4 +338,38 @@
   background: var(--bg-card, #ffffff);
   border-radius: 12px;
   border: 1px dashed #cbd5e1;
+}
+
+.tank-status-legend-bar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.legend-chip {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+}
+
+.legend-color-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dot-red {
+  background-color: #dc2626;
+}
+
+.dot-orange {
+  background-color: #f59e0b;
+}
+
+.dot-green {
+  background-color: #16a34a;
 }

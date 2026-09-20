@@ -276,17 +276,29 @@
       </div>
     </div>
 
-    <!-- Dynamic Fuel Tank Cards Grid -->
+    <!-- Dynamic Fuel Tank Cards Grid (2-Column Grid Matching Reference Design) -->
     <div class="row mb-4" *ngIf="currentTankStocks.length > 0">
       <div *ngFor="let tank of currentTankStocks"
            class="mb-4"
-           [ngClass]="{
-             'col-lg-6 col-md-6': currentTankStocks.length === 2,
-             'col-lg-4 col-md-6': currentTankStocks.length === 3,
-             'col-lg-3 col-md-6': currentTankStocks.length >= 4,
-             'col-12': currentTankStocks.length === 1
-           }">
+           [ngClass]="currentTankStocks.length === 1 ? 'col-xl-6 col-lg-8 col-md-12 col-12' : 'col-xl-6 col-lg-6 col-md-12 col-12'">
         <app-fuel-tank [stockData]="tank" (openDetails)="openTankDetails($event)"></app-fuel-tank>
+      </div>
+    </div>
+
+    <!-- Reference Design Legend Bar -->
+    <div class="tank-status-legend-bar d-flex justify-content-between align-items-center flex-wrap p-3 rounded mb-4" *ngIf="currentTankStocks.length > 0">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="d-flex align-items-center text-muted font-weight-500">
+          <mat-icon class="text-primary mr-1" style="font-size: 18px; width: 18px; height: 18px;">info</mat-icon>
+          <span>Tank level color changes based on current stock:</span>
+        </div>
+        <span class="legend-chip"><span class="legend-color-dot dot-red"></span> Red = Critical (&le; 3,000 L)</span>
+        <span class="legend-chip"><span class="legend-color-dot dot-orange"></span> Orange = Warning (3,001 &ndash; 6,000 L)</span>
+        <span class="legend-chip"><span class="legend-color-dot dot-green"></span> Green = Normal (&gt; 6,000 L)</span>
+      </div>
+      <div class="text-muted small d-flex align-items-center font-weight-500">
+        <mat-icon class="text-secondary mr-1" style="font-size: 16px; width: 16px; height: 16px;">calendar_today</mat-icon>
+        Last Updated: {{ tankStockDate || (today | date:'dd MMM yyyy hh:mm a') }}
       </div>
     </div>
 

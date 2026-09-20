@@ -281,4 +281,34 @@ public class HierarchyControllerIsolationTest {
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
+
+    @Test
+    public void testGetManagerReports_UnauthenticatedFallbackByManagerId() {
+        SecurityContextHolder.clearContext();
+        when(userRepository.findById(100L)).thenReturn(Optional.of(manager));
+        when(userRepository.findByManagerIdAndRole(100L, "EMPLOYEE")).thenReturn(Arrays.asList(employee1, employee2));
+
+        DailyReport r1 = new DailyReport();
+        r1.setReportId(1L);
+        r1.setEmployeeId(11L);
+        r1.setPumpId(1L);
+
+        when(dailyReportRepository.findByPumpId(1L)).thenReturn(Collections.singletonList(r1));
+
+        ResponseEntity<?> response = hierarchyController.getManagerReports(100L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<?> reports = (List<?>) response.getBody();
+        assertEquals(1, reports.size());
+    }
+
+    @Test
+    public void testGetManagerReports_UnauthenticatedNoUserFoundReturns401() {
+        SecurityContextHolder.clearContext();
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = hierarchyController.getManagerReports(999L);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
 }

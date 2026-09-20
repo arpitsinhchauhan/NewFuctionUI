@@ -1,83 +1,227 @@
-<mat-card class="card-premium tank-card" (click)="onCardClick()" title="Click to view detailed stock breakdown">
-  <!-- Tank Header -->
-  <div class="tank-header">
-    <div class="header-main">
-      <div class="label-with-icon">
-        <mat-icon [style.color]="liquidColor">
-          {{ effectiveFuelType === 'petrol' || effectiveFuelType === 'xp' ? 'local_gas_station' : 'ev_station' }}
-        </mat-icon>
-        <span class="tank-label">{{ effectiveLabel }}</span>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <span class="fuel-badge" [style.background-color]="liquidColor">{{ effectiveFuelType | uppercase }}</span>
-        <span class="status-indicator" [ngClass]="{
-          'status-normal': effectiveStatus === 'NORMAL',
-          'status-low': effectiveStatus === 'LOW',
-          'status-critical': effectiveStatus === 'CRITICAL'
-        }">
-          ● {{ effectiveStatus }}
-        </span>
-      </div>
+<div class="tank-card-container" [ngClass]="cardThemeClass" (click)="onCardClick()" title="Click to view detailed stock breakdown">
+  <!-- Card Header -->
+  <div class="card-header-row d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <mat-icon [style.color]="statusColor" class="gas-icon">local_gas_station</mat-icon>
+      <span class="tank-name font-weight-bold">{{ effectiveLabel }}</span>
     </div>
-    <div class="stock-info">
-      <span class="current-stock">{{ effectiveStock | number:'1.0-0' }} <small>L</small></span>
-      <span class="capacity-total">of {{ effectiveCapacity | number:'1.0-0' }} L</span>
+    <div class="status-badge" [ngClass]="statusPillClass">
+      <span class="status-dot" [style.background-color]="statusColor"></span>
+      <span class="status-title">{{ statusLabel }}</span>
     </div>
   </div>
 
-  <!-- Visual Liquid Tank & Metrics Row -->
-  <div class="tank-visual">
-    <!-- Cylindrical / Glass Tank Display -->
-    <div class="tank-container-modern">
-      <div class="tank-fill-modern"
-           [style.height.%]="percentage"
-           [style.background]="'linear-gradient(180deg, ' + liquidColor + ' 0%, ' + borderColor + ' 100%)'"
-           [class.warning]="effectiveStatus === 'LOW'"
-           [class.danger]="effectiveStatus === 'CRITICAL'">
-        <div class="wave"></div>
+  <!-- Card Body: Tank Visualization (Left) + Details (Right) -->
+  <div class="card-body-row d-flex align-items-center">
+    <!-- Cylindrical Industrial Fuel Tank -->
+    <div class="tank-visual-wrapper position-relative">
+      <svg class="tank-cylinder-svg" viewBox="0 0 160 215" width="158" height="212" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Metallic Tank Body Gradient -->
+          <linearGradient id="tankMetalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#b0b7c3" />
+            <stop offset="18%" stop-color="#e2e8f0" />
+            <stop offset="38%" stop-color="#ffffff" />
+            <stop offset="65%" stop-color="#cbd5e1" />
+            <stop offset="85%" stop-color="#94a3b8" />
+            <stop offset="100%" stop-color="#64748b" />
+          </linearGradient>
+
+          <!-- Dome Gradient -->
+          <linearGradient id="tankDomeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#cbd5e1" />
+            <stop offset="35%" stop-color="#f8fafc" />
+            <stop offset="70%" stop-color="#94a3b8" />
+            <stop offset="100%" stop-color="#64748b" />
+          </linearGradient>
+
+          <!-- Support Stand Legs Gradient -->
+          <linearGradient id="metalStandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#334155" />
+            <stop offset="50%" stop-color="#64748b" />
+            <stop offset="100%" stop-color="#1e293b" />
+          </linearGradient>
+
+          <!-- Liquid Gradients -->
+          <!-- 1. Red / Critical -->
+          <linearGradient id="liquidRedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#f87171" />
+            <stop offset="25%" stop-color="#ef4444" />
+            <stop offset="75%" stop-color="#dc2626" />
+            <stop offset="100%" stop-color="#991b1b" />
+          </linearGradient>
+          <linearGradient id="liquidRedSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#fca5a5" />
+            <stop offset="100%" stop-color="#ef4444" />
+          </linearGradient>
+
+          <!-- 2. Orange / Warning -->
+          <linearGradient id="liquidOrangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fbbf24" />
+            <stop offset="25%" stop-color="#f59e0b" />
+            <stop offset="75%" stop-color="#d97706" />
+            <stop offset="100%" stop-color="#92400e" />
+          </linearGradient>
+          <linearGradient id="liquidOrangeSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#fde68a" />
+            <stop offset="100%" stop-color="#f59e0b" />
+          </linearGradient>
+
+          <!-- 3. Green / Normal -->
+          <linearGradient id="liquidGreenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#4ade80" />
+            <stop offset="25%" stop-color="#22c55e" />
+            <stop offset="75%" stop-color="#16a34a" />
+            <stop offset="100%" stop-color="#14532d" />
+          </linearGradient>
+          <linearGradient id="liquidGreenSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#86efac" />
+            <stop offset="100%" stop-color="#22c55e" />
+          </linearGradient>
+
+          <!-- 4. Blue / Full -->
+          <linearGradient id="liquidBlueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#60a5fa" />
+            <stop offset="25%" stop-color="#3b82f6" />
+            <stop offset="75%" stop-color="#2563eb" />
+            <stop offset="100%" stop-color="#1e40af" />
+          </linearGradient>
+          <linearGradient id="liquidBlueSurface" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#93c5fd" />
+            <stop offset="100%" stop-color="#3b82f6" />
+          </linearGradient>
+        </defs>
+
+        <!-- Foundation Shadow -->
+        <ellipse cx="80" cy="207" rx="66" ry="5" fill="rgba(0,0,0,0.18)" />
+
+        <!-- Concrete/Steel Foundation Base Platform -->
+        <path d="M 18 202 L 142 202 L 146 208 L 14 208 Z" fill="#94a3b8" stroke="#475569" stroke-width="0.75" />
+        <line x1="18" y1="202" x2="142" y2="202" stroke="#e2e8f0" stroke-width="1.2" />
+
+        <!-- Industrial Support Legs / Brackets -->
+        <!-- Outer Left Leg -->
+        <polygon points="25,178 20,202 27,202 31,178" fill="url(#metalStandGrad)" stroke="#334155" stroke-width="0.75" />
+        <!-- Inner Left Leg -->
+        <polygon points="50,182 46,202 53,202 56,182" fill="url(#metalStandGrad)" stroke="#334155" stroke-width="0.75" />
+        <!-- Inner Right Leg -->
+        <polygon points="104,182 107,202 114,202 110,182" fill="url(#metalStandGrad)" stroke="#334155" stroke-width="0.75" />
+        <!-- Outer Right Leg -->
+        <polygon points="129,178 133,202 140,202 135,178" fill="url(#metalStandGrad)" stroke="#334155" stroke-width="0.75" />
+
+        <!-- Tank Top Safety Railing -->
+        <!-- Railing Posts -->
+        <line x1="28" y1="36" x2="28" y2="19" stroke="#94a3b8" stroke-width="1.6" />
+        <line x1="48" y1="31" x2="48" y2="15" stroke="#94a3b8" stroke-width="1.6" />
+        <line x1="72" y1="28" x2="72" y2="13" stroke="#94a3b8" stroke-width="1.6" />
+        <line x1="88" y1="28" x2="88" y2="13" stroke="#94a3b8" stroke-width="1.6" />
+        <line x1="112" y1="31" x2="112" y2="15" stroke="#94a3b8" stroke-width="1.6" />
+        <line x1="132" y1="36" x2="132" y2="19" stroke="#94a3b8" stroke-width="1.6" />
+        <!-- Top Handrail Curve -->
+        <path d="M 28 19 C 48 10, 112 10, 132 19" fill="none" stroke="#94a3b8" stroke-width="2.2" />
+        <!-- Mid Safety Rail Curve -->
+        <path d="M 28 27 C 48 18, 112 18, 132 27" fill="none" stroke="#cbd5e1" stroke-width="1.4" />
+
+        <!-- Tank Top Dome -->
+        <path d="M 25 40 C 25 24, 135 24, 135 40 Z" fill="url(#tankDomeGrad)" stroke="#94a3b8" stroke-width="1" />
+        <!-- Top Dome Inspection Cap -->
+        <ellipse cx="80" cy="27" rx="9" ry="3.2" fill="#cbd5e1" stroke="#64748b" stroke-width="0.75" />
+
+        <!-- Tank Metallic Main Cylinder Shell -->
+        <path d="M 25 40 L 25 180 C 25 189.5, 135 189.5, 135 180 L 135 40 C 135 30.5, 25 30.5, 25 40 Z"
+              fill="url(#tankMetalGrad)" stroke="#94a3b8" stroke-width="1.2" />
+
+        <!-- Horizontal Panel Seam Rings -->
+        <path d="M 25 85 C 25 93, 135 93, 135 85" fill="none" stroke="#cbd5e1" stroke-width="0.75" stroke-dasharray="2,3" />
+        <path d="M 25 135 C 25 143, 135 143, 135 135" fill="none" stroke="#cbd5e1" stroke-width="0.75" stroke-dasharray="2,3" />
+
+        <!-- DYNAMIC LIQUID FILL LAYER -->
+        <g *ngIf="percentage > 0">
+          <!-- Main Liquid Volume -->
+          <path [attr.d]="liquidPath"
+                [attr.fill]="effectiveStatus === 'CRITICAL' ? 'url(#liquidRedGrad)' : (effectiveStatus === 'WARNING' ? 'url(#liquidOrangeGrad)' : (effectiveStatus === 'FULL' ? 'url(#liquidBlueGrad)' : 'url(#liquidGreenGrad)'))" />
+
+          <!-- Top 3D Elliptical Meniscus Surface -->
+          <ellipse cx="80" [attr.cy]="liquidTopY" rx="54.5" ry="9"
+                   [attr.fill]="effectiveStatus === 'CRITICAL' ? 'url(#liquidRedSurface)' : (effectiveStatus === 'WARNING' ? 'url(#liquidOrangeSurface)' : (effectiveStatus === 'FULL' ? 'url(#liquidBlueSurface)' : 'url(#liquidGreenSurface)'))"
+                   stroke="rgba(255,255,255,0.45)" stroke-width="0.8" />
+
+          <!-- Vertical Gloss Highlight Reflection on Liquid -->
+          <path [attr.d]="'M 42 ' + liquidTopY + ' L 42 184 L 54 185 L 54 ' + liquidTopY + ' Z'"
+                fill="rgba(255,255,255,0.22)" />
+        </g>
+
+        <!-- Outer Cylinder Edge Highlight & Shadow -->
+        <!-- Vertical Highlight Band -->
+        <line x1="45" y1="40" x2="45" y2="182" stroke="rgba(255,255,255,0.35)" stroke-width="3" />
+        <!-- Right Shade Line -->
+        <line x1="134" y1="40" x2="134" y2="180" stroke="rgba(0,0,0,0.18)" stroke-width="1.5" />
+      </svg>
+
+      <!-- Center Text Overlay inside Tank -->
+      <div class="tank-text-overlay" [ngClass]="{ 'text-light-mode': percentage >= 58 }">
+        <div class="overlay-pct" [style.color]="percentage >= 58 ? '#ffffff' : statusColor">
+          {{ displayPercentage | number:'1.0-0' }}%
+        </div>
+        <div class="overlay-litres" [style.color]="percentage >= 58 ? '#ffffff' : '#1e293b'">
+          {{ effectiveStock | number:'1.0-0' }} L
+        </div>
+        <div class="overlay-capacity" [style.color]="percentage >= 58 ? 'rgba(255,255,255,0.85)' : '#64748b'">
+          of {{ effectiveCapacity | number:'1.0-0' }} L
+        </div>
       </div>
-      <div class="tank-glass-effect"></div>
-      <div class="percentage-overlay">{{ percentage | number:'1.0-0' }}%</div>
     </div>
 
-    <!-- Live Stock Details Columns -->
-    <div class="tank-metrics">
-      <div class="metric-row d-flex justify-content-between">
-        <span class="metric-label">System Stock:</span>
-        <span class="metric-val-bold">{{ effectiveStock | number:'1.0-0' }} L</span>
-      </div>
-
-      <div class="metric-row d-flex justify-content-between" *ngIf="physicalStock != null">
-        <span class="metric-label">Dip Stock:</span>
-        <span class="metric-val-bold text-dark">{{ physicalStock | number:'1.0-0' }} L</span>
-      </div>
-
-      <div class="metric-row d-flex justify-content-between" *ngIf="lossGain != null">
-        <span class="metric-label">Variance:</span>
-        <span class="metric-val-bold" [ngClass]="{
-          'text-success font-weight-bold': lossGain > 0,
-          'text-danger font-weight-bold': lossGain < 0,
-          'text-muted': lossGain === 0
-        }">
-          {{ (lossGain > 0 ? '+' : '') + (lossGain | number:'1.1-1') }} L
+    <!-- Details Column (Right) -->
+    <div class="tank-details-col flex-grow-1 pl-3">
+      <!-- 1. Current Stock -->
+      <div class="detail-row d-flex justify-content-between align-items-center mb-2">
+        <span class="detail-label">Current Stock:</span>
+        <span class="detail-val font-weight-bold" [style.color]="statusColor">
+          {{ effectiveStock | number:'1.0-0' }} L
         </span>
       </div>
 
-      <div class="metric-row d-flex justify-content-between" *ngIf="physicalStock == null">
-        <span class="metric-label">Dip Reading:</span>
-        <span class="metric-val-muted small">Not taken today</span>
+      <!-- 2. Tank Capacity -->
+      <div class="detail-row d-flex justify-content-between align-items-center mb-2">
+        <span class="detail-label">Tank Capacity:</span>
+        <span class="detail-val text-dark font-weight-bold">
+          {{ effectiveCapacity | number:'1.0-0' }} L
+        </span>
       </div>
 
-      <div class="metric-row d-flex justify-content-between border-top pt-1">
-        <span class="metric-label">Remaining:</span>
-        <span class="metric-val-bold text-muted">{{ (effectiveCapacity - effectiveStock > 0 ? effectiveCapacity - effectiveStock : 0) | number:'1.0-0' }} L</span>
+      <!-- 3. Warning Limit -->
+      <div class="detail-row d-flex justify-content-between align-items-center mb-2">
+        <span class="detail-label">Warning Limit:</span>
+        <span class="detail-val val-warning font-weight-bold">
+          {{ effectiveWarningLimit | number:'1.0-0' }} L
+        </span>
+      </div>
+
+      <!-- 4. Critical Limit -->
+      <div class="detail-row d-flex justify-content-between align-items-center mb-2">
+        <span class="detail-label">Critical Limit:</span>
+        <span class="detail-val val-critical font-weight-bold">
+          {{ effectiveCriticalLimit | number:'1.0-0' }} L
+        </span>
+      </div>
+
+      <!-- 5. Available Space -->
+      <div class="detail-row d-flex justify-content-between align-items-center">
+        <span class="detail-label">Available Space:</span>
+        <span class="detail-val text-dark font-weight-bold">
+          {{ availableSpace | number:'1.0-0' }} L
+        </span>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Details Prompt -->
-  <div class="tank-card-footer d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-    <span class="click-hint"><mat-icon class="hint-icon">touch_app</mat-icon> View Full Breakdown</span>
+  <!-- Card Footer: View Full Breakdown & Arrow -->
+  <div class="card-footer-row d-flex justify-content-between align-items-center mt-3 pt-2">
+    <div class="breakdown-link d-flex align-items-center gap-2">
+      <mat-icon class="chart-icon">poll</mat-icon>
+      <span class="breakdown-text">View Full Breakdown</span>
+    </div>
     <mat-icon class="arrow-icon">arrow_forward</mat-icon>
   </div>
-</mat-card>
+</div>

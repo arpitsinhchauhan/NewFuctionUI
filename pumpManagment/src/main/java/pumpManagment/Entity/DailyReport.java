@@ -34,16 +34,16 @@ public class DailyReport {
     @Column(name = "manager_id")
     private Long managerId;
 
-    @Column(name = "report_date", nullable = false)
+    @Column(name = "report_date", nullable = false, length = 50)
     private String reportDate;
 
-    @Column(name = "report_time", nullable = false)
+    @Column(name = "report_time", nullable = false, length = 50)
     private String reportTime;
 
-    @Column(name = "shift", nullable = false)
+    @Column(name = "shift", nullable = false, length = 50)
     private String shift;
 
-    @Column(name = "created_by", nullable = false)
+    @Column(name = "created_by", nullable = false, length = 100)
     private String createdBy;
 
     @Column(name = "created_datetime", nullable = false)
@@ -135,10 +135,10 @@ public class DailyReport {
         this.createdDatetime = createdDatetime;
     }
 
-    @Column(name = "employee_name")
+    @Column(name = "employee_name", length = 150)
     private String employeeName;
 
-    @Column(name = "status")
+    @Column(name = "status", length = 50)
     private String status = "Pending";
 
     @Column(name = "petrol_sales")

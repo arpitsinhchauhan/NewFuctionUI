@@ -420,7 +420,8 @@ export class DashboardComponent implements OnInit {
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md'],
-      width: '750px'
+      width: '820px',
+      maxHeight: '90vh'
     });
 
     dialogRef.afterClosed().subscribe(res => {

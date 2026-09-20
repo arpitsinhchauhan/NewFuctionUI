@@ -958,15 +958,46 @@ export class UserServiceService {
     return this.http.post<any>(API_FORGOT_PASSWORD_DIRECT, { identity, newPassword });
   }
 
-  getPreviousClosingMeter(fuelType: string, pump: string, date: string, currentId?: number, userId?: string): Observable<any> {
+  getPreviousClosingMeter(fuelType: string, pump: string, date: string, shiftOrCurrentId?: string | number, currentIdOrUserId?: number | string, userIdParam?: string): Observable<any> {
     let params = new HttpParams().set('fuelType', fuelType).set('pump', pump).set('date', date);
-    if (currentId) {
+    let shift: string | undefined;
+    let currentId: number | undefined;
+    let userId: string | undefined;
+
+    if (typeof shiftOrCurrentId === 'string' && isNaN(Number(shiftOrCurrentId))) {
+      shift = shiftOrCurrentId;
+      if (typeof currentIdOrUserId === 'number') {
+        currentId = currentIdOrUserId;
+        userId = userIdParam;
+      } else if (typeof currentIdOrUserId === 'string') {
+        userId = currentIdOrUserId;
+      }
+    } else {
+      if (typeof shiftOrCurrentId === 'number' || (typeof shiftOrCurrentId === 'string' && !isNaN(Number(shiftOrCurrentId)))) {
+        currentId = Number(shiftOrCurrentId);
+      }
+      if (typeof currentIdOrUserId === 'string') {
+        userId = currentIdOrUserId;
+      }
+      if (userIdParam) {
+        userId = userIdParam;
+      }
+    }
+
+    if (shift) {
+      params = params.set('shift', shift);
+    }
+    if (currentId !== undefined && currentId !== null) {
       params = params.set('currentId', currentId.toString());
     }
     if (userId) {
       params = params.set('userId', userId.toString());
     }
     return this.http.get<any>(API_PREVIOUS_CLOSING_METER, { params });
+  }
+
+  getOpeningMeter(fuelType: string, pump: string, date: string, shift?: string, currentId?: number, userId?: string): Observable<any> {
+    return this.getPreviousClosingMeter(fuelType, pump, date, shift, currentId, userId);
   }
 
   closeShift(payload: any): Observable<any> {

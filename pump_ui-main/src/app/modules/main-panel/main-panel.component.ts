@@ -187,6 +187,11 @@ export class MainPanelComponent implements OnInit {
   showDailyConsolidatedModal: boolean = false;
   shiftReportData: any = null;
   dailyConsolidatedData: any = null;
+  isOverrideAllowed: boolean = false;
+
+  get isAdmin(): boolean {
+    return this.userRole === 'ADMIN' || this.userRole === 'admin' || this.userRole === 'PUMP_MANAGER' || this.userRole === 'pumpmanager';
+  }
 
   // Manager Dashboard Properties
   userRole: string = '';
@@ -201,17 +206,8 @@ export class MainPanelComponent implements OnInit {
   searchQuery: string = '';
   selectedEmployeeIdForView: string = 'ALL';
   managerEmployeeList: any[] = [];
-  hasEmployeeDataForDate: boolean = true;
   displayedColumns: string[] = ['employeeName', 'reportTime', 'reportDate', 'shift', 'petrolSales', 'dieselSales', 'expenses', 'cash', 'status', 'actions'];
   editingReportId: number | null = null;
-
-  getSelectedEmployeeName(): string {
-    if (this.selectedEmployeeIdForView === 'ALL') {
-      return 'All Employees';
-    }
-    const emp = this.managerEmployeeList.find(e => e.id.toString() === this.selectedEmployeeIdForView.toString());
-    return emp ? (emp.username || emp.firstName || 'Employee') : `Employee (${this.selectedEmployeeIdForView})`;
-  }
 
   get totalManagerPetrolSales(): number {
     return this.filteredReports.reduce((sum, r) => sum + (Number(r.petrolSales) || 0), 0);
@@ -362,10 +358,7 @@ export class MainPanelComponent implements OnInit {
   }
 
   getUserPump() {
-    const targetUserId = (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee')
-      ? (localStorage.getItem('userId') || this.userId)
-      : this.userId;
-    this.use.getUserPump(targetUserId).subscribe(
+    this.use.getUserPump(this.userId).subscribe(
       response => {
         if (response && response.success && response.data) {
           const data = response.data;
@@ -374,9 +367,8 @@ export class MainPanelComponent implements OnInit {
           this.showDieselPumpsCount = data.diesel_nozzle;
           this.showXpPetrolCount = data.xp_petrol_nozzle;
           this.showPowerDieselCount = data.powe_diesel_nozzle;
-          if (data.pumpId && !localStorage.getItem('pumpId')) {
-            localStorage.setItem('pumpId', data.pumpId.toString());
-          }
+          // If you want total count
+          const totalPumpCount = this.showPetrolPumpsCount + this.showDieselPumpsCount + this.showXpPetrolCount + this.showPowerDieselCount;
         }
       },
       error => {
@@ -638,9 +630,6 @@ export class MainPanelComponent implements OnInit {
 
   fetchPreviousClosingMeters() {
     if (!this.reportDate) return;
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      return;
-    }
     const formatted = this.use.getFormattedDate(this.reportDate);
     const uid = this.userId || localStorage.getItem('userId') || '';
 
@@ -993,12 +982,8 @@ export class MainPanelComponent implements OnInit {
 
 
   getPetrolUgadtoStock() {
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      this.Petrol_Ugadto_Stock = 0;
-      return;
-    }
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getPetrolStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
@@ -1021,7 +1006,7 @@ export class MainPanelComponent implements OnInit {
       data: {
         date: formattedDate,
         dieselopenstock: this.Diesel_Ugadto_Stock,
-        userId: this.userId || localStorage.getItem('userId')
+        userId: localStorage.getItem('userId') || this.userId
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1034,12 +1019,8 @@ export class MainPanelComponent implements OnInit {
   }
 
   getDieselUgadtoStock() {
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      this.Diesel_Ugadto_Stock = 0;
-      return;
-    }
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getDieselStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
@@ -1062,7 +1043,7 @@ export class MainPanelComponent implements OnInit {
       data: {
         date: formattedDate,
         xp_ugadto_stock: this.XP_Petrol_Ugadto_Stock,
-        userId: this.userId || localStorage.getItem('userId')
+        userId: localStorage.getItem('userId') || this.userId
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1075,12 +1056,8 @@ export class MainPanelComponent implements OnInit {
   }
 
   getxpPetrolUgadtoStock() {
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      this.XP_Petrol_Ugadto_Stock = 0;
-      return;
-    }
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getXpPetrolStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
@@ -1103,7 +1080,7 @@ export class MainPanelComponent implements OnInit {
       data: {
         date: formattedDate,
         power_ugadto_stock: this.Power_Diesel_Ugadto_Stock,
-        userId: this.userId || localStorage.getItem('userId')
+        userId: localStorage.getItem('userId') || this.userId
       },
       hasBackdrop: true,
       panelClass: ['dialog-modern-wrapper', 'dialog-md']
@@ -1116,12 +1093,8 @@ export class MainPanelComponent implements OnInit {
   }
 
   getpowerDieselUgadtoStock() {
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      this.Power_Diesel_Ugadto_Stock = 0;
-      return;
-    }
     const formattedDate = this.use.getFormattedDate(this.reportDate);
-    const uid = this.userId || localStorage.getItem('userId');
+    const uid = localStorage.getItem('userId') || this.userId;
     this.use.getPowerDieselStock(formattedDate, uid).subscribe(
       data => {
         if (data) {
@@ -1374,13 +1347,6 @@ export class MainPanelComponent implements OnInit {
   }
 
   getDiplist() {
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      this.Petrol_dip = 0;
-      this.Petrol_stock = 0;
-      this.Diesel_dip = 0;
-      this.Diesel_stock = 0;
-      return;
-    }
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     const uid = this.userId || localStorage.getItem('userId');
     this.use.getDipList(formattedDate, uid).subscribe(
@@ -1429,13 +1395,6 @@ export class MainPanelComponent implements OnInit {
   }
 
   getextraDiplist() {
-    if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee' && this.selectedEmployeeIdForView !== 'ALL') {
-      this.Extra_Petrol_dip = 0;
-      this.Extra_Petrol_stock = 0;
-      this.Extra_Diesel_dip = 0;
-      this.Extra_Diesel_stock = 0;
-      return;
-    }
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     this.use.getextraDipList(formattedDate, this.userId).subscribe(
       (data) => {
@@ -1894,7 +1853,11 @@ export class MainPanelComponent implements OnInit {
     const formattedDate = this.use.getFormattedDate(this.reportDate);
     const apiUrl = `${API_BACKPAGE}?date=${formattedDate}&userId=${userId}`;
 
-    this.http.get<BackPageResponse>(apiUrl).subscribe(
+    this.http.get<BackPageResponse>(apiUrl, {
+      headers: {
+        'Authorization': `Bearer ${userId}`
+      }
+    }).subscribe(
       response => {
         this.kharchSellSummary = response.kharchSellSummary || [];
         this.transactionSellSummary = response.transactionSellSummary || [];
@@ -2066,9 +2029,8 @@ export class MainPanelComponent implements OnInit {
     const pumpId = localStorage.getItem('pumpId');
     const userId = localStorage.getItem('userId');
     if (!pumpId) return;
-    const formattedDate = this.use.getFormattedDate(this.reportDate || this.managerSelectedDate);
-    const empParam = this.selectedEmployeeIdForView !== 'ALL' ? this.selectedEmployeeIdForView : undefined;
-    this.use.getManagerDailyReports(+pumpId, formattedDate, userId ? +userId : undefined, empParam).subscribe(
+    const formattedDate = this.use.getFormattedDate(this.managerSelectedDate);
+    this.use.getManagerDailyReports(+pumpId, formattedDate, userId ? +userId : undefined).subscribe(
       (data) => {
         this.managerReports = data || [];
         this.populateEmployeeList();
@@ -2109,17 +2071,8 @@ export class MainPanelComponent implements OnInit {
   applyManagerFilters() {
     let filtered = [...this.managerReports];
 
-    // Filter by Active Employee Dropdown
-    if (this.selectedEmployeeIdForView && this.selectedEmployeeIdForView !== 'ALL') {
-      const selectedEmp = this.managerEmployeeList.find(e => e.id.toString() === this.selectedEmployeeIdForView.toString());
-      if (selectedEmp) {
-        filtered = filtered.filter(r =>
-          (r.employeeId && r.employeeId.toString() === selectedEmp.id.toString()) ||
-          (r.employeeName && r.employeeName.toLowerCase().includes(selectedEmp.username.toLowerCase())) ||
-          (r.createdBy && r.createdBy.toLowerCase().includes(selectedEmp.username.toLowerCase()))
-        );
-      }
-    } else if (this.managerSelectedEmployee) {
+    // Filter by Employee Name
+    if (this.managerSelectedEmployee) {
       filtered = filtered.filter(r => (r.employeeName || r.createdBy) === this.managerSelectedEmployee);
     }
 
@@ -2202,7 +2155,6 @@ export class MainPanelComponent implements OnInit {
   }
 
   exportManagerReports() {
-    const selectedEmpName = this.getSelectedEmployeeName();
     const headers = ['Employee Name', 'Report Time', 'Report Date', 'Shift', 'Petrol Sales', 'Diesel Sales', 'Total Sales', 'Expenses', 'Cash', 'Status'];
     const rows = this.filteredReports.map(r => [
       r.employeeName || r.createdBy || '',
@@ -2219,7 +2171,7 @@ export class MainPanelComponent implements OnInit {
 
     if (this.filteredReports.length > 0) {
       rows.push([
-        `Total (${selectedEmpName})`,
+        'Total (All Managed Employees)',
         '-',
         '-',
         '-',
@@ -2238,7 +2190,7 @@ export class MainPanelComponent implements OnInit {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Daily_Reports_${selectedEmpName.replace(/\s+/g, '_')}_${this.use.getFormattedDate(this.reportDate || new Date())}.csv`);
+    link.setAttribute("download", `Manager_Daily_Reports_${this.use.getFormattedDate(new Date())}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2246,28 +2198,7 @@ export class MainPanelComponent implements OnInit {
 
   getManagerEmployees() {
     const mgrId = Number(localStorage.getItem('userId'));
-    const pumpId = Number(localStorage.getItem('pumpId'));
-    if (pumpId) {
-      this.use.getEmployeesByPump(pumpId).subscribe(
-        (data) => {
-          this.managerEmployeeList = data || [];
-          this.onManagerViewChange();
-        },
-        (err) => {
-          if (mgrId) {
-            this.use.getEmployeesByManager(mgrId).subscribe(
-              (d) => {
-                this.managerEmployeeList = d || [];
-                this.onManagerViewChange();
-              },
-              () => this.onManagerViewChange()
-            );
-          } else {
-            this.onManagerViewChange();
-          }
-        }
-      );
-    } else if (mgrId) {
+    if (mgrId) {
       this.use.getEmployeesByManager(mgrId).subscribe(
         (data) => {
           this.managerEmployeeList = data || [];
@@ -2286,6 +2217,7 @@ export class MainPanelComponent implements OnInit {
   onDateChange() {
     if (this.userRole !== 'EMPLOYEE' && this.userRole !== 'employee') {
       this.managerSelectedDate = this.reportDate;
+      this.loadManagerReportsByDate();
       this.onManagerViewChange();
     } else {
       this.showSelectedDate();
@@ -2294,58 +2226,14 @@ export class MainPanelComponent implements OnInit {
 
   onManagerViewChange() {
     if (this.selectedEmployeeIdForView === 'ALL') {
-      this.hasEmployeeDataForDate = true;
       this.userId = localStorage.getItem('userId');
       this.getUserPump();
       this.loadAggregatedDailyReportData();
-      this.loadManagerReportsByDate();
     } else {
       this.userId = this.selectedEmployeeIdForView;
       this.getUserPump();
-      const formatted = this.use.getFormattedDate(this.reportDate);
-      this.checkEmployeeDataPresence(this.selectedEmployeeIdForView, formatted);
-      this.loadManagerReportsByDate();
+      this.showSelectedDate();
     }
-  }
-
-  checkEmployeeDataPresence(empId: string, dateStr: string) {
-    if (empId === 'ALL') {
-      this.hasEmployeeDataForDate = true;
-      return;
-    }
-    this.resetAllDailyReportFields();
-    const pumpId = localStorage.getItem('pumpId');
-    forkJoin({
-      petrol: this.use.getPetrolList(dateStr, empId).pipe(catchError(() => of([]))),
-      diesel: this.use.getDieselList(dateStr, empId).pipe(catchError(() => of([]))),
-      xpPetrol: this.use.getXPPetrolList(dateStr, empId).pipe(catchError(() => of([]))),
-      powerDiesel: this.use.getpowerDiesel(dateStr, empId).pipe(catchError(() => of([]))),
-      oil: this.use.getOillsellList(dateStr, empId).pipe(catchError(() => of([]))),
-      kharch: this.use.getKharchList(dateStr, empId).pipe(catchError(() => of([]))),
-      jamaBaki: this.use.getJamaBakiList(dateStr, empId).pipe(catchError(() => of([]))),
-      dailyReports: this.use.getDailyReportFiltered(pumpId ? +pumpId : undefined, empId, dateStr).pipe(catchError(() => of([])))
-    }).subscribe(results => {
-      const hasPetrol = results.petrol && results.petrol.length > 0;
-      const hasDiesel = results.diesel && results.diesel.length > 0;
-      const hasXp = results.xpPetrol && results.xpPetrol.length > 0;
-      const hasPower = results.powerDiesel && results.powerDiesel.length > 0;
-      const hasOil = results.oil && results.oil.length > 0 && Number(results.oil[0]) > 0;
-      const hasKharch = results.kharch && results.kharch.length > 0 && Number(results.kharch[0]) > 0;
-      const hasJamaBaki = results.jamaBaki && results.jamaBaki.length > 0 && (
-        (results.jamaBaki[0] && Number(results.jamaBaki[0][0]) > 0) ||
-        (results.jamaBaki[0] && Number(results.jamaBaki[0][1]) > 0)
-      );
-      const hasReports = results.dailyReports && Array.isArray(results.dailyReports) && results.dailyReports.some((r: any) => r.employeeId && r.employeeId.toString() === empId.toString());
-
-      const hasData = hasPetrol || hasDiesel || hasXp || hasPower || hasOil || hasKharch || hasJamaBaki || hasReports;
-      this.hasEmployeeDataForDate = hasData;
-
-      if (hasData) {
-        this.showSelectedDate();
-      } else {
-        this.resetAllDailyReportFields();
-      }
-    });
   }
 
   resetAllDailyReportFields() {
@@ -2601,7 +2489,9 @@ export class MainPanelComponent implements OnInit {
     // 14. Back page ledgers
     const backpageCalls = empIds.map(id => {
       const apiUrl = `${API_BACKPAGE}?date=${formatted}&userId=${id}`;
-      return this.http.get<BackPageResponse>(apiUrl).pipe(catchError(() => of({ kharchSellSummary: [], transactionSellSummary: [], jamaSummary: [], bakiSummary: [], loclcredit: [] } as any)));
+      return this.http.get<BackPageResponse>(apiUrl, {
+        headers: { 'Authorization': `Bearer ${id}` }
+      }).pipe(catchError(() => of({ kharchSellSummary: [], transactionSellSummary: [], jamaSummary: [], bakiSummary: [], loclcredit: [] } as any)));
     });
     forkJoin(backpageCalls).subscribe((results: BackPageResponse[]) => {
       this.kharchSellSummary = [];

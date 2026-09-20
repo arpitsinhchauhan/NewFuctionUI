@@ -1,10 +1,11 @@
 <div class="tank-config-modal">
-  <div class="modal-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+  <!-- Dialog Header -->
+  <div class="modal-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-shrink-0">
     <div class="d-flex align-items-center gap-2">
-      <mat-icon class="text-primary">tune</mat-icon>
+      <mat-icon class="text-primary" style="font-size: 26px; width: 26px; height: 26px;">tune</mat-icon>
       <div>
-        <h4 class="m-0 font-weight-bold">Fuel Tank Capacity & Threshold Settings</h4>
-        <small class="text-muted">Configure calibrated tank capacities, low stock thresholds, and critical alert limits</small>
+        <h4 class="m-0 font-weight-bold" style="font-size: 18px;">Fuel Tank Capacity & Stock Limit Configuration</h4>
+        <small class="text-muted">Configure tank capacity, low stock warning (orange), and critical limit (red) in litres</small>
       </div>
     </div>
     <button mat-icon-button (click)="close()">
@@ -17,40 +18,102 @@
     <p class="text-muted mt-2">Loading tank parameters...</p>
   </div>
 
+  <!-- Tank List -->
   <div *ngIf="!isLoading" class="tank-list-container">
-    <div *ngFor="let tank of tanks" class="card mb-3 p-3 tank-edit-card shadow-sm">
-      <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
-        <h5 class="m-0 font-weight-bold text-primary d-flex align-items-center gap-2">
-          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">local_gas_station</mat-icon>
-          {{ tank.label || tank.tankName || (tank.fuelType | uppercase) }}
-        </h5>
-        <button mat-raised-button color="primary" class="btn-sm" (click)="saveTank(tank)" [disabled]="isSaving">
-          <mat-icon style="font-size:16px; width:16px; height:16px;">save</mat-icon> Update
+    <div *ngFor="let tank of tanks"
+         class="card mb-3 p-3 tank-edit-card shadow-sm"
+         [ngClass]="{
+           'petrol-card': (tank.fuelType || '').toLowerCase().includes('petrol'),
+           'diesel-card': (tank.fuelType || '').toLowerCase().includes('diesel')
+         }">
+
+      <!-- Card Top: Tank title, Badge and Save button -->
+      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div class="d-flex align-items-center gap-2">
+          <mat-icon [style.color]="(tank.fuelType || '').toLowerCase().includes('petrol') ? '#059669' : '#2563eb'">
+            local_gas_station
+          </mat-icon>
+          <span class="font-weight-bold" style="font-size: 16px; color: #1e293b;">
+            {{ tank.tankName || (tank.fuelType | uppercase) }}
+          </span>
+          <span class="fuel-pill"
+                [ngClass]="{
+                  'petrol': (tank.fuelType || '').toLowerCase() === 'petrol',
+                  'diesel': (tank.fuelType || '').toLowerCase() === 'diesel',
+                  'xp': (tank.fuelType || '').toLowerCase().includes('xp'),
+                  'power': (tank.fuelType || '').toLowerCase().includes('power')
+                }">
+            {{ tank.fuelType | uppercase }}
+          </span>
+        </div>
+
+        <button mat-raised-button color="primary" class="btn-sm d-flex align-items-center gap-1"
+                (click)="saveTank(tank)" [disabled]="isSaving">
+          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">save</mat-icon>
+          Save Configuration
         </button>
       </div>
 
-      <div class="row g-2">
+      <!-- 4 Columns of Inputs -->
+      <div class="row g-2 mb-2">
+        <!-- 1. Tank Name / Alias -->
         <div class="col-md-3">
-          <label class="form-label small text-muted font-weight-bold">Tank Name / Alias</label>
-          <input type="text" class="form-control form-control-sm" [(ngModel)]="tank.tankName" placeholder="e.g. Tank 1">
+          <label class="form-label-custom">Tank Name / Alias</label>
+          <input type="text" class="form-control form-control-sm input-custom"
+                 [(ngModel)]="tank.tankName" placeholder="e.g. Petrol Tank">
+          <small class="text-muted d-block mt-1">Display identifier</small>
         </div>
+
+        <!-- 2. Tank Capacity (L) -->
         <div class="col-md-3">
-          <label class="form-label small text-muted font-weight-bold">Total Capacity (L)</label>
-          <input type="number" class="form-control form-control-sm" [(ngModel)]="tank.capacity" min="100" placeholder="e.g. 20000">
+          <label class="form-label-custom">Tank Capacity (L)</label>
+          <input type="number" class="form-control form-control-sm input-custom"
+                 [(ngModel)]="tank.tankCapacity" min="100" placeholder="20000">
+          <small class="text-muted d-block mt-1">Max tank volume (Litres)</small>
         </div>
+
+        <!-- 3. Warning Limit (L) -->
         <div class="col-md-3">
-          <label class="form-label small text-muted font-weight-bold">Low Level Warning (%)</label>
-          <input type="number" class="form-control form-control-sm" [(ngModel)]="tank.minStockLevel" min="1" max="90" placeholder="e.g. 25">
-          <small class="text-muted d-block" *ngIf="tank.capacity">
-            {{ (tank.capacity * (tank.minStockLevel || 25) / 100) | number:'1.0-0' }} L
+          <label class="form-label-custom text-warning">
+            <mat-icon style="font-size: 14px; width: 14px; height: 14px;">warning</mat-icon>
+            Warning Limit (L)
+          </label>
+          <input type="number" class="form-control form-control-sm input-custom input-warning"
+                 [(ngModel)]="tank.warningLimit" min="0" placeholder="6000">
+          <small class="text-muted d-block mt-1" *ngIf="tank.tankCapacity">
+            {{ ((tank.warningLimit || 0) / tank.tankCapacity * 100) | number:'1.1-1' }}% of capacity (Default: 6,000 L)
           </small>
         </div>
+
+        <!-- 4. Critical Limit (L) -->
         <div class="col-md-3">
-          <label class="form-label small text-muted font-weight-bold">Critical Alert Level (%)</label>
-          <input type="number" class="form-control form-control-sm" [(ngModel)]="tank.alertLevel" min="1" max="50" placeholder="e.g. 15">
-          <small class="text-muted d-block" *ngIf="tank.capacity">
-            {{ (tank.capacity * (tank.alertLevel || 15) / 100) | number:'1.0-0' }} L
+          <label class="form-label-custom text-danger">
+            <mat-icon style="font-size: 14px; width: 14px; height: 14px;">error</mat-icon>
+            Critical Limit (L)
+          </label>
+          <input type="number" class="form-control form-control-sm input-custom input-critical"
+                 [(ngModel)]="tank.criticalLimit" min="0" placeholder="3000">
+          <small class="text-muted d-block mt-1" *ngIf="tank.tankCapacity">
+            {{ ((tank.criticalLimit || 0) / tank.tankCapacity * 100) | number:'1.1-1' }}% of capacity (Default: 3,000 L)
           </small>
+        </div>
+      </div>
+
+      <!-- Horizontal Clean Threshold Guide Strip -->
+      <div class="threshold-strip mt-2">
+        <div class="threshold-item">
+          <span class="tag-critical">CRITICAL</span>
+          <span class="threshold-val">&le; {{ (tank.criticalLimit || 3000) | number:'1.0-0' }} L (Red)</span>
+        </div>
+        <span class="threshold-divider">|</span>
+        <div class="threshold-item">
+          <span class="tag-warning">WARNING</span>
+          <span class="threshold-val">{{ ((tank.criticalLimit || 3000) + 1) | number:'1.0-0' }} &ndash; {{ (tank.warningLimit || 6000) | number:'1.0-0' }} L (Orange)</span>
+        </div>
+        <span class="threshold-divider">|</span>
+        <div class="threshold-item">
+          <span class="tag-normal">NORMAL</span>
+          <span class="threshold-val">&gt; {{ (tank.warningLimit || 6000) | number:'1.0-0' }} L (Green)</span>
         </div>
       </div>
     </div>
@@ -60,7 +123,8 @@
     </div>
   </div>
 
-  <div class="modal-footer d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+  <!-- Modal Footer -->
+  <div class="modal-footer d-flex justify-content-end gap-2 mt-2 pt-2 border-top flex-shrink-0">
     <button mat-stroked-button (click)="close()">Close</button>
     <button mat-raised-button color="primary" (click)="saveAllAndClose()">Done</button>
   </div>
