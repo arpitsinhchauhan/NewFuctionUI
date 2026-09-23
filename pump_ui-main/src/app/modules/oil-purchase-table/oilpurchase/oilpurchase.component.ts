@@ -5,6 +5,33 @@ import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
 import { API_OIL_PURCHASE_ADD, API_OIL_PURCHASE_LIST } from 'app/serviceult';
 
+export interface OilPurchaseRow {
+  id?: any;
+  type: string;
+  quantity: any;
+  date: string;
+  userId: string;
+  vendorName: string;
+  skuName: string;
+  skuNumber: string;
+  hsn: string;
+  mrp: any;
+  qtyLtrOrKg: any;
+  unit: string;
+  rate: any;
+  netTotal: any;
+  discount: any;
+  taxableValue: any;
+  gstPercentage: any;
+  gstAmount: any;
+  cessPercentage: any;
+  cessAmount: any;
+  netAmount: any;
+  supplier?: string;
+  invoiceNumber?: string;
+  tankerNumber?: string;
+}
+
 @Component({
   selector: 'app-oilpurchase',
   templateUrl: './oilpurchase.component.html',
@@ -12,77 +39,38 @@ import { API_OIL_PURCHASE_ADD, API_OIL_PURCHASE_LIST } from 'app/serviceult';
 })
 export class OilpurchaseComponent implements OnInit {
 
-  isReload: boolean;
-  // userId: string;
+  isReload: boolean = false;
   userId = localStorage.getItem('userId');
-  row: PurchaseRow[] = [
-    {
-      id: this.purchase.id,
-      type: 'oil',
-      quantity: '',
-      total: '',
-      vat: '',
-      cess: '',
-      total_purchase: '',
-      jtcpercentage: '',
-      date: '',
-      userId: this.userId,
-      
-      vendorName: '',
-      skuName: '',
-      skuNumber: '',
-      hsn: '',
-      mrp: '',
-      qtyLtrOrKg: '',
-      unit: '',
-      rate: '',
-      netTotal: '',
-      discount: '',
-      taxableValue: '',
-      gstPercentage: '',
-      gstAmount: '',
-      cessPercentage: '',
-      cessAmount: '',
-      netAmount: ''
-    }
-  ];
+  purchaseDate: string = '';
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
+  row: OilPurchaseRow[] = [];
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,
-    private use: UserServiceService, @Inject(MAT_DIALOG_DATA) public purchase: any,
+    private use: UserServiceService,
+    @Inject(MAT_DIALOG_DATA) public purchase: any,
     public dialogRef: MatDialogRef<OilpurchaseComponent>,
-    private notificationService: NotificationService) {
-  }
+    private notificationService: NotificationService
+  ) { }
+
   ngOnInit(): void {
     this.use.dialogZIndexAdjustment();
     if (this.purchase && this.purchase.date) {
-      this.purchaDipStockseDetails.date = this.purchase.date;
+      this.purchaseDate = this.purchase.date;
+    } else {
+      this.purchaseDate = new Date().toISOString().split('T')[0];
     }
     this.getOilPurchaseReport();
   }
 
-  updateDate() {
-    this.row.forEach(row => {
-      row.date = this.purchaDipStockseDetails.date;
-    });
-  }
-  purchaDipStockseDetails = {
-    date: ''
-  };
-
-  addTable() {
-    this.row.push({
-      id: this.purchase.id,
-      type: '',
+  createEmptyRow(): OilPurchaseRow {
+    return {
+      id: null,
+      type: 'oil',
       quantity: '',
-      total: '',
-      vat: '',
-      cess: '',
-      total_purchase: '',
-      jtcpercentage: '',
-      date: this.purchaDipStockseDetails.date || '',
-      userId: this.userId,
-
+      date: this.purchaseDate,
+      userId: this.userId || '',
       vendorName: '',
       skuName: '',
       skuNumber: '',
@@ -98,174 +86,163 @@ export class OilpurchaseComponent implements OnInit {
       gstAmount: '',
       cessPercentage: '',
       cessAmount: '',
-      netAmount: ''
-    });
+      netAmount: '',
+      supplier: '',
+      invoiceNumber: '',
+      tankerNumber: ''
+    };
   }
 
-  deleteRow(index: number) {
-    this.row.splice(index, 1);
-    this.notificationService.success('Oil Purchase Data Succefully Delete.');
+  updateDate(): void {
+    this.row.forEach(r => r.date = this.purchaseDate);
+    if (this.purchase) {
+      this.purchase.date = this.purchaseDate;
+    }
+    this.getOilPurchaseReport();
+  }
+
+  addTable(): void {
+    this.row.push(this.createEmptyRow());
+  }
+
+  deleteRow(index: number): void {
+    if (this.row.length > 1) {
+      this.row.splice(index, 1);
+    } else {
+      this.row[0] = this.createEmptyRow();
+    }
+    this.notificationService.success('Purchase row removed.');
   }
 
   totalPrice(): number {
-    return this.row.reduce(
+    return parseFloat(this.row.reduce(
       (acc, item) => acc + (Number(item.netAmount) || 0),
       0
-    );
+    ).toFixed(2));
   }
 
-  calculateRow(item: any) {
+  totalQuantity(): number {
+    return this.row.reduce((acc, item) => acc + (Number(item.quantity) || 0), 0);
+  }
+
+  calculateRow(item: OilPurchaseRow): void {
     const qty = Number(item.quantity) || 0;
     const rate = Number(item.rate) || 0;
     const discount = Number(item.discount) || 0;
     const gstPct = Number(item.gstPercentage) || 0;
     const cessPct = Number(item.cessPercentage) || 0;
 
-    item.netTotal = qty * rate;
-    item.taxableValue = item.netTotal - discount;
-    item.gstAmount = (item.taxableValue * gstPct) / 100;
-    item.cessAmount = (item.taxableValue * cessPct) / 100;
-    item.netAmount = item.taxableValue + item.gstAmount + item.cessAmount;
+    item.netTotal = parseFloat((qty * rate).toFixed(2));
+    item.taxableValue = parseFloat((item.netTotal - discount).toFixed(2));
+    item.gstAmount = parseFloat(((item.taxableValue * gstPct) / 100).toFixed(2));
+    item.cessAmount = parseFloat(((item.taxableValue * cessPct) / 100).toFixed(2));
+    item.netAmount = parseFloat((item.taxableValue + item.gstAmount + item.cessAmount).toFixed(2));
   }
 
-
   validateData(): boolean {
-    if (!this.purchaDipStockseDetails.date) {
-      this.notificationService.failure('Date is required.');
+    if (!this.purchaseDate) {
+      this.notificationService.failure('Purchase Date is required.');
       return false;
     }
     for (let item of this.row) {
-      item.quantity = item.quantity === null || item.quantity === '' ? 0 : Number(item.quantity);
-      item.mrp = item.mrp === null || item.mrp === '' ? 0 : Number(item.mrp);
-      item.qtyLtrOrKg = item.qtyLtrOrKg === null || item.qtyLtrOrKg === '' ? 0 : Number(item.qtyLtrOrKg);
-      item.rate = item.rate === null || item.rate === '' ? 0 : Number(item.rate);
-      item.netTotal = item.netTotal === null || item.netTotal === '' ? 0 : Number(item.netTotal);
-      item.discount = item.discount === null || item.discount === '' ? 0 : Number(item.discount);
-      item.taxableValue = item.taxableValue === null || item.taxableValue === '' ? 0 : Number(item.taxableValue);
-      item.gstPercentage = item.gstPercentage === null || item.gstPercentage === '' ? 0 : Number(item.gstPercentage);
-      item.gstAmount = item.gstAmount === null || item.gstAmount === '' ? 0 : Number(item.gstAmount);
-      item.cessPercentage = item.cessPercentage === null || item.cessPercentage === '' ? 0 : Number(item.cessPercentage);
-      item.cessAmount = item.cessAmount === null || item.cessAmount === '' ? 0 : Number(item.cessAmount);
-      item.netAmount = item.netAmount === null || item.netAmount === '' ? 0 : Number(item.netAmount);
-
-      if (
-        isNaN(item.quantity) ||
-        isNaN(item.mrp) ||
-        isNaN(item.qtyLtrOrKg) ||
-        isNaN(item.rate) ||
-        isNaN(item.netTotal) ||
-        isNaN(item.discount) ||
-        isNaN(item.taxableValue) ||
-        isNaN(item.gstPercentage) ||
-        isNaN(item.gstAmount) ||
-        isNaN(item.cessPercentage) ||
-        isNaN(item.cessAmount) ||
-        isNaN(item.netAmount)
-      ) {
-        this.notificationService.failure('All numeric fields must contain valid numbers.');
-        return false;
-      }
-      if (!item.type) {
-        this.notificationService.failure('Type field is required.');
-        return false;
-      }
+      if (!item.type) item.type = 'oil';
     }
-
     return true;
   }
 
-
-  order() {
+  order(): void {
     if (!this.validateData()) {
       return;
     }
-    this.row.forEach(row => {
-      row.date = this.purchaDipStockseDetails.date;
-    });
 
-    this.http.post<any>(API_OIL_PURCHASE_ADD, this.row)
+    const payload = this.row
+      .filter(r => (Number(r.quantity) > 0) || (r.id && Number(r.quantity) >= 0))
+      .map(r => ({
+        ...r,
+        type: 'oil',
+        quantity: r.quantity ? String(r.quantity) : '0',
+        date: this.purchaseDate,
+        userId: this.userId,
+        mrp: Number(r.mrp) || 0,
+        qtyLtrOrKg: Number(r.qtyLtrOrKg) || 0,
+        rate: Number(r.rate) || 0,
+        netTotal: Number(r.netTotal) || 0,
+        discount: Number(r.discount) || 0,
+        taxableValue: Number(r.taxableValue) || 0,
+        gstPercentage: Number(r.gstPercentage) || 0,
+        gstAmount: Number(r.gstAmount) || 0,
+        cessPercentage: Number(r.cessPercentage) || 0,
+        cessAmount: Number(r.cessAmount) || 0,
+        netAmount: Number(r.netAmount) || 0,
+        vendorName: r.vendorName || r.supplier || '',
+        supplier: r.supplier || r.vendorName || '',
+        invoiceNumber: r.invoiceNumber || r.skuNumber || '',
+        tankerNumber: r.tankerNumber || '',
+        skuNumber: r.skuNumber || r.invoiceNumber || ''
+      }));
+
+    if (payload.length === 0) {
+      this.notificationService.failure("Please enter quantity greater than 0 for at least one purchase entry.");
+      return;
+    }
+
+    this.http.post<any>(API_OIL_PURCHASE_ADD, payload)
       .subscribe(response => {
-        if (response.length === 0) {
-          this.notificationService.failure("No data received from the server.");
-          this.row = [];
-          this.dialogRef.close();
-          return;
-        }
-        this.notificationService.success("Oil Purchase data Succefully Add");
-        this.purchaDipStockseDetails.date = null;
-        this.row = [];
-        this.dialogRef.close();
+        this.notificationService.success("Oil Purchase data successfully saved.");
+        this.isReload = true;
+        this.dialogRef.close({ 'isReload': true });
+      }, error => {
+        this.notificationService.failure("Error saving oil purchase data");
       });
   }
 
-  Edit(purchaseDetails: any) {
-    // singupobj.ID=this.x.id;
-    this.use.getUpdateOilPurchase(purchaseDetails).subscribe(
-      (response) => {
-        this.notificationService.success('OilPurchase data updated successfully');
-      },
-      (error) => {
-        console.error('Error updating data:', error);
-      }
-    );
-    this.dialogRef.close({ 'isReload': this.isReload });
-  }
   isNumber(value: any): boolean {
     return !isNaN(value) && value !== '';
   }
 
-  cancel() {
+  cancel(): void {
     this.dialogRef.close({ 'isReload': this.isReload });
   }
 
-  getOilPurchaseReport() {
+  getOilPurchaseReport(): void {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
+    const selectedDate = this.purchaseDate || this.purchase?.date;
 
     this.http.get<any[]>(API_OIL_PURCHASE_LIST, { params }).subscribe((data: any[]) => {
       let filteredData: any[] = [];
-
-      if (this.purchase?.date) {
+      if (selectedDate && data) {
         filteredData = data.filter(
-          (item) => new Date(item.date).toDateString() === new Date(this.purchase.date).toDateString()
+          (item) => new Date(item.date).toDateString() === new Date(selectedDate).toDateString()
         );
-      } else {
+      } else if (data) {
         filteredData = data;
       }
 
-      // Always enforce Petrol and Diesel rows
-      const oilRow = filteredData.find(item => item.type === 'oil') || {
-        id: this.purchase?.id,
-        type: 'oil',
-        quantity: '',
-        total: '',
-        vat: '',
-        cess: '',
-        jtcpercentage: '',
-        total_purchase: '',
-        date: this.purchaDipStockseDetails.date || '',
-        userId: this.userId,
-        vendorName: '',
-        skuName: '',
-        skuNumber: '',
-        hsn: '',
-        mrp: '',
-        qtyLtrOrKg: '',
-        unit: '',
-        rate: '',
-        netTotal: '',
-        discount: '',
-        taxableValue: '',
-        gstPercentage: '',
-        gstAmount: '',
-        cessPercentage: '',
-        cessAmount: '',
-        netAmount: ''
-      };
-
-
-      // Ensure Petrol & Diesel always appear at the top
-      this.row = [oilRow, ...filteredData.filter(item => item.type !== 'oil')];
+      if (filteredData && filteredData.length > 0) {
+        this.row = filteredData.map(item => ({
+          ...item,
+          type: 'oil',
+          date: selectedDate,
+          userId: this.userId,
+          quantity: item.quantity || '',
+          mrp: item.mrp || '',
+          qtyLtrOrKg: item.qtyLtrOrKg || '',
+          rate: item.rate || '',
+          netTotal: item.netTotal || '',
+          discount: item.discount || '',
+          taxableValue: item.taxableValue || '',
+          gstPercentage: item.gstPercentage || '',
+          gstAmount: item.gstAmount || '',
+          cessPercentage: item.cessPercentage || '',
+          cessAmount: item.cessAmount || '',
+          netAmount: item.netAmount || ''
+        }));
+      } else {
+        this.row = [this.createEmptyRow()];
+      }
+    }, err => {
+      this.row = [this.createEmptyRow()];
     });
   }
 

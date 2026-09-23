@@ -5,6 +5,23 @@ import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
 import { API_EXTRA_PURCHASE_ADD, API_EXTRA_PURCHASE_LIST } from 'app/serviceult';
 
+export interface ExtraPurchaseRow {
+  id?: any;
+  extraType: string;
+  skuNumber?: string;
+  supplier?: string;
+  invoiceNumber?: string;
+  tankerNumber?: string;
+  extra_quantity: any;
+  extra_total: any;
+  extra_vat: any;
+  extra_cess: any;
+  extra_total_purchase: any;
+  extra_jtcpercentage: any;
+  date: string;
+  userId: string;
+}
+
 @Component({
   selector: 'app-add-extra-purchase',
   templateUrl: './add-extra-purchase.component.html',
@@ -12,117 +29,150 @@ import { API_EXTRA_PURCHASE_ADD, API_EXTRA_PURCHASE_LIST } from 'app/serviceult'
 })
 export class AddExtraPurchaseComponent implements OnInit {
 
-
-  isReload: boolean;
+  isReload: boolean = false;
   userId = localStorage.getItem('userId');
-  row = [
-    {
-      id: this.purchase?.id,
-      extraType: 'XP Petrol',
-      skuNumber: '',
-      extra_quantity: '',
-      extra_total: '',
-      extra_vat: '',
-      extra_cess: '',
-      extra_total_purchase: '',
-      extra_jtcpercentage: '',
-      date: '',
-      userId: this.userId
-    },
-    {
-      id: this.purchase?.id,
-      extraType: 'Power Diesel',
-      skuNumber: '',
-      extra_quantity: '',
-      extra_total: '',
-      extra_vat: '',
-      extra_cess: '',
-      extra_total_purchase: '',
-      extra_jtcpercentage: "",
-      date: '',
-      userId: this.userId
-    }
-  ];
+  purchaseDate: string = '';
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
+  xpPetrolRows: ExtraPurchaseRow[] = [];
+  powerDieselRows: ExtraPurchaseRow[] = [];
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,
-    private use: UserServiceService, @Inject(MAT_DIALOG_DATA) public purchase: any,
+    private use: UserServiceService,
+    @Inject(MAT_DIALOG_DATA) public purchase: any,
     public dialogRef: MatDialogRef<AddExtraPurchaseComponent>,
-    private notificationService: NotificationService) {
-  }
+    private notificationService: NotificationService
+  ) { }
+
   ngOnInit(): void {
     this.use.dialogZIndexAdjustment();
     if (this.purchase && this.purchase.date) {
-      this.extraDetails.date = this.purchase.date;
+      this.purchaseDate = this.purchase.date;
+    } else {
+      this.purchaseDate = new Date().toISOString().split('T')[0];
     }
     this.getExtraPurchase();
   }
 
-  updateDate() {
-    // Update the date field in each row with the selected date
-    this.row.forEach(row => {
-      row.date = this.extraDetails.date;
-    });
-  }
-  extraDetails = {
-    date: ''
-  };
-
-
-  addTable() {
-    this.row.push({
-      id: this.purchase?.id,
-      extraType: '',
+  createEmptyRow(type: string): ExtraPurchaseRow {
+    return {
+      id: null,
+      extraType: type,
       skuNumber: '',
+      supplier: '',
+      invoiceNumber: '',
+      tankerNumber: '',
       extra_quantity: '',
       extra_total: '',
       extra_vat: '',
       extra_cess: '',
       extra_total_purchase: '',
       extra_jtcpercentage: '',
-      date: this.extraDetails.date || '',
-      userId: this.userId
-    });
+      date: this.purchaseDate,
+      userId: this.userId || ''
+    };
   }
 
-  deleteRow(index: number) {
-    this.row.splice(index, 1);
-    this.notificationService.success('Purchase Data Succefully Delete.');
+  updateDate(): void {
+    this.xpPetrolRows.forEach(r => r.date = this.purchaseDate);
+    this.powerDieselRows.forEach(r => r.date = this.purchaseDate);
+    if (this.purchase) {
+      this.purchase.date = this.purchaseDate;
+    }
+    this.getExtraPurchase();
   }
 
-  totalPrice() {
-    return this.row.reduce((acc, item) => acc + (parseFloat(item.extra_total_purchase) || 0), 0);
+  addXpPetrolPurchase(): void {
+    this.xpPetrolRows.push(this.createEmptyRow('XP Petrol'));
+  }
+
+  removeXpPetrolPurchase(index: number): void {
+    if (this.xpPetrolRows.length > 1) {
+      this.xpPetrolRows.splice(index, 1);
+    } else {
+      this.xpPetrolRows[0] = this.createEmptyRow('XP Petrol');
+    }
+  }
+
+  addPowerDieselPurchase(): void {
+    this.powerDieselRows.push(this.createEmptyRow('Power Diesel'));
+  }
+
+  removePowerDieselPurchase(index: number): void {
+    if (this.powerDieselRows.length > 1) {
+      this.powerDieselRows.splice(index, 1);
+    } else {
+      this.powerDieselRows[0] = this.createEmptyRow('Power Diesel');
+    }
+  }
+
+  calculateRow(item: ExtraPurchaseRow): void {
+    const total = Number(item.extra_total) || 0;
+    const vat = Number(item.extra_vat) || 0;
+    const cess = Number(item.extra_cess) || 0;
+    item.extra_total_purchase = parseFloat((total + vat + cess).toFixed(2));
+  }
+
+  getXpTotalQuantity(): number {
+    return this.xpPetrolRows.reduce((acc, r) => acc + (Number(r.extra_quantity) || 0), 0);
+  }
+
+  getXpTotalPurchase(): number {
+    return parseFloat(this.xpPetrolRows.reduce((acc, r) => acc + (Number(r.extra_total_purchase) || 0), 0).toFixed(2));
+  }
+
+  getPowerDieselTotalQuantity(): number {
+    return this.powerDieselRows.reduce((acc, r) => acc + (Number(r.extra_quantity) || 0), 0);
+  }
+
+  getPowerDieselTotalPurchase(): number {
+    return parseFloat(this.powerDieselRows.reduce((acc, r) => acc + (Number(r.extra_total_purchase) || 0), 0).toFixed(2));
+  }
+
+  grandTotalPurchase(): number {
+    return parseFloat((this.getXpTotalPurchase() + this.getPowerDieselTotalPurchase()).toFixed(2));
   }
 
   validateData(): boolean {
-    if (!this.extraDetails.date) {
+    if (!this.purchaseDate) {
       this.notificationService.failure('Date is required.');
       return false;
-    }
-    for (let item of this.row) {
-      if (!this.isNumber(item.extra_quantity) || !this.isNumber(item.extra_total) || !this.isNumber(item.extra_vat) || !this.isNumber(item.extra_cess) || !this.isNumber(item.extra_jtcpercentage) || !this.isNumber(item.extra_total_purchase)) {
-        this.notificationService.failure('All numeric fields must contain valid numbers.');
-        return false;
-      }
-      if (!item.extraType) {
-        this.notificationService.failure('Extra Type is required.');
-        return false;
-      }
     }
     return true;
   }
 
-  order() {
+  order(): void {
     if (!this.validateData()) {
       return;
     }
-    this.row.forEach(row => {
-      row.date = this.extraDetails.date;
-    });
+    const allRows = [...this.xpPetrolRows, ...this.powerDieselRows];
+    const payload = allRows
+      .filter(r => (Number(r.extra_quantity) > 0) || (r.id && Number(r.extra_quantity) >= 0))
+      .map(r => ({
+        ...r,
+        extra_quantity: r.extra_quantity ? String(r.extra_quantity) : '0',
+        extra_total: r.extra_total ? String(r.extra_total) : '0',
+        extra_vat: r.extra_vat ? String(r.extra_vat) : '0',
+        extra_cess: r.extra_cess ? String(r.extra_cess) : '0',
+        extra_jtcpercentage: r.extra_jtcpercentage ? String(r.extra_jtcpercentage) : '0',
+        extra_total_purchase: Number(r.extra_total_purchase) || 0,
+        date: this.purchaseDate,
+        supplier: r.supplier || '',
+        invoiceNumber: r.invoiceNumber || r.skuNumber || '',
+        tankerNumber: r.tankerNumber || '',
+        skuNumber: r.skuNumber || r.invoiceNumber || '',
+        userId: this.userId
+      }));
 
-    this.http.post<any>(API_EXTRA_PURCHASE_ADD, this.row)
+    if (payload.length === 0) {
+      this.notificationService.failure("Please enter quantity greater than 0 for at least one purchase entry.");
+      return;
+    }
+
+    this.http.post<any>(API_EXTRA_PURCHASE_ADD, payload)
       .subscribe(response => {
-        this.notificationService.success("Purchase data Succefully Add");
+        this.notificationService.success("Extra Purchase data successfully recorded.");
         this.isReload = true;
         this.dialogRef.close({ 'isReload': true });
       }, error => {
@@ -130,72 +180,64 @@ export class AddExtraPurchaseComponent implements OnInit {
       });
   }
 
-
   isNumber(value: any): boolean {
     return !isNaN(value) && value !== '';
   }
 
-  cancel() {
+  cancel(): void {
     this.dialogRef.close({ 'isReload': this.isReload });
   }
 
-  getExtraPurchase() {
+  getExtraPurchase(): void {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
+    const selectedDate = this.purchaseDate || this.purchase?.date;
 
     this.http.get<any[]>(API_EXTRA_PURCHASE_LIST, { params }).subscribe((data: any[]) => {
       let filteredData: any[] = [];
-
-      if (this.purchase?.date) {
+      if (selectedDate && data) {
         filteredData = data.filter(
-          item =>
-            new Date(item.date).toDateString() ===
-            new Date(this.purchase.date).toDateString()
+          item => new Date(item.date).toDateString() === new Date(selectedDate).toDateString()
         );
-      } else {
+      } else if (data) {
         filteredData = data;
       }
 
-      // Always enforce XP Petrol and Power Diesel rows
-      const xpPetrolRow =
-        filteredData.find(item => item.extraType === 'XP Petrol') || {
-          id: this.purchase?.id,
+      const xps = filteredData.filter(item => (item.extraType || '').toLowerCase().includes('xp'));
+      const pds = filteredData.filter(item => (item.extraType || '').toLowerCase().includes('power'));
+
+      if (xps.length > 0) {
+        this.xpPetrolRows = xps.map(x => ({
+          ...x,
           extraType: 'XP Petrol',
-          skuNumber: '',
-          extra_quantity: '',
-          extra_total: '',
-          extra_vat: '',
-          extra_cess: '',
-          extra_total_purchase: '',
-          extra_jtcpercentage: '',
-          date: this.extraDetails.date || '',
-          userId: this.userId
-        };
+          date: selectedDate,
+          userId: this.userId,
+          extra_total: x.extra_total ? parseFloat(Number(x.extra_total).toFixed(2)) : '',
+          extra_vat: x.extra_vat ? parseFloat(Number(x.extra_vat).toFixed(2)) : '',
+          extra_cess: x.extra_cess ? parseFloat(Number(x.extra_cess).toFixed(2)) : '',
+          extra_total_purchase: x.extra_total_purchase ? parseFloat(Number(x.extra_total_purchase).toFixed(2)) : ''
+        }));
+      } else {
+        this.xpPetrolRows = [this.createEmptyRow('XP Petrol')];
+      }
 
-      const powerDieselRow =
-        filteredData.find(item => item.extraType === 'Power Diesel') || {
-          id: this.purchase?.id,
+      if (pds.length > 0) {
+        this.powerDieselRows = pds.map(p => ({
+          ...p,
           extraType: 'Power Diesel',
-          skuNumber: '',
-          extra_quantity: '',
-          extra_total: '',
-          extra_vat: '',
-          extra_cess: '',
-          extra_total_purchase: '',
-          extra_jtcpercentage: '',
-          date: this.extraDetails.date || '',
-          userId: this.userId
-        };
-
-      // Ensure XP Petrol & Power Diesel always appear at the top
-      this.row = [
-        xpPetrolRow,
-        powerDieselRow,
-        ...filteredData.filter(
-          item =>
-            item.extraType !== 'XP Petrol' && item.extraType !== 'Power Diesel'
-        )
-      ];
+          date: selectedDate,
+          userId: this.userId,
+          extra_total: p.extra_total ? parseFloat(Number(p.extra_total).toFixed(2)) : '',
+          extra_vat: p.extra_vat ? parseFloat(Number(p.extra_vat).toFixed(2)) : '',
+          extra_cess: p.extra_cess ? parseFloat(Number(p.extra_cess).toFixed(2)) : '',
+          extra_total_purchase: p.extra_total_purchase ? parseFloat(Number(p.extra_total_purchase).toFixed(2)) : ''
+        }));
+      } else {
+        this.powerDieselRows = [this.createEmptyRow('Power Diesel')];
+      }
+    }, err => {
+      this.xpPetrolRows = [this.createEmptyRow('XP Petrol')];
+      this.powerDieselRows = [this.createEmptyRow('Power Diesel')];
     });
   }
 }

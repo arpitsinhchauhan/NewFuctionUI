@@ -17,6 +17,10 @@ import pumpManagment.controller.PurchaseController;
 import pumpManagment.model.DAOUser;
 import pumpManagment.Entity.Purchase;
 import pumpManagment.Entity.PetrolSell;
+import pumpManagment.Entity.Oilpurchase;
+import pumpManagment.Entity.extraPurchases;
+import pumpManagment.repository.OilPurchaseRepository;
+import pumpManagment.repository.extraPurchaseRepository;
 import pumpManagment.repository.PurchaseRepository;
 import pumpManagment.repository.PetrolSellRepository;
 import pumpManagment.repository.UserRepository;
@@ -41,6 +45,12 @@ public class PurchaseControllerIsolationTest {
 
     @Mock
     private PurchaseRepository purchaseRepository;
+
+    @Mock
+    private OilPurchaseRepository oilPurchaseRepository;
+
+    @Mock
+    private extraPurchaseRepository extraPurchaseRepository;
 
     private DAOUser nc11;
     private DAOUser nc22;
@@ -333,6 +343,78 @@ public class PurchaseControllerIsolationTest {
         // Verified: NO record is saved or inserted automatically into petrolSellRepository
         verify(petrolSellRepository, never()).save(any());
         verify(petrolSellRepository, never()).saveAll(any());
+    }
+
+    @Test
+    public void testMultipleOilPurchasesOnSameDay_SavedSeparately() {
+        authenticate("pumpmanager", "PUMP_MANAGER");
+
+        Oilpurchase op1 = new Oilpurchase();
+        op1.setDate("2026-09-23");
+        op1.setType("Engine Oil");
+        op1.setQuantity("20");
+        op1.setSupplier("Oil Corp");
+        op1.setInvoiceNumber("INV-OIL-1");
+        op1.setUserId("100");
+
+        Oilpurchase op2 = new Oilpurchase();
+        op2.setDate("2026-09-23");
+        op2.setType("Gear Oil");
+        op2.setQuantity("15");
+        op2.setSupplier("Oil Corp");
+        op2.setInvoiceNumber("INV-OIL-2");
+        op2.setUserId("100");
+
+        when(oilPurchaseRepository.save(any(Oilpurchase.class))).thenAnswer(inv -> {
+            Oilpurchase arg = inv.getArgument(0);
+            if (arg.getId() == null || arg.getId() == 0) arg.setId(new Random().nextInt(1000) + 1);
+            return arg;
+        });
+
+        ResponseEntity<List<Oilpurchase>> res1 = purchaseController.updateOilPurchase(Collections.singletonList(op1));
+        assertEquals(200, res1.getStatusCodeValue());
+
+        ResponseEntity<List<Oilpurchase>> res2 = purchaseController.updateOilPurchase(Collections.singletonList(op2));
+        assertEquals(200, res2.getStatusCodeValue());
+
+        // Verify oilPurchaseRepository.save was called for both independent purchases
+        verify(oilPurchaseRepository, times(2)).save(any(Oilpurchase.class));
+    }
+
+    @Test
+    public void testMultipleExtraPurchasesOnSameDay_SavedSeparately() {
+        authenticate("pumpmanager", "PUMP_MANAGER");
+
+        extraPurchases ep1 = new extraPurchases();
+        ep1.setDate("2026-09-23");
+        ep1.setExtraType("XP Petrol");
+        ep1.setExtra_quantity("2000");
+        ep1.setSupplier("IOCL");
+        ep1.setInvoiceNumber("INV-XP-1");
+        ep1.setUserId("100");
+
+        extraPurchases ep2 = new extraPurchases();
+        ep2.setDate("2026-09-23");
+        ep2.setExtraType("XP Petrol");
+        ep2.setExtra_quantity("3000");
+        ep2.setSupplier("IOCL");
+        ep2.setInvoiceNumber("INV-XP-2");
+        ep2.setUserId("100");
+
+        when(extraPurchaseRepository.save(any(extraPurchases.class))).thenAnswer(inv -> {
+            extraPurchases arg = inv.getArgument(0);
+            if (arg.getId() == null || arg.getId() == 0) arg.setId(new Random().nextInt(1000) + 1);
+            return arg;
+        });
+
+        ResponseEntity<List<extraPurchases>> res1 = purchaseController.updateExtraPurchase(Collections.singletonList(ep1));
+        assertEquals(200, res1.getStatusCodeValue());
+
+        ResponseEntity<List<extraPurchases>> res2 = purchaseController.updateExtraPurchase(Collections.singletonList(ep2));
+        assertEquals(200, res2.getStatusCodeValue());
+
+        // Verify extraPurchaseRepository.save was called for both independent purchases
+        verify(extraPurchaseRepository, times(2)).save(any(extraPurchases.class));
     }
 }
 

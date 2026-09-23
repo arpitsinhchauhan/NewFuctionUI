@@ -644,33 +644,54 @@ public class PurchaseController {
     @PostMapping("/addoilPurchase")
     public ResponseEntity<List<Oilpurchase>> updateOilPurchase(@RequestBody List<Oilpurchase> expenses) {
         List<Oilpurchase> updatedExpenses = new ArrayList<>();
+        DAOUser authUser = getAuthenticatedUser();
+        Long authPumpId = (authUser != null) ? authUser.getPumpId() : null;
 
         for (Oilpurchase expense : expenses) {
-            Optional<Oilpurchase> existingEntry = oilPurchaseRepository.findByDateAndTypeAndUserId(
-                    expense.getDate(), expense.getType(), expense.getUserId());
-            if (existingEntry.isPresent()) {
-                Oilpurchase existingExpense = existingEntry.get();
-                // ...
-                existingExpense.setQuantity(expense.getQuantity());
-                existingExpense.setVendorName(expense.getVendorName());
-                existingExpense.setSkuName(expense.getSkuName());
-                existingExpense.setSkuNumber(expense.getSkuNumber());
-                existingExpense.setHsn(expense.getHsn());
-                existingExpense.setMrp(expense.getMrp());
-                existingExpense.setQtyLtrOrKg(expense.getQtyLtrOrKg());
-                existingExpense.setUnit(expense.getUnit());
-                existingExpense.setRate(expense.getRate());
-                existingExpense.setNetTotal(expense.getNetTotal());
-                existingExpense.setDiscount(expense.getDiscount());
-                existingExpense.setTaxableValue(expense.getTaxableValue());
-                existingExpense.setGstPercentage(expense.getGstPercentage());
-                existingExpense.setGstAmount(expense.getGstAmount());
-                existingExpense.setCessPercentage(expense.getCessPercentage());
-                existingExpense.setCessAmount(expense.getCessAmount());
-                existingExpense.setNetAmount(expense.getNetAmount());
+            if (expense.getQuantity() == null || expense.getQuantity().trim().isEmpty() || "0".equals(expense.getQuantity().trim())) {
+                if (expense.getId() == null || expense.getId() <= 0) {
+                    continue;
+                }
+            }
 
-                Oilpurchase savedExpense = oilPurchaseRepository.save(existingExpense);
-                updatedExpenses.add(savedExpense);
+            if (expense.getPumpId() == null && authPumpId != null) {
+                expense.setPumpId(authPumpId);
+            }
+
+            if (expense.getId() != null && expense.getId() > 0) {
+                Optional<Oilpurchase> existingEntry = oilPurchaseRepository.findById(expense.getId());
+                if (existingEntry.isPresent()) {
+                    Oilpurchase existingExpense = existingEntry.get();
+                    existingExpense.setDate(expense.getDate());
+                    existingExpense.setType(expense.getType());
+                    existingExpense.setQuantity(expense.getQuantity());
+                    existingExpense.setVendorName(expense.getVendorName());
+                    existingExpense.setSkuName(expense.getSkuName());
+                    existingExpense.setSkuNumber(expense.getSkuNumber());
+                    existingExpense.setHsn(expense.getHsn());
+                    existingExpense.setMrp(expense.getMrp());
+                    existingExpense.setQtyLtrOrKg(expense.getQtyLtrOrKg());
+                    existingExpense.setUnit(expense.getUnit());
+                    existingExpense.setRate(expense.getRate());
+                    existingExpense.setNetTotal(expense.getNetTotal());
+                    existingExpense.setDiscount(expense.getDiscount());
+                    existingExpense.setTaxableValue(expense.getTaxableValue());
+                    existingExpense.setGstPercentage(expense.getGstPercentage());
+                    existingExpense.setGstAmount(expense.getGstAmount());
+                    existingExpense.setCessPercentage(expense.getCessPercentage());
+                    existingExpense.setCessAmount(expense.getCessAmount());
+                    existingExpense.setNetAmount(expense.getNetAmount());
+                    if (expense.getSupplier() != null) existingExpense.setSupplier(expense.getSupplier());
+                    if (expense.getInvoiceNumber() != null) existingExpense.setInvoiceNumber(expense.getInvoiceNumber());
+                    if (expense.getTankerNumber() != null) existingExpense.setTankerNumber(expense.getTankerNumber());
+                    if (expense.getPumpId() != null) existingExpense.setPumpId(expense.getPumpId());
+
+                    Oilpurchase savedExpense = oilPurchaseRepository.save(existingExpense);
+                    updatedExpenses.add(savedExpense);
+                } else {
+                    Oilpurchase savedExpense = oilPurchaseRepository.save(expense);
+                    updatedExpenses.add(savedExpense);
+                }
             } else {
                 Oilpurchase savedExpense = oilPurchaseRepository.save(expense);
                 updatedExpenses.add(savedExpense);
@@ -681,6 +702,10 @@ public class PurchaseController {
 
     @PostMapping("/updateoilPurchase")
     public ResponseEntity<ApiResponse> updateOilPurchase(@RequestBody Oilpurchase purchase) {
+        DAOUser authUser = getAuthenticatedUser();
+        if (purchase.getPumpId() == null && authUser != null && authUser.getPumpId() != null) {
+            purchase.setPumpId(authUser.getPumpId());
+        }
         oilPurchaseRepository.save(purchase);
         ApiResponse response = new ApiResponse("Oilpurchase updated and saved successfully");
         return ResponseEntity.ok(response);
@@ -710,31 +735,45 @@ public class PurchaseController {
     @PostMapping("/extraAddPurchase")
     public ResponseEntity<List<extraPurchases>> updateExtraPurchase(@RequestBody List<extraPurchases> expenses) {
         List<extraPurchases> updatedExpenses = new ArrayList<>();
+        DAOUser authUser = getAuthenticatedUser();
+        Long authPumpId = (authUser != null) ? authUser.getPumpId() : null;
 
         for (extraPurchases expense : expenses) {
-            Optional<extraPurchases> existingEntry = (expense.getUserId() != null && !expense.getUserId().trim().isEmpty())
-                    ? extraPurchaseRepository.findByDateAndExtraTypeAndUserId(expense.getDate(), expense.getExtraType(), expense.getUserId())
-                    : extraPurchaseRepository.findByDateAndExtraType(expense.getDate(), expense.getExtraType());
+            if (expense.getExtra_quantity() == null || expense.getExtra_quantity().trim().isEmpty() || "0".equals(expense.getExtra_quantity().trim())) {
+                if (expense.getId() == null || expense.getId() <= 0) {
+                    continue;
+                }
+            }
 
-            if (existingEntry.isPresent()) {
-                extraPurchases existingExpense = existingEntry.get();
-                // ...
+            if (expense.getPumpId() == null && authPumpId != null) {
+                expense.setPumpId(authPumpId);
+            }
 
-                // Perform arithmetic addition instead of string concatenation
-                existingExpense.setExtra_quantity(expense.getExtra_quantity());
-                existingExpense.setExtra_total(expense.getExtra_total());
-                existingExpense.setExtra_vat(expense.getExtra_vat());
-                existingExpense.setExtra_cess(expense.getExtra_cess());
-                existingExpense.setExtra_jtcpercentage(expense.getExtra_jtcpercentage());
-                existingExpense.setExtra_total_purchase(expense.getExtra_total_purchase());
-                existingExpense.setSkuNumber(expense.getSkuNumber());
+            if (expense.getId() != null && expense.getId() > 0) {
+                Optional<extraPurchases> existingEntry = extraPurchaseRepository.findById(expense.getId());
+                if (existingEntry.isPresent()) {
+                    extraPurchases existingExpense = existingEntry.get();
+                    existingExpense.setDate(expense.getDate());
+                    existingExpense.setExtraType(expense.getExtraType());
+                    existingExpense.setExtra_quantity(expense.getExtra_quantity());
+                    existingExpense.setExtra_total(expense.getExtra_total());
+                    existingExpense.setExtra_vat(expense.getExtra_vat());
+                    existingExpense.setExtra_cess(expense.getExtra_cess());
+                    existingExpense.setExtra_jtcpercentage(expense.getExtra_jtcpercentage());
+                    existingExpense.setExtra_total_purchase(expense.getExtra_total_purchase());
+                    existingExpense.setSkuNumber(expense.getSkuNumber());
+                    if (expense.getSupplier() != null) existingExpense.setSupplier(expense.getSupplier());
+                    if (expense.getInvoiceNumber() != null) existingExpense.setInvoiceNumber(expense.getInvoiceNumber());
+                    if (expense.getTankerNumber() != null) existingExpense.setTankerNumber(expense.getTankerNumber());
+                    if (expense.getPumpId() != null) existingExpense.setPumpId(expense.getPumpId());
 
-                // Save the updated expense
-                extraPurchases savedExpense = extraPurchaseRepository.save(existingExpense);
-                updatedExpenses.add(savedExpense);
-
+                    extraPurchases savedExpense = extraPurchaseRepository.save(existingExpense);
+                    updatedExpenses.add(savedExpense);
+                } else {
+                    extraPurchases savedExpense = extraPurchaseRepository.save(expense);
+                    updatedExpenses.add(savedExpense);
+                }
             } else {
-                // If it doesn't exist, it is saved as a new entry
                 extraPurchases savedExpense = extraPurchaseRepository.save(expense);
                 updatedExpenses.add(savedExpense);
             }
@@ -4023,19 +4062,55 @@ public class PurchaseController {
 
     @GetMapping(value = "/purchase")
     public List<Purchase> getPurchase(@RequestParam String date, @RequestParam String userId) {
-        List<Purchase> purchase = purchaseRepository.getPurchase(date, userId);
+        DAOUser auth = getAuthenticatedUser();
+        Long effectivePumpId = (auth != null) ? auth.getPumpId() : null;
+        if (effectivePumpId != null) {
+            List<Purchase> pumpPurchases = purchaseRepository.findByPumpIdAndDate(effectivePumpId, date);
+            if (pumpPurchases != null && !pumpPurchases.isEmpty()) {
+                return pumpPurchases;
+            }
+        }
+        String effUserId = getEffectiveUserId(userId);
+        List<Purchase> purchase = purchaseRepository.getPurchase(date, effUserId);
+        if ((purchase == null || purchase.isEmpty()) && !effUserId.equals(userId)) {
+            purchase = purchaseRepository.getPurchase(date, userId);
+        }
         return purchase;
     }
 
     @GetMapping(value = "/oilPurchase")
     public List<Oilpurchase> getOilPurchase(@RequestParam String date, @RequestParam String userId) {
-        List<Oilpurchase> oilpurchase = oilPurchaseRepository.getOilPurchase(date, userId);
+        DAOUser auth = getAuthenticatedUser();
+        Long effectivePumpId = (auth != null) ? auth.getPumpId() : null;
+        if (effectivePumpId != null) {
+            List<Oilpurchase> pumpPurchases = oilPurchaseRepository.findByPumpIdAndDate(effectivePumpId, date);
+            if (pumpPurchases != null && !pumpPurchases.isEmpty()) {
+                return pumpPurchases;
+            }
+        }
+        String effUserId = getEffectiveUserId(userId);
+        List<Oilpurchase> oilpurchase = oilPurchaseRepository.getOilPurchase(date, effUserId);
+        if ((oilpurchase == null || oilpurchase.isEmpty()) && !effUserId.equals(userId)) {
+            oilpurchase = oilPurchaseRepository.getOilPurchase(date, userId);
+        }
         return oilpurchase;
     }
 
     @GetMapping(value = "/extraPurchase")
     public List<extraPurchases> getExtraPurchase(@RequestParam String date, @RequestParam String userId) {
-        List<extraPurchases> extraPurchases = extraPurchaseRepository.getextraPurchase(date, userId);
+        DAOUser auth = getAuthenticatedUser();
+        Long effectivePumpId = (auth != null) ? auth.getPumpId() : null;
+        if (effectivePumpId != null) {
+            List<extraPurchases> pumpPurchases = extraPurchaseRepository.findByPumpIdAndDate(effectivePumpId, date);
+            if (pumpPurchases != null && !pumpPurchases.isEmpty()) {
+                return pumpPurchases;
+            }
+        }
+        String effUserId = getEffectiveUserId(userId);
+        List<extraPurchases> extraPurchases = extraPurchaseRepository.getextraPurchase(date, effUserId);
+        if ((extraPurchases == null || extraPurchases.isEmpty()) && !effUserId.equals(userId)) {
+            extraPurchases = extraPurchaseRepository.getextraPurchase(date, userId);
+        }
         return extraPurchases;
     }
 
@@ -6326,13 +6401,13 @@ public class PurchaseController {
                 purchaseQuantity = p != null ? p : 0.0;
             } else if ("xppetrol".equalsIgnoreCase(fuelType)) {
                 Double p = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(CAST(quantity AS DECIMAL(15,2))), 0) FROM extrapurchases WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(type) LIKE '%xp%'",
+                    "SELECT COALESCE(SUM(CAST(extra_quantity AS DECIMAL(15,2))), 0) FROM extrapurchases WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(extra_type) LIKE '%xp%'",
                     Double.class
                 );
                 purchaseQuantity = p != null ? p : 0.0;
             } else if ("powerdiesel".equalsIgnoreCase(fuelType)) {
                 Double p = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(CAST(quantity AS DECIMAL(15,2))), 0) FROM extrapurchases WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(type) LIKE '%power%'",
+                    "SELECT COALESCE(SUM(CAST(extra_quantity AS DECIMAL(15,2))), 0) FROM extrapurchases WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(extra_type) LIKE '%power%'",
                     Double.class
                 );
                 purchaseQuantity = p != null ? p : 0.0;

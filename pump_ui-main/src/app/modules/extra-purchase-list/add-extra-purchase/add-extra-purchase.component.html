@@ -1,83 +1,183 @@
-<div class="card-premium dialog-modern-card p-0 overflow-hidden">
+<div class="card-premium dialog-modern-card p-0 overflow-hidden" style="max-height: 90vh; display: flex; flex-direction: column;">
   <!-- Header -->
   <div class="card-header-modern d-flex justify-content-between align-items-center p-3 border-bottom bg-light">
     <div>
       <h4 class="card-title-modern m-0 font-weight-bold text-dark d-flex align-items-center gap-2">
         <mat-icon class="text-primary">local_gas_station</mat-icon>
-        Extra Fuel Purchase Entry (XP & Power)
+        Extra Fuel Purchase Entry (XP Petrol & Power Diesel)
       </h4>
-      <small class="text-muted">Register bulk XP Petrol and Power Diesel procurement details</small>
+      <small class="text-muted">Register multiple bulk XP Petrol and Power Diesel procurement records</small>
     </div>
     <button mat-icon-button type="button" (click)="cancel()" class="btn-close-custom">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
-  <div class="card-body p-3">
+  <div class="card-body p-3 overflow-auto" style="flex: 1 1 auto;">
     <!-- Date picker row -->
     <div class="row align-items-center mb-3">
-      <div class="col-md-5">
+      <div class="col-md-4">
         <label class="form-label font-weight-bold text-secondary mb-1">Purchase Date</label>
-        <input type="date" class="form-control modern-date-input" [(ngModel)]="extraDetails.date" (change)="updateDate()">
+        <input type="date" class="form-control modern-date-input" [(ngModel)]="purchaseDate" (change)="updateDate()">
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-responsive-modern border rounded">
-      <table class="modern-report-table w-100">
-        <thead>
-          <tr>
-            <th>Product Type</th>
-            <th>SKU Number</th>
-            <th>Quantity (LTR)</th>
-            <th>Base Total (₹)</th>
-            <th>VAT (₹)</th>
-            <th>Cess (₹)</th>
-            <th>JTC %</th>
-            <th class="text-right">Net Purchase (₹)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of row; let i = index">
-            <td class="font-weight-bold text-dark align-middle">{{ item.extraType }}</td>
-            <td>
-              <input type="text" [(ngModel)]="item.skuNumber" class="report-input text-center" placeholder="e.g. SKU-101" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.extra_quantity" class="report-input no-spinner text-right" [ngClass]="{'invalid-input': !isNumber(item.extra_quantity)}" placeholder="0.00" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.extra_total" class="report-input no-spinner text-right" [ngClass]="{'invalid-input': !isNumber(item.extra_total)}" placeholder="0.00" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.extra_vat" class="report-input no-spinner text-right" [ngClass]="{'invalid-input': !isNumber(item.extra_vat)}" placeholder="0.00" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.extra_cess" class="report-input no-spinner text-right" [ngClass]="{'invalid-input': !isNumber(item.extra_cess)}" placeholder="0.00" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.extra_jtcpercentage" class="report-input no-spinner text-right" [ngClass]="{'invalid-input': !isNumber(item.extra_jtcpercentage)}" placeholder="0.00" />
-            </td>
-            <td>
-              <input type="number" [(ngModel)]="item.extra_total_purchase" class="report-input no-spinner text-right font-weight-bold text-success" [ngClass]="{'invalid-input': !isNumber(item.extra_total_purchase)}" placeholder="0.00" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Footer Total & Actions -->
-    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
-      <div class="grand-total-box px-3 py-2 bg-light border rounded">
-        <span class="text-muted font-weight-bold mr-2">Grand Total Purchase:</span>
-        <span class="h5 font-weight-bold text-success mb-0">₹{{ totalPrice() | number:'1.2-2' }}</span>
-      </div>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-outline-secondary px-4 mr-2" (click)="cancel()">Cancel</button>
-        <button type="button" class="btn btn-primary px-4 d-flex align-items-center gap-1" (click)="order()">
-          <mat-icon class="mr-1">save</mat-icon> Save Extra Purchase
+    <!-- XP PETROL SECTION -->
+    <div class="card mb-4 border shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
+        <span class="font-weight-bold text-primary d-flex align-items-center gap-1" style="font-size: 15px;">
+          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">local_gas_station</mat-icon> XP Petrol Purchases
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="addXpPetrolPurchase()">
+          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon> + Add Purchase
         </button>
       </div>
+      <div class="card-body p-2">
+        <div *ngFor="let item of xpPetrolRows; let i = index" class="border rounded p-2 mb-2 bg-light">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge badge-primary px-2 py-1" style="font-size: 12px;">XP Petrol Purchase #{{ i + 1 }}</span>
+            <button *ngIf="xpPetrolRows.length > 1" type="button" class="btn btn-sm btn-outline-danger py-0 px-2" (click)="removeXpPetrolPurchase(i)">
+              <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">delete</mat-icon> Remove
+            </button>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">Supplier</label>
+              <input type="text" [(ngModel)]="item.supplier" class="form-control form-control-sm" placeholder="e.g. ABC Fuels">
+            </div>
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">Invoice No</label>
+              <input type="text" [(ngModel)]="item.invoiceNumber" class="form-control form-control-sm" placeholder="e.g. INV-001">
+            </div>
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">Tanker No</label>
+              <input type="text" [(ngModel)]="item.tankerNumber" class="form-control form-control-sm" placeholder="e.g. TN-01-AB-1234">
+            </div>
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">SKU Number</label>
+              <input type="text" [(ngModel)]="item.skuNumber" class="form-control form-control-sm" placeholder="e.g. SKU-101">
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold text-primary">Quantity (LTR) *</label>
+              <input type="number" [(ngModel)]="item.extra_quantity" class="form-control form-control-sm text-right font-weight-bold no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">Base Total (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_total" (input)="calculateRow(item)" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">VAT (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_vat" (input)="calculateRow(item)" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">Cess (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_cess" (input)="calculateRow(item)" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">JTC %</label>
+              <input type="number" [(ngModel)]="item.extra_jtcpercentage" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold text-success">Net Purchase (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_total_purchase" class="form-control form-control-sm text-right font-weight-bold text-success bg-white" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+
+        <!-- XP Petrol Subtotal -->
+        <div class="d-flex justify-content-between align-items-center p-2 bg-white border rounded mt-2">
+          <span class="text-muted font-weight-bold small">Total XP Petrol: {{ getXpTotalQuantity() | number:'1.2-2' }} LTR</span>
+          <span class="font-weight-bold text-primary small">Sub-Total: ₹{{ getXpTotalPurchase() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- POWER DIESEL SECTION -->
+    <div class="card mb-3 border shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
+        <span class="font-weight-bold text-warning d-flex align-items-center gap-1" style="font-size: 15px; color: #d97706 !important;">
+          <mat-icon style="font-size: 18px; width: 18px; height: 18px;">local_gas_station</mat-icon> Power Diesel Purchases
+        </span>
+        <button type="button" class="btn btn-sm btn-outline-warning d-flex align-items-center gap-1" style="color: #d97706; border-color: #d97706;" (click)="addPowerDieselPurchase()">
+          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">add</mat-icon> + Add Purchase
+        </button>
+      </div>
+      <div class="card-body p-2">
+        <div *ngFor="let item of powerDieselRows; let i = index" class="border rounded p-2 mb-2 bg-light">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="badge badge-warning px-2 py-1" style="font-size: 12px; background: #fef3c7; color: #92400e;">Power Diesel Purchase #{{ i + 1 }}</span>
+            <button *ngIf="powerDieselRows.length > 1" type="button" class="btn btn-sm btn-outline-danger py-0 px-2" (click)="removePowerDieselPurchase(i)">
+              <mat-icon style="font-size: 14px; width: 14px; height: 14px; vertical-align: middle;">delete</mat-icon> Remove
+            </button>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">Supplier</label>
+              <input type="text" [(ngModel)]="item.supplier" class="form-control form-control-sm" placeholder="e.g. ABC Fuels">
+            </div>
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">Invoice No</label>
+              <input type="text" [(ngModel)]="item.invoiceNumber" class="form-control form-control-sm" placeholder="e.g. INV-001">
+            </div>
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">Tanker No</label>
+              <input type="text" [(ngModel)]="item.tankerNumber" class="form-control form-control-sm" placeholder="e.g. TN-01-AB-1234">
+            </div>
+            <div class="col-md-3">
+              <label class="small text-muted mb-0 font-weight-bold">SKU Number</label>
+              <input type="text" [(ngModel)]="item.skuNumber" class="form-control form-control-sm" placeholder="e.g. SKU-101">
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold text-primary">Quantity (LTR) *</label>
+              <input type="number" [(ngModel)]="item.extra_quantity" class="form-control form-control-sm text-right font-weight-bold no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">Base Total (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_total" (input)="calculateRow(item)" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">VAT (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_vat" (input)="calculateRow(item)" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">Cess (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_cess" (input)="calculateRow(item)" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold">JTC %</label>
+              <input type="number" [(ngModel)]="item.extra_jtcpercentage" class="form-control form-control-sm text-right no-spinner" placeholder="0.00">
+            </div>
+            <div class="col-md-2">
+              <label class="small text-muted mb-0 font-weight-bold text-success">Net Purchase (₹)</label>
+              <input type="number" [(ngModel)]="item.extra_total_purchase" class="form-control form-control-sm text-right font-weight-bold text-success bg-white" placeholder="0.00">
+            </div>
+          </div>
+        </div>
+
+        <!-- Power Diesel Subtotal -->
+        <div class="d-flex justify-content-between align-items-center p-2 bg-white border rounded mt-2">
+          <span class="text-muted font-weight-bold small">Total Power Diesel: {{ getPowerDieselTotalQuantity() | number:'1.2-2' }} LTR</span>
+          <span class="font-weight-bold text-warning small" style="color: #d97706 !important;">Sub-Total: ₹{{ getPowerDieselTotalPurchase() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Total & Actions -->
+  <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+    <div class="grand-total-box px-3 py-2 bg-white border rounded">
+      <span class="text-muted font-weight-bold mr-2">Grand Total Extra Purchase:</span>
+      <span class="h5 font-weight-bold text-success mb-0">₹{{ grandTotalPurchase() | number:'1.2-2' }}</span>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-outline-secondary px-4 mr-2" (click)="cancel()">Cancel</button>
+      <button type="button" class="btn btn-primary px-4 d-flex align-items-center gap-1" (click)="order()">
+        <mat-icon class="mr-1">save</mat-icon> Save Extra Purchases
+      </button>
     </div>
   </div>
 </div>

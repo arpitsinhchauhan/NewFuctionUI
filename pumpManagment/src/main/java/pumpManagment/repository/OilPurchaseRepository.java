@@ -55,4 +55,13 @@ public interface OilPurchaseRepository extends JpaRepository<Oilpurchase, Intege
             "WHERE YEAR(date) = YEAR(CURDATE()) AND user_id = ?", nativeQuery = true)
     Double findTotalOilPurchaseForCurrentYear(String userId);
 
+    List<Oilpurchase> findByPumpId(Long pumpId);
+
+    List<Oilpurchase> findByPumpIdAndDate(Long pumpId, String date);
+
+    List<Oilpurchase> findByUserIdAndDate(String userId, String date);
+
+    List<Oilpurchase> findByDate(String date);
+
+    List<Oilpurchase> findByDateBetween(String startDate, String endDate);
 }

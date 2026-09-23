@@ -1161,11 +1161,11 @@ export class MainPanelComponent implements OnInit {
           for (const item of data) {
             const [quantity, type] = item;
             if (type === 'Petrol') {
-              this.petolQuantity = Number(quantity) || 0;
-              this.petrolPurchaseLTR = Number(quantity) || 0;
+              this.petolQuantity += Number(quantity) || 0;
+              this.petrolPurchaseLTR += Number(quantity) || 0;
             } else if (type === 'Diesel') {
-              this.dieselQuantity = Number(quantity) || 0;
-              this.dieselPurchaseLTR = Number(quantity) || 0;
+              this.dieselQuantity += Number(quantity) || 0;
+              this.dieselPurchaseLTR += Number(quantity) || 0;
             }
           }
         }
@@ -1205,7 +1205,7 @@ export class MainPanelComponent implements OnInit {
           for (const item of data) {
             const [quantity, type] = item;
             if (type === 'oil') {
-              this.oilQuantity = Number(quantity) || 0;
+              this.oilQuantity += Number(quantity) || 0;
             }
           }
         }
@@ -1244,9 +1244,9 @@ export class MainPanelComponent implements OnInit {
           for (const item of data) {
             const [quantity, type] = item;
             if (type === 'XP Petrol') {
-              this.xpPetolQuantity = Number(quantity) || 0;
+              this.xpPetolQuantity += Number(quantity) || 0;
             } else if (type === 'Power Diesel') {
-              this.powerDieselQuantity = Number(quantity) || 0;
+              this.powerDieselQuantity += Number(quantity) || 0;
             }
           }
         }
@@ -2418,11 +2418,11 @@ export class MainPanelComponent implements OnInit {
         for (const item of list) {
           const [quantity, type] = item;
           if (type === 'Petrol') {
-            this.petolQuantity = Number(quantity) || 0;
-            this.petrolPurchaseLTR = Number(quantity) || 0;
+            this.petolQuantity += Number(quantity) || 0;
+            this.petrolPurchaseLTR += Number(quantity) || 0;
           } else if (type === 'Diesel') {
-            this.dieselQuantity = Number(quantity) || 0;
-            this.dieselPurchaseLTR = Number(quantity) || 0;
+            this.dieselQuantity += Number(quantity) || 0;
+            this.dieselPurchaseLTR += Number(quantity) || 0;
           }
         }
       }
@@ -2435,8 +2435,8 @@ export class MainPanelComponent implements OnInit {
       if (list && list.length > 0) {
         for (const item of list) {
           const [quantity, type] = item;
-          if (type === 'XP Petrol') this.xpPetolQuantity = Number(quantity) || 0;
-          else if (type === 'Power Diesel') this.powerDieselQuantity = Number(quantity) || 0;
+          if (type === 'XP Petrol') this.xpPetolQuantity += Number(quantity) || 0;
+          else if (type === 'Power Diesel') this.powerDieselQuantity += Number(quantity) || 0;
         }
       }
     });
@@ -2447,7 +2447,7 @@ export class MainPanelComponent implements OnInit {
       if (list && list.length > 0) {
         for (const item of list) {
           const [quantity, type] = item;
-          if (type === 'oil') this.oilQuantity = Number(quantity) || 0;
+          if (type === 'oil') this.oilQuantity += Number(quantity) || 0;
         }
       }
     });

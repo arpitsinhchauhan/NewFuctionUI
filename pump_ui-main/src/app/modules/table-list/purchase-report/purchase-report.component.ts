@@ -31,41 +31,10 @@ export class PurchaseReportComponent implements OnInit {
 
   isReload: boolean = false;
   userId = localStorage.getItem('userId');
-  purchaDipStockseDetails = {
-    date: '',
-    supplier: '',
-    invoiceNumber: '',
-    tankerNumber: ''
-  };
+  purchaseDate: string = '';
 
-  row: PurchaseRow[] = [
-    {
-      id: null,
-      type: 'Petrol',
-      skuNumber: '',
-      quantity: '',
-      total: '',
-      vat: '',
-      cess: '',
-      total_purchase: '',
-      jtcpercentage: '',
-      date: '',
-      userId: this.userId
-    },
-    {
-      id: null,
-      type: 'Diesel',
-      skuNumber: '',
-      quantity: '',
-      total: '',
-      vat: '',
-      cess: '',
-      total_purchase: '',
-      jtcpercentage: "",
-      date: '',
-      userId: this.userId
-    }
-  ];
+  petrolRows: PurchaseRow[] = [];
+  dieselRows: PurchaseRow[] = [];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -79,118 +48,133 @@ export class PurchaseReportComponent implements OnInit {
   ngOnInit(): void {
     this.use.dialogZIndexAdjustment();
     if (this.purchase && this.purchase.date) {
-      this.purchaDipStockseDetails.date = this.purchase.date;
-      if (this.purchase.supplier) this.purchaDipStockseDetails.supplier = this.purchase.supplier;
-      if (this.purchase.invoiceNumber) this.purchaDipStockseDetails.invoiceNumber = this.purchase.invoiceNumber;
-      if (this.purchase.tankerNumber) this.purchaDipStockseDetails.tankerNumber = this.purchase.tankerNumber;
+      this.purchaseDate = this.purchase.date;
     } else {
-      const today = new Date().toISOString().split('T')[0];
-      this.purchaDipStockseDetails.date = today;
-    }
-    // Only prefill existing data if editing an existing record with id
-    if (this.purchase && this.purchase.id) {
-      this.getPurchaseReport();
-    }
-  }
-
-  updateDate() {
-    if (this.row) {
-      this.row.forEach(row => {
-        row.date = this.purchaDipStockseDetails.date;
-      });
-    }
-    if (this.purchase) {
-      this.purchase.date = this.purchaDipStockseDetails.date;
+      this.purchaseDate = new Date().toISOString().split('T')[0];
     }
     this.getPurchaseReport();
   }
 
-  calculateRow(item: any) {
-    const total = Number(item.total) || 0;
-    const vat = Number(item.vat) || 0;
-    const cess = Number(item.cess) || 0;
-    item.total_purchase = parseFloat((total + vat + cess).toFixed(2));
-  }
-
-  addTable() {
-    this.row.push({
-      id: this.purchase?.id,
-      type: '',
+  createEmptyRow(type: string): PurchaseRow {
+    return {
+      id: null,
+      type: type,
       skuNumber: '',
+      supplier: '',
+      invoiceNumber: '',
+      tankerNumber: '',
       quantity: '',
       total: '',
       vat: '',
       cess: '',
       total_purchase: '',
       jtcpercentage: '',
-      date: this.purchaDipStockseDetails.date || '',
-      userId: this.userId
-    });
+      date: this.purchaseDate,
+      userId: this.userId || ''
+    };
   }
 
-  deleteRow(index: number) {
-    this.row.splice(index, 1);
-    this.notificationService.success('Purchase Data Succefully Delete.');
+  updateDate(): void {
+    this.petrolRows.forEach(r => r.date = this.purchaseDate);
+    this.dieselRows.forEach(r => r.date = this.purchaseDate);
+    if (this.purchase) {
+      this.purchase.date = this.purchaseDate;
+    }
+    this.getPurchaseReport();
   }
 
-  totalPrice(): number {
-    const total = this.row.reduce(
-      (acc, item) => acc + (Number(item.total_purchase) || 0),
-      0
-    );
-    return parseFloat(total.toFixed(2));
+  addPetrolPurchase(): void {
+    this.petrolRows.push(this.createEmptyRow('Petrol'));
+  }
+
+  removePetrolPurchase(index: number): void {
+    if (this.petrolRows.length > 1) {
+      this.petrolRows.splice(index, 1);
+    } else {
+      this.petrolRows[0] = this.createEmptyRow('Petrol');
+    }
+  }
+
+  addDieselPurchase(): void {
+    this.dieselRows.push(this.createEmptyRow('Diesel'));
+  }
+
+  removeDieselPurchase(index: number): void {
+    if (this.dieselRows.length > 1) {
+      this.dieselRows.splice(index, 1);
+    } else {
+      this.dieselRows[0] = this.createEmptyRow('Diesel');
+    }
+  }
+
+  calculateRow(item: PurchaseRow): void {
+    const total = Number(item.total) || 0;
+    const vat = Number(item.vat) || 0;
+    const cess = Number(item.cess) || 0;
+    item.total_purchase = parseFloat((total + vat + cess).toFixed(2));
+  }
+
+  getPetrolTotalQuantity(): number {
+    return this.petrolRows.reduce((acc, r) => acc + (Number(r.quantity) || 0), 0);
+  }
+
+  getPetrolTotalPurchase(): number {
+    return parseFloat(this.petrolRows.reduce((acc, r) => acc + (Number(r.total_purchase) || 0), 0).toFixed(2));
+  }
+
+  getDieselTotalQuantity(): number {
+    return this.dieselRows.reduce((acc, r) => acc + (Number(r.quantity) || 0), 0);
+  }
+
+  getDieselTotalPurchase(): number {
+    return parseFloat(this.dieselRows.reduce((acc, r) => acc + (Number(r.total_purchase) || 0), 0).toFixed(2));
+  }
+
+  grandTotalPurchase(): number {
+    return parseFloat((this.getPetrolTotalPurchase() + this.getDieselTotalPurchase()).toFixed(2));
   }
 
   validateData(): boolean {
-    if (!this.purchaDipStockseDetails.date) {
-      this.notificationService.failure('Date is required.');
+    if (!this.purchaseDate) {
+      this.notificationService.failure('Purchase Date is required.');
       return false;
     }
-    for (let item of this.row) {
-      item.quantity = item.quantity === null || item.quantity === '' ? 0 : Number(item.quantity);
-      item.total = item.total === null || item.total === '' ? 0 : Number(item.total);
-      item.vat = item.vat === null || item.vat === '' ? 0 : Number(item.vat);
-      item.cess = item.cess === null || item.cess === '' ? 0 : Number(item.cess);
-      item.jtcpercentage = item.jtcpercentage === null || item.jtcpercentage === '' ? 0 : Number(item.jtcpercentage);
-      item.total_purchase = item.total_purchase === null || item.total_purchase === '' ? 0 : Number(item.total_purchase);
-      if (
-        isNaN(item.quantity) ||
-        isNaN(item.total) ||
-        isNaN(item.vat) ||
-        isNaN(item.cess) ||
-        isNaN(item.jtcpercentage) ||
-        isNaN(item.total_purchase)
-      ) {
-        this.notificationService.failure('All numeric fields must contain valid numbers.');
-        return false;
-      }
-      if (!item.type) {
-        this.notificationService.failure('Type field is required.');
+    const allRows = [...this.petrolRows, ...this.dieselRows];
+    for (let item of allRows) {
+      const q = item.quantity === null || item.quantity === '' ? 0 : Number(item.quantity);
+      if (isNaN(q)) {
+        this.notificationService.failure('Quantity must be a valid number.');
         return false;
       }
     }
-
     return true;
   }
 
-  order() {
+  order(): void {
     if (!this.validateData()) {
       return;
     }
-    const payload = this.row
+    const allRows = [...this.petrolRows, ...this.dieselRows];
+    const payload = allRows
       .filter(r => (Number(r.quantity) > 0) || (r.id && Number(r.quantity) >= 0))
       .map(r => ({
         ...r,
-        id: this.purchase?.id ? this.purchase.id : null,
-        date: this.purchaDipStockseDetails.date,
-        supplier: this.purchaDipStockseDetails.supplier || '',
-        invoiceNumber: this.purchaDipStockseDetails.invoiceNumber || r.skuNumber || '',
-        tankerNumber: this.purchaDipStockseDetails.tankerNumber || '',
+        quantity: r.quantity ? String(r.quantity) : '0',
+        total: r.total ? String(r.total) : '0',
+        vat: r.vat ? String(r.vat) : '0',
+        cess: r.cess ? String(r.cess) : '0',
+        jtcpercentage: r.jtcpercentage ? String(r.jtcpercentage) : '0',
+        total_purchase: Number(r.total_purchase) || 0,
+        date: this.purchaseDate,
+        supplier: r.supplier || '',
+        invoiceNumber: r.invoiceNumber || r.skuNumber || '',
+        tankerNumber: r.tankerNumber || '',
+        skuNumber: r.skuNumber || r.invoiceNumber || '',
         userId: this.userId
       }));
 
     if (payload.length === 0) {
-      this.notificationService.failure("Please enter quantity greater than 0 for at least one fuel type.");
+      this.notificationService.failure("Please enter quantity greater than 0 for at least one purchase entry.");
       return;
     }
 
@@ -208,71 +192,60 @@ export class PurchaseReportComponent implements OnInit {
     return !isNaN(value) && value !== '';
   }
 
-  cancel() {
+  cancel(): void {
     this.dialogRef.close({ 'isReload': this.isReload });
   }
 
-  getPurchaseReport() {
+  getPurchaseReport(): void {
     this.userId = localStorage.getItem('userId');
     const params = { userId: this.userId };
-    const selectedDate = this.purchaDipStockseDetails.date || this.purchase?.date;
+    const selectedDate = this.purchaseDate || this.purchase?.date;
 
     this.http.get<any[]>(API_PURCHASE_LIST, { params }).subscribe((data: any[]) => {
       let filteredData: any[] = [];
-
-      if (selectedDate) {
+      if (selectedDate && data) {
         filteredData = data.filter(
           (item) => new Date(item.date).toDateString() === new Date(selectedDate).toDateString()
         );
-      } else {
+      } else if (data) {
         filteredData = data;
       }
 
-      const petrolRow = filteredData.find(item => item.type === 'Petrol') || {
-        id: this.purchase?.id,
-        type: 'Petrol',
-        skuNumber: '',
-        quantity: '',
-        total: '',
-        vat: '',
-        cess: '',
-        jtcpercentage: '',
-        total_purchase: '',
-        date: selectedDate || '',
-        userId: this.userId
-      };
+      const petrols = filteredData.filter(item => (item.type || '').toLowerCase() === 'petrol');
+      const diesels = filteredData.filter(item => (item.type || '').toLowerCase() === 'diesel');
 
-      const dieselRow = filteredData.find(item => item.type === 'Diesel') || {
-        id: this.purchase?.id,
-        type: 'Diesel',
-        skuNumber: '',
-        quantity: '',
-        total: '',
-        vat: '',
-        cess: '',
-        jtcpercentage: '',
-        total_purchase: '',
-        date: selectedDate || '',
-        userId: this.userId
-      };
+      if (petrols.length > 0) {
+        this.petrolRows = petrols.map(p => ({
+          ...p,
+          type: 'Petrol',
+          date: selectedDate,
+          userId: this.userId,
+          total: p.total ? parseFloat(Number(p.total).toFixed(2)) : '',
+          vat: p.vat ? parseFloat(Number(p.vat).toFixed(2)) : '',
+          cess: p.cess ? parseFloat(Number(p.cess).toFixed(2)) : '',
+          total_purchase: p.total_purchase ? parseFloat(Number(p.total_purchase).toFixed(2)) : ''
+        }));
+      } else {
+        this.petrolRows = [this.createEmptyRow('Petrol')];
+      }
 
-      this.row = [petrolRow, dieselRow, ...filteredData.filter(item => item.type !== 'Petrol' && item.type !== 'Diesel')];
-      this.row.forEach(r => {
-        if (r.total !== null && r.total !== undefined && r.total !== '') {
-          r.total = parseFloat(Number(r.total).toFixed(2));
-        }
-        if (r.vat !== null && r.vat !== undefined && r.vat !== '') {
-          r.vat = parseFloat(Number(r.vat).toFixed(2));
-        }
-        if (r.cess !== null && r.cess !== undefined && r.cess !== '') {
-          r.cess = parseFloat(Number(r.cess).toFixed(2));
-        }
-        if (r.total_purchase !== null && r.total_purchase !== undefined && r.total_purchase !== '') {
-          r.total_purchase = parseFloat(Number(r.total_purchase).toFixed(2));
-        } else if (r.total || r.vat || r.cess) {
-          this.calculateRow(r);
-        }
-      });
+      if (diesels.length > 0) {
+        this.dieselRows = diesels.map(d => ({
+          ...d,
+          type: 'Diesel',
+          date: selectedDate,
+          userId: this.userId,
+          total: d.total ? parseFloat(Number(d.total).toFixed(2)) : '',
+          vat: d.vat ? parseFloat(Number(d.vat).toFixed(2)) : '',
+          cess: d.cess ? parseFloat(Number(d.cess).toFixed(2)) : '',
+          total_purchase: d.total_purchase ? parseFloat(Number(d.total_purchase).toFixed(2)) : ''
+        }));
+      } else {
+        this.dieselRows = [this.createEmptyRow('Diesel')];
+      }
+    }, err => {
+      this.petrolRows = [this.createEmptyRow('Petrol')];
+      this.dieselRows = [this.createEmptyRow('Diesel')];
     });
   }
 

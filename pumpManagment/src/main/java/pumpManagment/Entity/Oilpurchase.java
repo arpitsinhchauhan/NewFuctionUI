@@ -51,6 +51,18 @@ public class Oilpurchase {
     @Column(name = "net_amount")
     private Double netAmount;
 
+    @Column(name = "supplier")
+    private String supplier;
+
+    @Column(name = "invoice_number")
+    private String invoiceNumber;
+
+    @Column(name = "tanker_number")
+    private String tankerNumber;
+
+    @Column(name = "pump_id")
+    private Long pumpId;
+
     public Integer getId() {
         return id;
     }
@@ -218,5 +230,37 @@ public class Oilpurchase {
 
     public void setNetAmount(Double netAmount) {
         this.netAmount = netAmount;
+    }
+
+    public String getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(String supplier) {
+        this.supplier = supplier;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    public String getTankerNumber() {
+        return tankerNumber;
+    }
+
+    public void setTankerNumber(String tankerNumber) {
+        this.tankerNumber = tankerNumber;
+    }
+
+    public Long getPumpId() {
+        return pumpId;
+    }
+
+    public void setPumpId(Long pumpId) {
+        this.pumpId = pumpId;
     }
 }

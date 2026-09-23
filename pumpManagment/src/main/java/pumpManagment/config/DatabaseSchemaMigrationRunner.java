@@ -38,6 +38,8 @@ public class DatabaseSchemaMigrationRunner implements CommandLineRunner {
             if (dbProduct != null && dbProduct.toLowerCase().contains("mysql")) {
                 migrateDailyReportsSchema(conn, metaData);
                 migratePurchaseSchema(conn, metaData);
+                migrateOilPurchaseSchema(conn, metaData);
+                migrateExtraPurchaseSchema(conn, metaData);
             }
         } catch (Exception e) {
             log.warn("Database schema migration check skipped or encountered error: {}", e.getMessage());
@@ -154,6 +156,96 @@ public class DatabaseSchemaMigrationRunner implements CommandLineRunner {
                     "CREATE INDEX idx_purchase_user_date ON purchase (user_id, date)");
         } catch (Exception e) {
             log.warn("Migration runner for purchase schema encountered: {}", e.getMessage());
+        }
+    }
+
+    private void migrateOilPurchaseSchema(Connection conn, DatabaseMetaData metaData) {
+        try {
+            boolean tableExists = false;
+            try (ResultSet rs = metaData.getTables(conn.getCatalog(), null, "oilpurchase", null)) {
+                if (rs.next()) {
+                    tableExists = true;
+                }
+            }
+            if (!tableExists) return;
+
+            log.info("Checking oilpurchase table columns and constraints...");
+            addColumnIfNotExists(conn, metaData, "oilpurchase", "supplier", "VARCHAR(150)");
+            addColumnIfNotExists(conn, metaData, "oilpurchase", "invoice_number", "VARCHAR(100)");
+            addColumnIfNotExists(conn, metaData, "oilpurchase", "tanker_number", "VARCHAR(50)");
+            addColumnIfNotExists(conn, metaData, "oilpurchase", "pump_id", "BIGINT");
+
+            // Drop any unique constraints that would restrict multiple oil purchases per day
+            try (ResultSet rs = metaData.getIndexInfo(conn.getCatalog(), null, "oilpurchase", false, false)) {
+                Set<String> uniqueIndices = new HashSet<>();
+                while (rs.next()) {
+                    boolean nonUnique = rs.getBoolean("NON_UNIQUE");
+                    String indexName = rs.getString("INDEX_NAME");
+                    if (!nonUnique && indexName != null && !"PRIMARY".equalsIgnoreCase(indexName)) {
+                        uniqueIndices.add(indexName);
+                    }
+                }
+                for (String idx : uniqueIndices) {
+                    try {
+                        jdbcTemplate.execute("ALTER TABLE oilpurchase DROP INDEX " + idx);
+                        log.info("Dropped unique index from oilpurchase table: {}", idx);
+                    } catch (Exception e) {
+                        log.debug("Index drop skipped for {}: {}", idx, e.getMessage());
+                    }
+                }
+            }
+
+            createIndexIfNotExists(conn, metaData, "oilpurchase", "idx_oilpurchase_pump_date",
+                    "CREATE INDEX idx_oilpurchase_pump_date ON oilpurchase (pump_id, date)");
+            createIndexIfNotExists(conn, metaData, "oilpurchase", "idx_oilpurchase_user_date",
+                    "CREATE INDEX idx_oilpurchase_user_date ON oilpurchase (user_id, date)");
+        } catch (Exception e) {
+            log.warn("Migration runner for oilpurchase schema encountered: {}", e.getMessage());
+        }
+    }
+
+    private void migrateExtraPurchaseSchema(Connection conn, DatabaseMetaData metaData) {
+        try {
+            boolean tableExists = false;
+            try (ResultSet rs = metaData.getTables(conn.getCatalog(), null, "extrapurchases", null)) {
+                if (rs.next()) {
+                    tableExists = true;
+                }
+            }
+            if (!tableExists) return;
+
+            log.info("Checking extrapurchases table columns and constraints...");
+            addColumnIfNotExists(conn, metaData, "extrapurchases", "supplier", "VARCHAR(150)");
+            addColumnIfNotExists(conn, metaData, "extrapurchases", "invoice_number", "VARCHAR(100)");
+            addColumnIfNotExists(conn, metaData, "extrapurchases", "tanker_number", "VARCHAR(50)");
+            addColumnIfNotExists(conn, metaData, "extrapurchases", "pump_id", "BIGINT");
+
+            // Drop any unique constraints that would restrict multiple extra purchases per day
+            try (ResultSet rs = metaData.getIndexInfo(conn.getCatalog(), null, "extrapurchases", false, false)) {
+                Set<String> uniqueIndices = new HashSet<>();
+                while (rs.next()) {
+                    boolean nonUnique = rs.getBoolean("NON_UNIQUE");
+                    String indexName = rs.getString("INDEX_NAME");
+                    if (!nonUnique && indexName != null && !"PRIMARY".equalsIgnoreCase(indexName)) {
+                        uniqueIndices.add(indexName);
+                    }
+                }
+                for (String idx : uniqueIndices) {
+                    try {
+                        jdbcTemplate.execute("ALTER TABLE extrapurchases DROP INDEX " + idx);
+                        log.info("Dropped unique index from extrapurchases table: {}", idx);
+                    } catch (Exception e) {
+                        log.debug("Index drop skipped for {}: {}", idx, e.getMessage());
+                    }
+                }
+            }
+
+            createIndexIfNotExists(conn, metaData, "extrapurchases", "idx_extrapurchases_pump_date",
+                    "CREATE INDEX idx_extrapurchases_pump_date ON extrapurchases (pump_id, date)");
+            createIndexIfNotExists(conn, metaData, "extrapurchases", "idx_extrapurchases_user_date",
+                    "CREATE INDEX idx_extrapurchases_user_date ON extrapurchases (user_id, date)");
+        } catch (Exception e) {
+            log.warn("Migration runner for extrapurchases schema encountered: {}", e.getMessage());
         }
     }
 

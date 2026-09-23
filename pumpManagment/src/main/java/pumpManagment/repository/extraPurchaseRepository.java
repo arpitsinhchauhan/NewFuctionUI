@@ -78,4 +78,13 @@ public interface extraPurchaseRepository extends JpaRepository<extraPurchases, I
                         @Param("endDate") String endDate,
                         @Param("userId") String userId);
 
+        List<extraPurchases> findByPumpId(Long pumpId);
+
+        List<extraPurchases> findByPumpIdAndDate(Long pumpId, String date);
+
+        List<extraPurchases> findByUserIdAndDate(String userId, String date);
+
+        List<extraPurchases> findByDate(String date);
+
+        List<extraPurchases> findByDateBetween(String startDate, String endDate);
 }
