@@ -12,6 +12,8 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @Order(1)
@@ -35,6 +37,7 @@ public class DatabaseSchemaMigrationRunner implements CommandLineRunner {
             // Only run MySQL-specific alter statements if connected to MySQL
             if (dbProduct != null && dbProduct.toLowerCase().contains("mysql")) {
                 migrateDailyReportsSchema(conn, metaData);
+                migratePurchaseSchema(conn, metaData);
             }
         } catch (Exception e) {
             log.warn("Database schema migration check skipped or encountered error: {}", e.getMessage());
@@ -101,6 +104,73 @@ public class DatabaseSchemaMigrationRunner implements CommandLineRunner {
 
         } catch (Exception e) {
             log.warn("Migration runner for daily_reports schema encountered: {}", e.getMessage());
+        }
+    }
+
+    private void migratePurchaseSchema(Connection conn, DatabaseMetaData metaData) {
+        try {
+            boolean tableExists = false;
+            try (ResultSet rs = metaData.getTables(conn.getCatalog(), null, "purchase", null)) {
+                if (rs.next()) {
+                    tableExists = true;
+                }
+            }
+
+            if (!tableExists) {
+                return;
+            }
+
+            log.info("Checking purchase table columns and constraints...");
+
+            // Ensure columns exist
+            addColumnIfNotExists(conn, metaData, "purchase", "supplier", "VARCHAR(150)");
+            addColumnIfNotExists(conn, metaData, "purchase", "invoice_number", "VARCHAR(100)");
+            addColumnIfNotExists(conn, metaData, "purchase", "tanker_number", "VARCHAR(50)");
+            addColumnIfNotExists(conn, metaData, "purchase", "pump_id", "BIGINT");
+
+            // Drop any unique constraints that would restrict multiple purchases per day
+            try (ResultSet rs = metaData.getIndexInfo(conn.getCatalog(), null, "purchase", false, false)) {
+                Set<String> uniqueIndices = new HashSet<>();
+                while (rs.next()) {
+                    boolean nonUnique = rs.getBoolean("NON_UNIQUE");
+                    String indexName = rs.getString("INDEX_NAME");
+                    if (!nonUnique && indexName != null && !"PRIMARY".equalsIgnoreCase(indexName)) {
+                        uniqueIndices.add(indexName);
+                    }
+                }
+                for (String idx : uniqueIndices) {
+                    try {
+                        jdbcTemplate.execute("ALTER TABLE purchase DROP INDEX " + idx);
+                        log.info("Dropped unique index from purchase table: {}", idx);
+                    } catch (Exception e) {
+                        log.debug("Index drop skipped for {}: {}", idx, e.getMessage());
+                    }
+                }
+            }
+
+            createIndexIfNotExists(conn, metaData, "purchase", "idx_purchase_pump_date",
+                    "CREATE INDEX idx_purchase_pump_date ON purchase (pump_id, date)");
+            createIndexIfNotExists(conn, metaData, "purchase", "idx_purchase_user_date",
+                    "CREATE INDEX idx_purchase_user_date ON purchase (user_id, date)");
+        } catch (Exception e) {
+            log.warn("Migration runner for purchase schema encountered: {}", e.getMessage());
+        }
+    }
+
+    private void addColumnIfNotExists(Connection conn, DatabaseMetaData metaData, String tableName, String columnName, String columnType) {
+        try {
+            boolean colExists = false;
+            try (ResultSet rs = metaData.getColumns(conn.getCatalog(), null, tableName, columnName)) {
+                if (rs.next()) {
+                    colExists = true;
+                }
+            }
+            if (!colExists) {
+                jdbcTemplate.execute("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + columnType);
+                log.info("Successfully added column {}.{}", tableName, columnName);
+            }
+        } catch (Exception e) {
+            log.debug("Column addition {}.{} skipped or failed: {}", tableName, columnName, e.getMessage());
         }
     }
 

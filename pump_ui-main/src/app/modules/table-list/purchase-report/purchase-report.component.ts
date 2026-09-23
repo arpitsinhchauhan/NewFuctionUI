@@ -9,6 +9,9 @@ export interface PurchaseRow {
   id?: any;
   type: string;
   skuNumber?: string;
+  supplier?: string;
+  invoiceNumber?: string;
+  tankerNumber?: string;
   quantity: any;
   total: any;
   vat: any;
@@ -29,12 +32,15 @@ export class PurchaseReportComponent implements OnInit {
   isReload: boolean = false;
   userId = localStorage.getItem('userId');
   purchaDipStockseDetails = {
-    date: ''
+    date: '',
+    supplier: '',
+    invoiceNumber: '',
+    tankerNumber: ''
   };
 
   row: PurchaseRow[] = [
     {
-      id: this.purchase?.id,
+      id: null,
       type: 'Petrol',
       skuNumber: '',
       quantity: '',
@@ -47,7 +53,7 @@ export class PurchaseReportComponent implements OnInit {
       userId: this.userId
     },
     {
-      id: this.purchase?.id,
+      id: null,
       type: 'Diesel',
       skuNumber: '',
       quantity: '',
@@ -74,11 +80,17 @@ export class PurchaseReportComponent implements OnInit {
     this.use.dialogZIndexAdjustment();
     if (this.purchase && this.purchase.date) {
       this.purchaDipStockseDetails.date = this.purchase.date;
+      if (this.purchase.supplier) this.purchaDipStockseDetails.supplier = this.purchase.supplier;
+      if (this.purchase.invoiceNumber) this.purchaDipStockseDetails.invoiceNumber = this.purchase.invoiceNumber;
+      if (this.purchase.tankerNumber) this.purchaDipStockseDetails.tankerNumber = this.purchase.tankerNumber;
     } else {
       const today = new Date().toISOString().split('T')[0];
       this.purchaDipStockseDetails.date = today;
     }
-    this.getPurchaseReport();
+    // Only prefill existing data if editing an existing record with id
+    if (this.purchase && this.purchase.id) {
+      this.getPurchaseReport();
+    }
   }
 
   updateDate() {
@@ -165,13 +177,26 @@ export class PurchaseReportComponent implements OnInit {
     if (!this.validateData()) {
       return;
     }
-    this.row.forEach(row => {
-      row.date = this.purchaDipStockseDetails.date;
-    });
+    const payload = this.row
+      .filter(r => (Number(r.quantity) > 0) || (r.id && Number(r.quantity) >= 0))
+      .map(r => ({
+        ...r,
+        id: this.purchase?.id ? this.purchase.id : null,
+        date: this.purchaDipStockseDetails.date,
+        supplier: this.purchaDipStockseDetails.supplier || '',
+        invoiceNumber: this.purchaDipStockseDetails.invoiceNumber || r.skuNumber || '',
+        tankerNumber: this.purchaDipStockseDetails.tankerNumber || '',
+        userId: this.userId
+      }));
 
-    this.http.post<any>(API_PURCHASE_ADD, this.row)
+    if (payload.length === 0) {
+      this.notificationService.failure("Please enter quantity greater than 0 for at least one fuel type.");
+      return;
+    }
+
+    this.http.post<any>(API_PURCHASE_ADD, payload)
       .subscribe(response => {
-        this.notificationService.success("Purchase data Succefully Add");
+        this.notificationService.success("Purchase data successfully recorded.");
         this.isReload = true;
         this.dialogRef.close({ 'isReload': true });
       }, error => {

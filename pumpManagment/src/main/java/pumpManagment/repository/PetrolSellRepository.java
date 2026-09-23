@@ -116,4 +116,6 @@ public interface PetrolSellRepository extends JpaRepository<PetrolSell, Integer>
                         @Param("endDate") String endDate,
                         @Param("userId") String userId);
 
+        @Query("SELECT p FROM PetrolSell p WHERE p.date BETWEEN :startDate AND :endDate AND p.userId IN (:userIds) ORDER BY p.date ASC, p.pump ASC, p.id ASC")
+        List<PetrolSell> findSalesForExport(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("userIds") List<String> userIds);
 }

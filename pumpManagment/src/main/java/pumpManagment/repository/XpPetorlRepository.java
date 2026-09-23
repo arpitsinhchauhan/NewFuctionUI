@@ -100,4 +100,6 @@ public interface XpPetorlRepository extends JpaRepository<xpPetrol, Integer> {
                         @Param("endDate") String endDate,
                         @Param("userId") String userId);
 
+        @Query("SELECT xp FROM xpPetrol xp WHERE xp.date BETWEEN :startDate AND :endDate AND xp.userId IN (:userIds) ORDER BY xp.date ASC, xp.pump ASC, xp.id ASC")
+        List<xpPetrol> findSalesForExport(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("userIds") List<String> userIds);
 }

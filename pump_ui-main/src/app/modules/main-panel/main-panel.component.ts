@@ -633,10 +633,12 @@ export class MainPanelComponent implements OnInit {
     const formatted = this.use.getFormattedDate(this.reportDate);
     const uid = this.userId || localStorage.getItem('userId') || '';
 
+    const shift = this.selectedShift || undefined;
+
     // Petrol
     this.petrolPumps.slice(0, this.showPetrolPumpsCount).forEach((pump, index) => {
       if (pump.openingMeter === null || pump.openingMeter === 0) {
-        this.use.getPreviousClosingMeter('petrol', pump.name, formatted, undefined, uid).subscribe(res => {
+        this.use.getPreviousClosingMeter('petrol', pump.name, formatted, shift, pump.id, uid).subscribe(res => {
           if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
             if (pump.openingMeter === null || pump.openingMeter === 0) {
               pump.openingMeter = +res.previousClosingMeter;
@@ -651,7 +653,7 @@ export class MainPanelComponent implements OnInit {
     // Diesel
     this.dieselPumps.slice(0, this.showDieselPumpsCount).forEach((pump, index) => {
       if (pump.openingMeter === null || pump.openingMeter === 0) {
-        this.use.getPreviousClosingMeter('diesel', pump.name, formatted, undefined, uid).subscribe(res => {
+        this.use.getPreviousClosingMeter('diesel', pump.name, formatted, shift, pump.id, uid).subscribe(res => {
           if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
             if (pump.openingMeter === null || pump.openingMeter === 0) {
               pump.openingMeter = +res.previousClosingMeter;
@@ -667,7 +669,7 @@ export class MainPanelComponent implements OnInit {
     if (this.showXpPetrolCount > 0) {
       this.xpPetrol.slice(0, this.showXpPetrolCount).forEach((pump, index) => {
         if (pump.openingMeter === null || pump.openingMeter === 0) {
-          this.use.getPreviousClosingMeter('xppetrol', pump.name, formatted, undefined, uid).subscribe(res => {
+          this.use.getPreviousClosingMeter('xppetrol', pump.name, formatted, shift, pump.id, uid).subscribe(res => {
             if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
               if (pump.openingMeter === null || pump.openingMeter === 0) {
                 pump.openingMeter = +res.previousClosingMeter;
@@ -684,7 +686,7 @@ export class MainPanelComponent implements OnInit {
     if (this.showPowerDieselCount > 0) {
       this.powerDiesel.slice(0, this.showPowerDieselCount).forEach((pump, index) => {
         if (pump.openingMeter === null || pump.openingMeter === 0) {
-          this.use.getPreviousClosingMeter('powerdiesel', pump.name, formatted, undefined, uid).subscribe(res => {
+          this.use.getPreviousClosingMeter('powerdiesel', pump.name, formatted, shift, pump.id, uid).subscribe(res => {
             if (res && res.previousClosingMeter !== undefined && res.previousClosingMeter !== null && res.previousClosingMeter !== '') {
               if (pump.openingMeter === null || pump.openingMeter === 0) {
                 pump.openingMeter = +res.previousClosingMeter;

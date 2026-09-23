@@ -11,8 +11,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import pumpManagment.controller.PurchaseController;
 import pumpManagment.model.DAOUser;
+import pumpManagment.Entity.Purchase;
+import pumpManagment.Entity.PetrolSell;
+import pumpManagment.repository.PurchaseRepository;
+import pumpManagment.repository.PetrolSellRepository;
 import pumpManagment.repository.UserRepository;
 
 import java.lang.reflect.Method;
@@ -31,7 +37,10 @@ public class PurchaseControllerIsolationTest {
     private UserRepository userRepository;
 
     @Mock
-    private pumpManagment.repository.PetrolSellRepository petrolSellRepository;
+    private PetrolSellRepository petrolSellRepository;
+
+    @Mock
+    private PurchaseRepository purchaseRepository;
 
     private DAOUser nc11;
     private DAOUser nc22;
@@ -162,6 +171,168 @@ public class PurchaseControllerIsolationTest {
         assertNotNull(body);
         assertEquals(true, body.get("success"));
         assertEquals("12345.50", body.get("previousClosingMeter"));
+    }
+
+    @Test
+    public void testMultiplePurchasesOnSameDay_SavedSeparately() {
+        authenticate("pumpmanager", "PUMP_MANAGER");
+
+        Purchase p1 = new Purchase();
+        p1.setDate("2026-09-20");
+        p1.setType("Petrol");
+        p1.setQuantity("4000");
+        p1.setSupplier("ABC");
+        p1.setInvoiceNumber("INV-001");
+        p1.setTankerNumber("TN01");
+        p1.setUserId("100");
+
+        Purchase p2 = new Purchase();
+        p2.setDate("2026-09-20");
+        p2.setType("Diesel");
+        p2.setQuantity("8000");
+        p2.setSupplier("ABC");
+        p2.setInvoiceNumber("INV-001");
+        p2.setTankerNumber("TN01");
+        p2.setUserId("100");
+
+        Purchase p3 = new Purchase();
+        p3.setDate("2026-09-20");
+        p3.setType("Petrol");
+        p3.setQuantity("5000");
+        p3.setSupplier("XYZ");
+        p3.setInvoiceNumber("INV-002");
+        p3.setTankerNumber("TN02");
+        p3.setUserId("100");
+
+        when(purchaseRepository.save(any(Purchase.class))).thenAnswer(inv -> {
+            Purchase arg = inv.getArgument(0);
+            if (arg.getId() == null) arg.setId(new Random().nextInt(1000) + 1);
+            return arg;
+        });
+
+        ResponseEntity<List<Purchase>> res1 = purchaseController.updatePurchase(Arrays.asList(p1, p2));
+        assertEquals(200, res1.getStatusCodeValue());
+        assertEquals(2, res1.getBody().size());
+
+        ResponseEntity<List<Purchase>> res2 = purchaseController.updatePurchase(Collections.singletonList(p3));
+        assertEquals(200, res2.getStatusCodeValue());
+        assertEquals(1, res2.getBody().size());
+
+        // Verify purchaseRepository.save was called 3 separate times, not overwritten
+        verify(purchaseRepository, times(3)).save(any(Purchase.class));
+    }
+
+    @Test
+    public void testEditPurchase_ModifiesOnlyTargetedTransaction() {
+        authenticate("pumpmanager", "PUMP_MANAGER");
+
+        Purchase existing = new Purchase();
+        existing.setId(2);
+        existing.setDate("2026-09-20");
+        existing.setType("Petrol");
+        existing.setQuantity("5000");
+        existing.setSupplier("XYZ");
+        existing.setInvoiceNumber("INV-002");
+        existing.setTankerNumber("TN02");
+
+        when(purchaseRepository.findById(2)).thenReturn(Optional.of(existing));
+        when(purchaseRepository.save(any(Purchase.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Purchase updatedData = new Purchase();
+        updatedData.setId(2);
+        updatedData.setDate("2026-09-20");
+        updatedData.setType("Petrol");
+        updatedData.setQuantity("5500");
+        updatedData.setSupplier("XYZ Ltd");
+        updatedData.setInvoiceNumber("INV-002-REV");
+        updatedData.setTankerNumber("TN02");
+
+        ResponseEntity<Purchase> response = purchaseController.updatePurchaseById(2, updatedData);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("5500", response.getBody().getQuantity());
+        assertEquals("XYZ Ltd", response.getBody().getSupplier());
+        assertEquals("INV-002-REV", response.getBody().getInvoiceNumber());
+    }
+
+    @Test
+    public void testDeletePurchase_RemovesOnlyTargetedTransaction() {
+        authenticate("pumpmanager", "PUMP_MANAGER");
+        when(purchaseRepository.existsById(2)).thenReturn(true);
+
+        ResponseEntity<?> response = purchaseController.deletePurchaseRest(2);
+        assertEquals(200, response.getStatusCodeValue());
+        verify(purchaseRepository, times(1)).deleteById(2);
+    }
+
+    @Test
+    public void testSameDayMultipleEmployees_SaveSeparateRecords() {
+        authenticate("pumpmanager", "PUMP_MANAGER");
+
+        // EMP1: 1000 -> 1500
+        Map<String, Object> emp1Data = new HashMap<>();
+        emp1Data.put("date", "2026-09-20");
+        emp1Data.put("user_id", "11");
+        emp1Data.put("employee_name", "EMP1");
+        emp1Data.put("pump", "Petrol nozzle 1");
+        emp1Data.put("shift", "Morning");
+        emp1Data.put("open_meter", "1000");
+        emp1Data.put("close_meter", "1500");
+        emp1Data.put("testing", "10");
+        emp1Data.put("total", "500");
+        emp1Data.put("petrol_ltr", "490");
+        emp1Data.put("rate", "100");
+        emp1Data.put("total_sell", "49000");
+
+        // EMP2: 1500 -> 2100
+        Map<String, Object> emp2Data = new HashMap<>();
+        emp2Data.put("date", "2026-09-20");
+        emp2Data.put("user_id", "22");
+        emp2Data.put("employee_name", "EMP2");
+        emp2Data.put("pump", "Petrol nozzle 1");
+        emp2Data.put("shift", "Afternoon");
+        emp2Data.put("open_meter", "1500");
+        emp2Data.put("close_meter", "2100");
+        emp2Data.put("testing", "10");
+        emp2Data.put("total", "600");
+        emp2Data.put("petrol_ltr", "590");
+        emp2Data.put("rate", "100");
+        emp2Data.put("total_sell", "59000");
+
+        when(petrolSellRepository.findByDateAndPumpAndShiftAndUserId("2026-09-20", "Petrol nozzle 1", "Morning", "11"))
+                .thenReturn(Optional.empty());
+        when(petrolSellRepository.findByDateAndPumpAndShiftAndUserId("2026-09-20", "Petrol nozzle 1", "Afternoon", "22"))
+                .thenReturn(Optional.empty());
+
+        Map<String, Object> payload1 = new HashMap<>();
+        payload1.put("petrolInputData", Collections.singletonList(emp1Data));
+        purchaseController.saveFuelData(payload1);
+
+        Map<String, Object> payload2 = new HashMap<>();
+        payload2.put("petrolInputData", Collections.singletonList(emp2Data));
+        purchaseController.saveFuelData(payload2);
+
+        // Verify saveAll was called for each employee distinctly without overwriting
+        verify(petrolSellRepository, times(2)).saveAll(anyList());
+    }
+
+    @Test
+    public void testNextBusinessDate_NoAutomaticFutureRecordCreated() {
+        // When checking previous closing meter for 2026-09-21, EMP3's 2800 closing on 2026-09-20 is suggested
+        when(petrolSellRepository.findPreviousClosingRecord(eq("Petrol nozzle 1"), eq("2026-09-21"), anyInt(), any(), anyList()))
+                .thenReturn(Optional.of(new PetrolSell() {{
+                    setDate("2026-09-20");
+                    setClose_meter("2800");
+                    setShift("Night");
+                }}));
+
+        ResponseEntity<Map<String, Object>> response =
+                purchaseController.getPreviousClosingMeter("petrol", "Petrol nozzle 1", "2026-09-21", null, "100");
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("2800", response.getBody().get("previousClosingMeter"));
+        // Verified: NO record is saved or inserted automatically into petrolSellRepository
+        verify(petrolSellRepository, never()).save(any());
+        verify(petrolSellRepository, never()).saveAll(any());
     }
 }
 

@@ -729,17 +729,308 @@ public class FinancialReportController {
         List<String> uids = getUserIdsForPump(caller, pumpId);
 
         try (Workbook workbook = new XSSFWorkbook()) {
-            // Sheet 1: Profit & Loss
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+
+            CellStyle secStyle = workbook.createCellStyle();
+            Font secFont = workbook.createFont();
+            secFont.setBold(true);
+            secFont.setFontHeightInPoints((short) 11);
+            secStyle.setFont(secFont);
+
+            Map<String, String> userNames = new HashMap<>();
+            for (String uid : uids) {
+                try {
+                    DAOUser u = userRepository.findById(Long.parseLong(uid)).orElse(null);
+                    if (u != null) {
+                        String name = (u.getFirstName() != null ? u.getFirstName() : "") + " " + (u.getLastName() != null ? u.getLastName() : "");
+                        userNames.put(uid, name.trim().isEmpty() ? u.getUsername() : name.trim());
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            // ================= SHEET 1: EMPLOYEE FUEL SALES =================
+            Sheet salesSheet = workbook.createSheet("Employee Fuel Sales");
+            Row salesHeader = salesSheet.createRow(0);
+            String[] sCols = {"Date", "Employee", "Shift", "Fuel Type", "Nozzle/Meter", "Opening Meter", "Closing Meter", "Testing (L)", "Sale (L)", "Net Sale (L)", "Rate (₹)", "Total Amount (₹)"};
+            for (int i = 0; i < sCols.length; i++) {
+                Cell c = salesHeader.createCell(i);
+                c.setCellValue(sCols[i]);
+                c.setCellStyle(headerStyle);
+            }
+
+            int sIdx = 1;
+
+            class FuelSaleRecord {
+                String date;
+                String employee;
+                String shift;
+                String fuelType;
+                String nozzle;
+                double openMeter;
+                double closeMeter;
+                double testing;
+                double sale;
+                double netSale;
+                double rate;
+                double total;
+            }
+
+            List<FuelSaleRecord> allSales = new ArrayList<>();
+
+            // 1. Petrol
+            List<PetrolSell> pList = petrolSellRepository.findSalesForExport(startDate, endDate, uids);
+            for (PetrolSell p : pList) {
+                FuelSaleRecord r = new FuelSaleRecord();
+                r.date = p.getDate() != null ? p.getDate() : "";
+                String emp = (p.getEmployeeName() != null && !p.getEmployeeName().trim().isEmpty()) ? p.getEmployeeName().trim() : userNames.getOrDefault(p.getUserId(), p.getUserId());
+                r.employee = emp != null ? emp : "N/A";
+                r.shift = p.getShift() != null ? p.getShift() : "Morning";
+                r.fuelType = "Petrol";
+                r.nozzle = p.getPump() != null ? p.getPump() : "Petrol Pump";
+                try { r.openMeter = Double.parseDouble(p.getOpen_meter()); } catch (Exception ignored) {}
+                try { r.closeMeter = Double.parseDouble(p.getClose_meter()); } catch (Exception ignored) {}
+                try { r.testing = Double.parseDouble(p.getTesting()); } catch (Exception ignored) {}
+                try { r.sale = Double.parseDouble(p.getTotal()); } catch (Exception ignored) {}
+                try { r.netSale = Double.parseDouble(p.getPetrol_ltr()); } catch (Exception ignored) {}
+                try { r.rate = Double.parseDouble(p.getRate()); } catch (Exception ignored) {}
+                try { r.total = Double.parseDouble(p.getTotal_sell()); } catch (Exception ignored) {}
+                allSales.add(r);
+            }
+
+            // 2. Diesel
+            List<Dieselsell> dList = dieselSellRepository.findSalesForExport(startDate, endDate, uids);
+            for (Dieselsell d : dList) {
+                FuelSaleRecord r = new FuelSaleRecord();
+                r.date = d.getDate() != null ? d.getDate() : "";
+                String emp = (d.getEmployeeName() != null && !d.getEmployeeName().trim().isEmpty()) ? d.getEmployeeName().trim() : userNames.getOrDefault(d.getUserId(), d.getUserId());
+                r.employee = emp != null ? emp : "N/A";
+                r.shift = d.getShift() != null ? d.getShift() : "Morning";
+                r.fuelType = "Diesel";
+                r.nozzle = d.getPump() != null ? d.getPump() : "Diesel Pump";
+                try { r.openMeter = Double.parseDouble(d.getOpen_meter()); } catch (Exception ignored) {}
+                try { r.closeMeter = Double.parseDouble(d.getClose_meter()); } catch (Exception ignored) {}
+                try { r.testing = Double.parseDouble(d.getTesting()); } catch (Exception ignored) {}
+                try { r.sale = Double.parseDouble(d.getTotal()); } catch (Exception ignored) {}
+                try { r.netSale = Double.parseDouble(d.getDiesel_ltr()); } catch (Exception ignored) {}
+                try { r.rate = Double.parseDouble(d.getRate()); } catch (Exception ignored) {}
+                try { r.total = Double.parseDouble(d.getTotal_sell()); } catch (Exception ignored) {}
+                allSales.add(r);
+            }
+
+            // 3. XP Petrol
+            List<xpPetrol> xpList = xpPetorlRepository.findSalesForExport(startDate, endDate, uids);
+            for (xpPetrol xp : xpList) {
+                FuelSaleRecord r = new FuelSaleRecord();
+                r.date = xp.getDate() != null ? xp.getDate() : "";
+                String emp = (xp.getEmployeeName() != null && !xp.getEmployeeName().trim().isEmpty()) ? xp.getEmployeeName().trim() : userNames.getOrDefault(xp.getUserId(), xp.getUserId());
+                r.employee = emp != null ? emp : "N/A";
+                r.shift = xp.getShift() != null ? xp.getShift() : "Morning";
+                r.fuelType = "XP Petrol";
+                r.nozzle = xp.getPump() != null ? xp.getPump() : "XP Petrol Pump";
+                try { r.openMeter = Double.parseDouble(xp.getOpen_meter()); } catch (Exception ignored) {}
+                try { r.closeMeter = Double.parseDouble(xp.getClose_meter()); } catch (Exception ignored) {}
+                try { r.testing = Double.parseDouble(xp.getTesting()); } catch (Exception ignored) {}
+                try { r.sale = Double.parseDouble(xp.getTotal()); } catch (Exception ignored) {}
+                try { r.netSale = Double.parseDouble(xp.getXppetrol_ltr()); } catch (Exception ignored) {}
+                try { r.rate = Double.parseDouble(xp.getRate()); } catch (Exception ignored) {}
+                try { r.total = Double.parseDouble(xp.getTotal_sell()); } catch (Exception ignored) {}
+                allSales.add(r);
+            }
+
+            // 4. Power Diesel
+            List<powerDiesel> pdList = powerDieselRepository.findSalesForExport(startDate, endDate, uids);
+            for (powerDiesel pd : pdList) {
+                FuelSaleRecord r = new FuelSaleRecord();
+                r.date = pd.getDate() != null ? pd.getDate() : "";
+                String emp = (pd.getEmployeeName() != null && !pd.getEmployeeName().trim().isEmpty()) ? pd.getEmployeeName().trim() : userNames.getOrDefault(pd.getUserId(), pd.getUserId());
+                r.employee = emp != null ? emp : "N/A";
+                r.shift = pd.getShift() != null ? pd.getShift() : "Morning";
+                r.fuelType = "Power Diesel";
+                r.nozzle = pd.getPump() != null ? pd.getPump() : "Power Diesel Pump";
+                try { r.openMeter = Double.parseDouble(pd.getOpen_meter()); } catch (Exception ignored) {}
+                try { r.closeMeter = Double.parseDouble(pd.getClose_meter()); } catch (Exception ignored) {}
+                try { r.testing = Double.parseDouble(pd.getTesting()); } catch (Exception ignored) {}
+                try { r.sale = Double.parseDouble(pd.getTotal()); } catch (Exception ignored) {}
+                try { r.netSale = Double.parseDouble(pd.getPowerdiesel_ltr()); } catch (Exception ignored) {}
+                try { r.rate = Double.parseDouble(pd.getRate()); } catch (Exception ignored) {}
+                try { r.total = Double.parseDouble(pd.getTotal_sell()); } catch (Exception ignored) {}
+                allSales.add(r);
+            }
+
+            allSales.sort((a, b) -> {
+                int c = a.date.compareTo(b.date);
+                if (c != 0) return c;
+                int f = a.fuelType.compareTo(b.fuelType);
+                if (f != 0) return f;
+                int n = a.nozzle.compareTo(b.nozzle);
+                if (n != 0) return n;
+                return Double.compare(a.openMeter, b.openMeter);
+            });
+
+            for (FuelSaleRecord r : allSales) {
+                Row row = salesSheet.createRow(sIdx++);
+                row.createCell(0).setCellValue(r.date);
+                row.createCell(1).setCellValue(r.employee);
+                row.createCell(2).setCellValue(r.shift);
+                row.createCell(3).setCellValue(r.fuelType);
+                row.createCell(4).setCellValue(r.nozzle);
+                row.createCell(5).setCellValue(r.openMeter);
+                row.createCell(6).setCellValue(r.closeMeter);
+                row.createCell(7).setCellValue(r.testing);
+                row.createCell(8).setCellValue(r.sale);
+                row.createCell(9).setCellValue(r.netSale);
+                row.createCell(10).setCellValue(r.rate);
+                row.createCell(11).setCellValue(r.total);
+            }
+
+            // Daily Nozzle Summary
+            sIdx++;
+            Row sumTitleRow = salesSheet.createRow(sIdx++);
+            Cell sumTitle = sumTitleRow.createCell(0);
+            sumTitle.setCellValue("DAILY NOZZLE FINANCIAL SUMMARY (First Open to Final Close)");
+            sumTitle.setCellStyle(secStyle);
+
+            Row sumHeader = salesSheet.createRow(sIdx++);
+            String[] sumCols = {"Date", "Fuel Type", "Nozzle/Meter", "Daily Opening", "Daily Closing", "Daily Meter Sale (L)", "Total Testing (L)", "Total Net Sale (L)", "Total Amount (₹)"};
+            for (int i = 0; i < sumCols.length; i++) {
+                Cell c = sumHeader.createCell(i);
+                c.setCellValue(sumCols[i]);
+                c.setCellStyle(headerStyle);
+            }
+
+            // Group by Date + FuelType + Nozzle
+            Map<String, List<FuelSaleRecord>> groupedByNozzle = new LinkedHashMap<>();
+            for (FuelSaleRecord r : allSales) {
+                String key = r.date + "||" + r.fuelType + "||" + r.nozzle;
+                groupedByNozzle.computeIfAbsent(key, k -> new ArrayList<>()).add(r);
+            }
+
+            for (Map.Entry<String, List<FuelSaleRecord>> entry : groupedByNozzle.entrySet()) {
+                String[] parts = entry.getKey().split("\\|\\|");
+                String dDate = parts[0];
+                String dFuel = parts[1];
+                String dNozzle = parts[2];
+                List<FuelSaleRecord> list = entry.getValue();
+
+                double firstOpen = list.get(0).openMeter;
+                double finalClose = list.get(list.size() - 1).closeMeter;
+                double meterSale = finalClose - firstOpen;
+                double totalTesting = list.stream().mapToDouble(x -> x.testing).sum();
+                double totalNetSale = list.stream().mapToDouble(x -> x.netSale).sum();
+                double totalAmt = list.stream().mapToDouble(x -> x.total).sum();
+
+                Row sr = salesSheet.createRow(sIdx++);
+                sr.createCell(0).setCellValue(dDate);
+                sr.createCell(1).setCellValue(dFuel);
+                sr.createCell(2).setCellValue(dNozzle);
+                sr.createCell(3).setCellValue(firstOpen);
+                sr.createCell(4).setCellValue(finalClose);
+                sr.createCell(5).setCellValue(meterSale);
+                sr.createCell(6).setCellValue(totalTesting);
+                sr.createCell(7).setCellValue(totalNetSale);
+                sr.createCell(8).setCellValue(totalAmt);
+            }
+
+            for (int i = 0; i < sCols.length; i++) {
+                salesSheet.autoSizeColumn(i);
+            }
+
+            // ================= SHEET 2: PURCHASE ENTRIES =================
+            Sheet purSheet = workbook.createSheet("Purchase Entries");
+            Row purHeader = purSheet.createRow(0);
+            String[] pCols = {"Date", "Supplier", "Invoice No", "Tanker No", "Fuel Type", "Quantity (L)", "Base Total (₹)", "VAT (₹)", "Cess (₹)", "JTC %", "Total Purchase (₹)"};
+            for (int i = 0; i < pCols.length; i++) {
+                Cell c = purHeader.createCell(i);
+                c.setCellValue(pCols[i]);
+                c.setCellStyle(headerStyle);
+            }
+
+            Long effPump = (pumpId != null) ? pumpId : caller.getPumpId();
+            List<Purchase> purchases = purchaseRepository.findPurchasesForExport(startDate, endDate, uids, effPump);
+
+            int pIdx = 1;
+            double totPetrolQty = 0.0;
+            double totDieselQty = 0.0;
+            double totPurAmt = 0.0;
+
+            for (Purchase p : purchases) {
+                Row r = purSheet.createRow(pIdx++);
+                r.createCell(0).setCellValue(p.getDate() != null ? p.getDate() : "");
+                r.createCell(1).setCellValue(p.getSupplier() != null ? p.getSupplier() : "");
+                r.createCell(2).setCellValue(p.getInvoiceNumber() != null ? p.getInvoiceNumber() : (p.getSkuNumber() != null ? p.getSkuNumber() : ""));
+                r.createCell(3).setCellValue(p.getTankerNumber() != null ? p.getTankerNumber() : "");
+                r.createCell(4).setCellValue(p.getType() != null ? p.getType() : "");
+
+                double qty = 0;
+                try { qty = Double.parseDouble(p.getQuantity()); } catch (Exception ignored) {}
+                r.createCell(5).setCellValue(qty);
+
+                double baseTot = 0;
+                try { baseTot = Double.parseDouble(p.getTotal()); } catch (Exception ignored) {}
+                r.createCell(6).setCellValue(baseTot);
+
+                double vat = 0;
+                try { vat = Double.parseDouble(p.getVat()); } catch (Exception ignored) {}
+                r.createCell(7).setCellValue(vat);
+
+                double cess = 0;
+                try { cess = Double.parseDouble(p.getCess()); } catch (Exception ignored) {}
+                r.createCell(8).setCellValue(cess);
+
+                double jtc = 0;
+                try { jtc = Double.parseDouble(p.getJtcpercentage()); } catch (Exception ignored) {}
+                r.createCell(9).setCellValue(jtc);
+
+                double tot = p.getTotal_purchase();
+                r.createCell(10).setCellValue(tot);
+
+                totPurAmt += tot;
+                if ("petrol".equalsIgnoreCase(p.getType())) {
+                    totPetrolQty += qty;
+                } else if ("diesel".equalsIgnoreCase(p.getType())) {
+                    totDieselQty += qty;
+                }
+            }
+
+            pIdx++;
+            Row ptRow = purSheet.createRow(pIdx++);
+            ptRow.createCell(4).setCellValue("Total Petrol Purchase");
+            ptRow.getCell(4).setCellStyle(headerStyle);
+            ptRow.createCell(5).setCellValue(totPetrolQty + " L");
+            ptRow.getCell(5).setCellStyle(headerStyle);
+
+            Row dtRow = purSheet.createRow(pIdx++);
+            dtRow.createCell(4).setCellValue("Total Diesel Purchase");
+            dtRow.getCell(4).setCellStyle(headerStyle);
+            dtRow.createCell(5).setCellValue(totDieselQty + " L");
+            dtRow.getCell(5).setCellStyle(headerStyle);
+
+            Row amtRow = purSheet.createRow(pIdx++);
+            amtRow.createCell(4).setCellValue("Grand Total Purchase Value");
+            amtRow.getCell(4).setCellStyle(headerStyle);
+            amtRow.createCell(10).setCellValue(totPurAmt);
+            amtRow.getCell(10).setCellStyle(headerStyle);
+
+            for (int i = 0; i < pCols.length; i++) {
+                purSheet.autoSizeColumn(i);
+            }
+
+            // ================= SHEET 3: PROFIT & LOSS =================
             Sheet plSheet = workbook.createSheet("Profit & Loss");
             Row header = plSheet.createRow(0);
             header.createCell(0).setCellValue("Metric");
             header.createCell(1).setCellValue("Value (INR)");
+            header.getCell(0).setCellStyle(headerStyle);
+            header.getCell(1).setCellStyle(headerStyle);
 
-            double sales = 0, expenses = 0, purchases = 0, indirectIncome = 0;
+            double sales = 0, expenses = 0, purchasesSum = 0, indirectIncome = 0;
             for (String uid : uids) {
                 sales += getSalesForUser(uid, startDate, endDate);
                 expenses += getExpensesForUser(uid, startDate, endDate);
-                purchases += getPurchasesForUser(uid, startDate, endDate);
+                purchasesSum += getPurchasesForUser(uid, startDate, endDate);
 
                 List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
                 for (jamabaki jb : jbList) {
@@ -762,7 +1053,7 @@ public class FinancialReportController {
 
             plSheet.createRow(rowIdx++).createCell(0);
             plSheet.getRow(rowIdx-1).getCell(0).setCellValue("Purchases");
-            plSheet.getRow(rowIdx-1).createCell(1).setCellValue(purchases);
+            plSheet.getRow(rowIdx-1).createCell(1).setCellValue(purchasesSum);
 
             plSheet.createRow(rowIdx++).createCell(0);
             plSheet.getRow(rowIdx-1).getCell(0).setCellValue("Expenses");
@@ -770,7 +1061,11 @@ public class FinancialReportController {
 
             plSheet.createRow(rowIdx++).createCell(0);
             plSheet.getRow(rowIdx-1).getCell(0).setCellValue("Net Profit");
-            plSheet.getRow(rowIdx-1).createCell(1).setCellValue(sales + indirectIncome - expenses - purchases);
+            plSheet.getRow(rowIdx-1).createCell(1).setCellValue(sales + indirectIncome - expenses - purchasesSum);
+
+            for (int i = 0; i < 2; i++) {
+                plSheet.autoSizeColumn(i);
+            }
 
             // Sheet 2: Customer Outstanding
             Sheet outSheet = workbook.createSheet("Customer Outstanding");

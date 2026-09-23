@@ -479,23 +479,44 @@ public class PurchaseController {
     @PostMapping("/addPurchase")
     public ResponseEntity<List<Purchase>> updatePurchase(@RequestBody List<Purchase> expenses) {
         List<Purchase> updatedExpenses = new ArrayList<>();
+        DAOUser authUser = getAuthenticatedUser();
+        Long authPumpId = (authUser != null) ? authUser.getPumpId() : null;
 
         for (Purchase expense : expenses) {
-            Optional<Purchase> existingEntry = purchaseRepository.findByDateAndTypeAndUserId(
-                    expense.getDate(), expense.getType(), expense.getUserId());
-            if (existingEntry.isPresent()) {
-                Purchase existingExpense = existingEntry.get();
-                // ... rest of the logic
-                existingExpense.setQuantity(expense.getQuantity());
-                existingExpense.setTotal(expense.getTotal());
-                existingExpense.setVat(expense.getVat());
-                existingExpense.setCess(expense.getCess());
-                existingExpense.setJtcpercentage(expense.getJtcpercentage());
-                existingExpense.setTotal_purchase(expense.getTotal_purchase());
-                existingExpense.setSkuNumber(expense.getSkuNumber());
-                Purchase savedExpense = purchaseRepository.save(existingExpense);
-                updatedExpenses.add(savedExpense);
+            if (expense.getQuantity() == null || expense.getQuantity().trim().isEmpty() || "0".equals(expense.getQuantity().trim())) {
+                // If it's a new entry with 0 quantity, skip saving empty tanker lines
+                if (expense.getId() == null || expense.getId() <= 0) {
+                    continue;
+                }
+            }
+
+            if (expense.getPumpId() == null && authPumpId != null) {
+                expense.setPumpId(authPumpId);
+            }
+
+            if (expense.getId() != null && expense.getId() > 0) {
+                Optional<Purchase> existingEntry = purchaseRepository.findById(expense.getId());
+                if (existingEntry.isPresent()) {
+                    Purchase existingExpense = existingEntry.get();
+                    existingExpense.setQuantity(expense.getQuantity());
+                    existingExpense.setTotal(expense.getTotal());
+                    existingExpense.setVat(expense.getVat());
+                    existingExpense.setCess(expense.getCess());
+                    existingExpense.setJtcpercentage(expense.getJtcpercentage());
+                    existingExpense.setTotal_purchase(expense.getTotal_purchase());
+                    existingExpense.setSkuNumber(expense.getSkuNumber());
+                    if (expense.getSupplier() != null) existingExpense.setSupplier(expense.getSupplier());
+                    if (expense.getInvoiceNumber() != null) existingExpense.setInvoiceNumber(expense.getInvoiceNumber());
+                    if (expense.getTankerNumber() != null) existingExpense.setTankerNumber(expense.getTankerNumber());
+                    if (expense.getPumpId() != null) existingExpense.setPumpId(expense.getPumpId());
+                    Purchase savedExpense = purchaseRepository.save(existingExpense);
+                    updatedExpenses.add(savedExpense);
+                } else {
+                    Purchase savedExpense = purchaseRepository.save(expense);
+                    updatedExpenses.add(savedExpense);
+                }
             } else {
+                // New transaction - do NOT overwrite by date/type/user!
                 Purchase savedExpense = purchaseRepository.save(expense);
                 updatedExpenses.add(savedExpense);
             }
@@ -503,8 +524,97 @@ public class PurchaseController {
         return ResponseEntity.ok(updatedExpenses);
     }
 
+    @PostMapping("/purchase")
+    public ResponseEntity<Purchase> createPurchase(@RequestBody Purchase purchase) {
+        DAOUser authUser = getAuthenticatedUser();
+        if (authUser != null && authUser.getPumpId() != null) {
+            purchase.setPumpId(authUser.getPumpId());
+        }
+        Purchase saved = purchaseRepository.save(purchase);
+        return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/purchase/by-date")
+    public ResponseEntity<List<Purchase>> getPurchasesByDate(
+            @RequestParam String date,
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) Long pumpId) {
+        List<Purchase> list;
+        DAOUser auth = getAuthenticatedUser();
+        Long effectivePumpId = pumpId;
+        if (auth != null && auth.getPumpId() != null) {
+            effectivePumpId = auth.getPumpId();
+        }
+        if (effectivePumpId != null) {
+            list = purchaseRepository.findByPumpIdAndDate(effectivePumpId, date);
+        } else if (userId != null && !userId.isEmpty()) {
+            list = purchaseRepository.findByUserIdAndDate(userId, date);
+        } else {
+            list = purchaseRepository.findByDate(date);
+        }
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/purchase/{id}")
+    public ResponseEntity<Purchase> getPurchaseById(@PathVariable Integer id) {
+        Optional<Purchase> p = purchaseRepository.findById(id);
+        return p.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/purchase/{id}")
+    public ResponseEntity<Purchase> updatePurchaseById(@PathVariable Integer id, @RequestBody Purchase p) {
+        Optional<Purchase> existing = purchaseRepository.findById(id);
+        if (!existing.isPresent()) return ResponseEntity.notFound().build();
+        Purchase ex = existing.get();
+        ex.setDate(p.getDate());
+        ex.setType(p.getType());
+        ex.setQuantity(p.getQuantity());
+        ex.setTotal(p.getTotal());
+        ex.setVat(p.getVat());
+        ex.setCess(p.getCess());
+        ex.setJtcpercentage(p.getJtcpercentage());
+        ex.setTotal_purchase(p.getTotal_purchase());
+        ex.setSkuNumber(p.getSkuNumber());
+        if (p.getSupplier() != null) ex.setSupplier(p.getSupplier());
+        if (p.getInvoiceNumber() != null) ex.setInvoiceNumber(p.getInvoiceNumber());
+        if (p.getTankerNumber() != null) ex.setTankerNumber(p.getTankerNumber());
+        if (p.getPumpId() != null) ex.setPumpId(p.getPumpId());
+        Purchase saved = purchaseRepository.save(ex);
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/purchase/{id}")
+    public ResponseEntity<ApiResponse> deletePurchaseRest(@PathVariable Integer id) {
+        if (purchaseRepository.existsById(id)) {
+            purchaseRepository.deleteById(id);
+            return ResponseEntity.ok(new ApiResponse("Purchase deleted successfully"));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/updatePurchase")
     public ResponseEntity<ApiResponse> updatePurchase(@RequestBody Purchase purchase) {
+        if (purchase.getId() != null) {
+            Optional<Purchase> ex = purchaseRepository.findById(purchase.getId());
+            if (ex.isPresent()) {
+                Purchase p = ex.get();
+                p.setDate(purchase.getDate());
+                p.setType(purchase.getType());
+                p.setQuantity(purchase.getQuantity());
+                p.setTotal(purchase.getTotal());
+                p.setVat(purchase.getVat());
+                p.setCess(purchase.getCess());
+                p.setJtcpercentage(purchase.getJtcpercentage());
+                p.setTotal_purchase(purchase.getTotal_purchase());
+                p.setSkuNumber(purchase.getSkuNumber());
+                if (purchase.getSupplier() != null) p.setSupplier(purchase.getSupplier());
+                if (purchase.getInvoiceNumber() != null) p.setInvoiceNumber(purchase.getInvoiceNumber());
+                if (purchase.getTankerNumber() != null) p.setTankerNumber(purchase.getTankerNumber());
+                if (purchase.getPumpId() != null) p.setPumpId(purchase.getPumpId());
+                purchaseRepository.save(p);
+                return ResponseEntity.ok(new ApiResponse("Purchase updated and saved successfully"));
+            }
+        }
         purchaseRepository.save(purchase);
         ApiResponse response = new ApiResponse("Purchase updated and saved successfully");
         return ResponseEntity.ok(response);
@@ -4177,16 +4287,29 @@ public class PurchaseController {
                                      ? String.valueOf(data.get("employee_name"))
                                      : "";
 
-                            List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<PetrolSell> existingPetrol = Optional.empty();
-                            for (String tId : targetUserIds) {
-                                existingPetrol = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
-                                if (existingPetrol.isPresent()) break;
+                            if (data.get("id") != null) {
+                                try {
+                                    Integer pId = Integer.valueOf(String.valueOf(data.get("id")));
+                                    existingPetrol = petrolSellRepository.findById(pId);
+                                } catch (Exception ignored) {}
                             }
                             if (!existingPetrol.isPresent()) {
+                                List<String> targetUserIds = getTargetUserIds(userId);
                                 for (String tId : targetUserIds) {
-                                    existingPetrol = petrolSellRepository.findByDateAndPumpAndUserId(date, pump, tId);
-                                    if (existingPetrol.isPresent()) break;
+                                    Optional<PetrolSell> match = petrolSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
+                                    if (match.isPresent()) {
+                                        String existingEmp = match.get().getEmployeeName();
+                                        if (employeeName != null && !employeeName.trim().isEmpty()) {
+                                            if (existingEmp == null || existingEmp.trim().isEmpty() || existingEmp.equalsIgnoreCase(employeeName.trim())) {
+                                                existingPetrol = match;
+                                                break;
+                                            }
+                                        } else if (existingEmp == null || existingEmp.trim().isEmpty()) {
+                                            existingPetrol = match;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
 
@@ -4237,16 +4360,29 @@ public class PurchaseController {
                                      ? String.valueOf(data.get("employee_name"))
                                      : "";
 
-                            List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<Dieselsell> existingDiesel = Optional.empty();
-                            for (String tId : targetUserIds) {
-                                existingDiesel = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
-                                if (existingDiesel.isPresent()) break;
+                            if (data.get("id") != null) {
+                                try {
+                                    Integer dId = Integer.valueOf(String.valueOf(data.get("id")));
+                                    existingDiesel = dieselSellRepository.findById(dId);
+                                } catch (Exception ignored) {}
                             }
                             if (!existingDiesel.isPresent()) {
+                                List<String> targetUserIds = getTargetUserIds(userId);
                                 for (String tId : targetUserIds) {
-                                    existingDiesel = dieselSellRepository.findByDateAndPumpAndUserId(date, pump, tId);
-                                    if (existingDiesel.isPresent()) break;
+                                    Optional<Dieselsell> match = dieselSellRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
+                                    if (match.isPresent()) {
+                                        String existingEmp = match.get().getEmployeeName();
+                                        if (employeeName != null && !employeeName.trim().isEmpty()) {
+                                            if (existingEmp == null || existingEmp.trim().isEmpty() || existingEmp.equalsIgnoreCase(employeeName.trim())) {
+                                                existingDiesel = match;
+                                                break;
+                                            }
+                                        } else if (existingEmp == null || existingEmp.trim().isEmpty()) {
+                                            existingDiesel = match;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
 
@@ -4342,16 +4478,29 @@ public class PurchaseController {
                                      ? String.valueOf(data.get("employee_name"))
                                      : "";
 
-                            List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<xpPetrol> existingPetrol = Optional.empty();
-                            for (String tId : targetUserIds) {
-                                existingPetrol = xpPetorlRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
-                                if (existingPetrol.isPresent()) break;
+                            if (data.get("id") != null) {
+                                try {
+                                    Integer xId = Integer.valueOf(String.valueOf(data.get("id")));
+                                    existingPetrol = xpPetorlRepository.findById(xId);
+                                } catch (Exception ignored) {}
                             }
                             if (!existingPetrol.isPresent()) {
+                                List<String> targetUserIds = getTargetUserIds(userId);
                                 for (String tId : targetUserIds) {
-                                    existingPetrol = xpPetorlRepository.findByDateAndPumpAndUserId(date, pump, tId);
-                                    if (existingPetrol.isPresent()) break;
+                                    Optional<xpPetrol> match = xpPetorlRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
+                                    if (match.isPresent()) {
+                                        String existingEmp = match.get().getEmployeeName();
+                                        if (employeeName != null && !employeeName.trim().isEmpty()) {
+                                            if (existingEmp == null || existingEmp.trim().isEmpty() || existingEmp.equalsIgnoreCase(employeeName.trim())) {
+                                                existingPetrol = match;
+                                                break;
+                                            }
+                                        } else if (existingEmp == null || existingEmp.trim().isEmpty()) {
+                                            existingPetrol = match;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
 
@@ -4401,16 +4550,29 @@ public class PurchaseController {
                                      ? String.valueOf(data.get("employee_name"))
                                      : "";
 
-                            List<String> targetUserIds = getTargetUserIds(userId);
                             Optional<powerDiesel> existingDiesel = Optional.empty();
-                            for (String tId : targetUserIds) {
-                                existingDiesel = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
-                                if (existingDiesel.isPresent()) break;
+                            if (data.get("id") != null) {
+                                try {
+                                    Integer pdId = Integer.valueOf(String.valueOf(data.get("id")));
+                                    existingDiesel = powerDieselRepository.findById(pdId);
+                                } catch (Exception ignored) {}
                             }
                             if (!existingDiesel.isPresent()) {
+                                List<String> targetUserIds = getTargetUserIds(userId);
                                 for (String tId : targetUserIds) {
-                                    existingDiesel = powerDieselRepository.findByDateAndPumpAndUserId(date, pump, tId);
-                                    if (existingDiesel.isPresent()) break;
+                                    Optional<powerDiesel> match = powerDieselRepository.findByDateAndPumpAndShiftAndUserId(date, pump, shift, tId);
+                                    if (match.isPresent()) {
+                                        String existingEmp = match.get().getEmployeeName();
+                                        if (employeeName != null && !employeeName.trim().isEmpty()) {
+                                            if (existingEmp == null || existingEmp.trim().isEmpty() || existingEmp.equalsIgnoreCase(employeeName.trim())) {
+                                                existingDiesel = match;
+                                                break;
+                                            }
+                                        } else if (existingEmp == null || existingEmp.trim().isEmpty()) {
+                                            existingDiesel = match;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
 
@@ -6149,27 +6311,28 @@ public class PurchaseController {
         // --- PURCHASE ---
         try {
             String inSql = targetUserIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(","));
+            String pumpCondition = (pumpId != null) ? " OR pump_id = " + pumpId : "";
             if ("petrol".equalsIgnoreCase(fuelType)) {
                 Double p = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(quantity), 0) FROM purchase WHERE date = '" + date + "' AND user_id IN (" + inSql + ") AND type = 'Petrol'",
+                    "SELECT COALESCE(SUM(CAST(quantity AS DECIMAL(15,2))), 0) FROM purchase WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(type) = 'petrol'",
                     Double.class
                 );
                 purchaseQuantity = p != null ? p : 0.0;
             } else if ("diesel".equalsIgnoreCase(fuelType)) {
                 Double p = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(quantity), 0) FROM purchase WHERE date = '" + date + "' AND user_id IN (" + inSql + ") AND type = 'Diesel'",
+                    "SELECT COALESCE(SUM(CAST(quantity AS DECIMAL(15,2))), 0) FROM purchase WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(type) = 'diesel'",
                     Double.class
                 );
                 purchaseQuantity = p != null ? p : 0.0;
             } else if ("xppetrol".equalsIgnoreCase(fuelType)) {
                 Double p = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(quantity), 0) FROM extrapurchases WHERE date = '" + date + "' AND user_id IN (" + inSql + ") AND type = 'XP Petrol'",
+                    "SELECT COALESCE(SUM(CAST(quantity AS DECIMAL(15,2))), 0) FROM extrapurchases WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(type) LIKE '%xp%'",
                     Double.class
                 );
                 purchaseQuantity = p != null ? p : 0.0;
             } else if ("powerdiesel".equalsIgnoreCase(fuelType)) {
                 Double p = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(quantity), 0) FROM extrapurchases WHERE date = '" + date + "' AND user_id IN (" + inSql + ") AND type = 'Power Diesel'",
+                    "SELECT COALESCE(SUM(CAST(quantity AS DECIMAL(15,2))), 0) FROM extrapurchases WHERE date = '" + date + "' AND (user_id IN (" + inSql + ")" + pumpCondition + ") AND LOWER(type) LIKE '%power%'",
                     Double.class
                 );
                 purchaseQuantity = p != null ? p : 0.0;

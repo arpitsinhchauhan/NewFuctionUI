@@ -12,6 +12,10 @@
             <mat-icon>search</mat-icon>
           </button>
         </div>
+        <button mat-raised-button color="primary" (click)="openDialog()" class="btn-add-purchase">
+          <mat-icon>add</mat-icon>
+          <span>Add Purchase</span>
+        </button>
         <button mat-stroked-button color="primary" (click)="openExcelPdf()">
           <mat-icon>download</mat-icon>
           <span>Export Excel</span>
@@ -30,8 +34,10 @@
               </mat-icon>
             </th>
             <th *ngIf="role !== 'EMPLOYEE' && role !== 'employee'">Employee</th>
+            <th>Supplier</th>
+            <th>Invoice No</th>
+            <th>Tanker No</th>
             <th>Type</th>
-            <th>SKU Number</th>
             <th>Quantity</th>
             <th>Base Total</th>
             <th>VAT</th>
@@ -48,11 +54,19 @@
               <span class="badge badge-info">{{ item.employeeName || 'N/A' }}</span>
             </td>
             <td>
-              <span class="status-pill info">{{ item.type }}</span>
+              <span class="font-weight-medium" *ngIf="item.supplier">{{ item.supplier }}</span>
+              <span class="text-muted" *ngIf="!item.supplier">-</span>
             </td>
             <td>
-              <span class="badge badge-secondary" *ngIf="item.skuNumber">{{ item.skuNumber }}</span>
-              <span class="text-muted" *ngIf="!item.skuNumber">-</span>
+              <span class="badge badge-secondary" *ngIf="item.invoiceNumber || item.skuNumber">{{ item.invoiceNumber || item.skuNumber }}</span>
+              <span class="text-muted" *ngIf="!item.invoiceNumber && !item.skuNumber">-</span>
+            </td>
+            <td>
+              <span class="badge badge-dark" *ngIf="item.tankerNumber">{{ item.tankerNumber }}</span>
+              <span class="text-muted" *ngIf="!item.tankerNumber">-</span>
+            </td>
+            <td>
+              <span class="status-pill info">{{ item.type }}</span>
             </td>
             <td>{{ item.quantity | number }} L</td>
             <td>₹{{ item.total | number:'1.2-2' }}</td>

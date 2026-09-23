@@ -3,7 +3,7 @@ import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialog } from "@angular/material/dialog";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { API_AGGREGATED_DATA } from "app/serviceult";
+import { API_AGGREGATED_DATA, API_PETROL_LIST, API_DIESEL_LIST, API_PURCHASE_LIST, API_EXTRA_PURCHASE_LIST } from "app/serviceult";
 import { UserServiceService } from "app/services/user-service.service";
 import { AggregatedDataDTO } from "app/models/AggregatedDataDTO";
 import { forkJoin, of } from "rxjs";
@@ -15,6 +15,9 @@ import { catchError } from "rxjs/operators";
   styleUrls: ["./pump-detail.component.css"],
 })
 export class PumpDetailComponent implements OnInit {
+  rawPurchasesList: any[] = [];
+  rawPetrolSells: any[] = [];
+  rawDieselSells: any[] = [];
   // productList: any = [];
   startDate: string;
   totalPetrolSum: number = 0;
@@ -124,6 +127,19 @@ export class PumpDetailComponent implements OnInit {
         next: (data) => this.processAggregatedData(this.mergeAggregatedByDate(data || [])),
         error: (error) => console.error("Error fetching data:", error)
       });
+
+    forkJoin({
+      purchases: this.http.get<any[]>(API_PURCHASE_LIST, { params: { userId: this.userId || "" } }).pipe(catchError(() => of([]))),
+      extraPurchases: this.http.get<any[]>(API_EXTRA_PURCHASE_LIST, { params: { userId: this.userId || "" } }).pipe(catchError(() => of([]))),
+      petrolSells: this.http.get<any[]>(API_PETROL_LIST, { params: { userId: this.userId || "" } }).pipe(catchError(() => of([]))),
+      dieselSells: this.http.get<any[]>(API_DIESEL_LIST, { params: { userId: this.userId || "" } }).pipe(catchError(() => of([]))),
+    }).subscribe(({ purchases, extraPurchases, petrolSells, dieselSells }) => {
+      this.rawPurchasesList = (purchases || []).concat(extraPurchases || []).filter(p => {
+        return p.date && p.date >= startDate && p.date <= endDate;
+      });
+      this.rawPetrolSells = (petrolSells || []).filter(p => p.date && p.date >= startDate && p.date <= endDate);
+      this.rawDieselSells = (dieselSells || []).filter(d => d.date && d.date >= startDate && d.date <= endDate);
+    });
   }
 
   /**
@@ -747,9 +763,112 @@ export class PumpDetailComponent implements OnInit {
     const displayHeaders = headerOrder.map(h => headerDisplayMap[h] || h);
     XLSX.utils.sheet_add_aoa(worksheet, [displayHeaders], { origin: "A1" });
 
+    // ── Sheet 1: Employee Fuel Sales & Daily Summary ──
+    const employeeSalesRows: any[] = [];
+    (this.rawPetrolSells || []).forEach(p => {
+      employeeSalesRows.push({
+        Date: p.date || "",
+        Employee: p.employeeName || p.username || "N/A",
+        Shift: p.shift || "Morning",
+        "Fuel Type": "Petrol",
+        "Nozzle/Meter": p.pump || "Petrol Pump",
+        "Opening Meter": Number(p.open_meter) || 0,
+        "Closing Meter": Number(p.close_meter) || 0,
+        "Testing (L)": Number(p.testing) || 0,
+        "Sale (L)": Number(p.total) || 0,
+        "Net Sale (L)": Number(p.petrol_ltr) || 0,
+        "Rate (₹)": Number(p.rate) || 0,
+        "Total Amount (₹)": Number(p.total_sell) || 0
+      });
+    });
+    (this.rawDieselSells || []).forEach(d => {
+      employeeSalesRows.push({
+        Date: d.date || "",
+        Employee: d.employeeName || d.username || "N/A",
+        Shift: d.shift || "Morning",
+        "Fuel Type": "Diesel",
+        "Nozzle/Meter": d.pump || "Diesel Pump",
+        "Opening Meter": Number(d.open_meter) || 0,
+        "Closing Meter": Number(d.close_meter) || 0,
+        "Testing (L)": Number(d.testing) || 0,
+        "Sale (L)": Number(d.total) || 0,
+        "Net Sale (L)": Number(d.diesel_ltr) || 0,
+        "Rate (₹)": Number(d.rate) || 0,
+        "Total Amount (₹)": Number(d.total_sell) || 0
+      });
+    });
+
+    employeeSalesRows.sort((a, b) => (
+      a.Date.localeCompare(b.Date) ||
+      a["Fuel Type"].localeCompare(b["Fuel Type"]) ||
+      a["Nozzle/Meter"].localeCompare(b["Nozzle/Meter"]) ||
+      (a["Opening Meter"] - b["Opening Meter"])
+    ));
+
+    const nozzleGroups: { [key: string]: any[] } = {};
+    employeeSalesRows.forEach(r => {
+      const key = `${r.Date}||${r["Fuel Type"]}||${r["Nozzle/Meter"]}`;
+      if (!nozzleGroups[key]) nozzleGroups[key] = [];
+      nozzleGroups[key].push(r);
+    });
+
+    const summaryRows: any[] = [];
+    Object.keys(nozzleGroups).forEach(k => {
+      const parts = k.split("||");
+      const list = nozzleGroups[k];
+      const firstOpen = list[0]["Opening Meter"];
+      const finalClose = list[list.length - 1]["Closing Meter"];
+      summaryRows.push({
+        Date: parts[0],
+        "Fuel Type": parts[1],
+        "Nozzle/Meter": parts[2],
+        "Daily Opening": firstOpen,
+        "Daily Closing": finalClose,
+        "Daily Meter Sale (L)": finalClose - firstOpen,
+        "Total Testing (L)": list.reduce((s, x) => s + x["Testing (L)"], 0),
+        "Total Net Sale (L)": list.reduce((s, x) => s + x["Net Sale (L)"], 0),
+        "Total Amount (₹)": list.reduce((s, x) => s + x["Total Amount (₹)"], 0)
+      });
+    });
+
+    const salesCombined = [...employeeSalesRows, {}, { Date: "DAILY NOZZLE FINANCIAL SUMMARY (First Open to Final Close)" }, ...summaryRows];
+    const salesWorksheet = XLSX.utils.json_to_sheet(salesCombined);
+
+    // ── Sheet 2: Purchase Entries ──
+    const purchaseRows: any[] = (this.rawPurchasesList || []).map(p => ({
+      Date: p.date || "",
+      Supplier: p.supplier || "",
+      "Invoice No": p.invoiceNumber || p.skuNumber || "",
+      "Tanker No": p.tankerNumber || "",
+      "Fuel Type": p.type || "",
+      "Quantity (L)": Number(p.quantity) || 0,
+      "Base Total (₹)": Number(p.total) || 0,
+      "VAT (₹)": Number(p.vat) || 0,
+      "Cess (₹)": Number(p.cess) || 0,
+      "JTC %": Number(p.jtcpercentage) || 0,
+      "Total Purchase (₹)": Number(p.total_purchase) || 0
+    }));
+
+    const totPetrolPur = purchaseRows.filter(p => p["Fuel Type"]?.toLowerCase() === 'petrol').reduce((s, p) => s + p["Quantity (L)"], 0);
+    const totDieselPur = purchaseRows.filter(p => p["Fuel Type"]?.toLowerCase() === 'diesel').reduce((s, p) => s + p["Quantity (L)"], 0);
+    const totPurAmount = purchaseRows.reduce((s, p) => s + p["Total Purchase (₹)"], 0);
+
+    const purCombined = [
+      ...purchaseRows,
+      {},
+      { "Fuel Type": "Total Petrol Purchase", "Quantity (L)": `${totPetrolPur} L` },
+      { "Fuel Type": "Total Diesel Purchase", "Quantity (L)": `${totDieselPur} L` },
+      { "Fuel Type": "Grand Total Purchase Value", "Total Purchase (₹)": totPurAmount }
+    ];
+    const purWorksheet = XLSX.utils.json_to_sheet(purCombined);
+
     const workbook: XLSX.WorkBook = {
-      Sheets: { data: worksheet },
-      SheetNames: ["data"]
+      Sheets: {
+        "Employee Fuel Sales": salesWorksheet,
+        "Purchase Entries": purWorksheet,
+        "Daily Financial Summary": worksheet
+      },
+      SheetNames: ["Employee Fuel Sales", "Purchase Entries", "Daily Financial Summary"]
     };
 
     XLSX.writeFile(workbook, "ProductList.xlsx");

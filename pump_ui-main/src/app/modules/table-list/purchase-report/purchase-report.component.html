@@ -16,9 +16,21 @@
   <div class="card-body p-3">
     <!-- Date picker row -->
     <div class="row align-items-center mb-3">
-      <div class="col-md-5">
+      <div class="col-md-3">
         <label class="form-label font-weight-bold text-secondary mb-1">Purchase Date</label>
         <input type="date" class="form-control modern-date-input" [(ngModel)]="purchaDipStockseDetails.date" (change)="updateDate()">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label font-weight-bold text-secondary mb-1">Supplier</label>
+        <input type="text" class="form-control" [(ngModel)]="purchaDipStockseDetails.supplier" placeholder="e.g. ABC Fuels">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label font-weight-bold text-secondary mb-1">Invoice Number</label>
+        <input type="text" class="form-control" [(ngModel)]="purchaDipStockseDetails.invoiceNumber" placeholder="e.g. INV-001">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label font-weight-bold text-secondary mb-1">Tanker Number</label>
+        <input type="text" class="form-control" [(ngModel)]="purchaDipStockseDetails.tankerNumber" placeholder="e.g. TN-01-AB-1234">
       </div>
     </div>
 

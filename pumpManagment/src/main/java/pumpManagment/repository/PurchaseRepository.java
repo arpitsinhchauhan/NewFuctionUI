@@ -118,4 +118,16 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                         @Param("endDate") String endDate,
                         @Param("userId") String userId);
 
+        List<Purchase> findByPumpId(Long pumpId);
+
+        List<Purchase> findByPumpIdAndDate(Long pumpId, String date);
+
+        List<Purchase> findByUserIdAndDate(String userId, String date);
+
+        List<Purchase> findByDate(String date);
+
+        List<Purchase> findByDateBetween(String startDate, String endDate);
+
+        @Query("SELECT p FROM Purchase p WHERE p.date BETWEEN :startDate AND :endDate AND (p.userId IN (:userIds) OR (p.pumpId IS NOT NULL AND p.pumpId = :pumpId)) ORDER BY p.date ASC, p.id ASC")
+        List<Purchase> findPurchasesForExport(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("userIds") List<String> userIds, @Param("pumpId") Long pumpId);
 }

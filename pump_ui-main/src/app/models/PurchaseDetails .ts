@@ -8,4 +8,8 @@ export interface PurchaseDetails {
     jtcpercentage: string;
     total_purchase: string;
     skuNumber?: string;
+    supplier?: string;
+    invoiceNumber?: string;
+    tankerNumber?: string;
+    id?: any;
 }

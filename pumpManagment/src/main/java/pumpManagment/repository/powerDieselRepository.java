@@ -94,4 +94,7 @@ public interface powerDieselRepository extends JpaRepository<powerDiesel, Intege
                         "END " +
                         "AND p.user_id = :userId ", nativeQuery = true)
         Double findTotalPowerDieselLtrForCurrentYear(@Param("userId") String userId);
+
+        @Query("SELECT pd FROM powerDiesel pd WHERE pd.date BETWEEN :startDate AND :endDate AND pd.userId IN (:userIds) ORDER BY pd.date ASC, pd.pump ASC, pd.id ASC")
+        List<powerDiesel> findSalesForExport(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("userIds") List<String> userIds);
 }

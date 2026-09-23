@@ -142,4 +142,6 @@ public interface DieselSellRepository extends JpaRepository<Dieselsell, Integer>
                         @Param("endDate") String endDate,
                         @Param("userId") String userId);
 
+        @Query("SELECT d FROM Dieselsell d WHERE d.date BETWEEN :startDate AND :endDate AND d.userId IN (:userIds) ORDER BY d.date ASC, d.pump ASC, d.id ASC")
+        List<Dieselsell> findSalesForExport(@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("userIds") List<String> userIds);
 }
