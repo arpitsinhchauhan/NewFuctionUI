@@ -25,7 +25,7 @@ public class dailytotal {
     private Integer id;
     @Column(name = "date")
     private String date;
-    @Column(name = "DailyTotal")
+    @Column(name = "daily_total")
     private double DailyTotal;
     @Column(name = "user_id") // Ensure this column exists
     private String userId;

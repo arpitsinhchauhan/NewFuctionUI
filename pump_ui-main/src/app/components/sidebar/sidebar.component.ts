@@ -93,6 +93,7 @@ export class SidebarComponent implements OnInit {
   @Input() isCollapsed = false;
   menuSections: any[];
   role: string = '';
+  username: string = '';
   ps: any;
   branding: any;
 
@@ -103,12 +104,18 @@ export class SidebarComponent implements OnInit {
     this.branding = this.brandService.getBranding();
     // Default to Owner if not set, for safety or mapping
     this.role = localStorage.getItem('role') || 'Owner';
-    // Removed Administrator-to-Owner mapping to allow separate visibility rules
+    this.username = localStorage.getItem('username') || '';
 
-    // Initialize with default (show all) so menu isn't empty on load or if API fails
+    const isHeadOffice = (this.username || '').toLowerCase() === 'manager' ||
+      (this.username || '').toLowerCase() === 'admin' ||
+      this.role === 'SUPER_ADMIN' ||
+      this.role === 'admin' ||
+      this.role === 'Administrator';
+
+    // Initialize with default menu so menu isn't empty on load
     this.buildMenu(true, true);
 
-    if (userId) {
+    if (!isHeadOffice && userId) {
       this.userService.getUserPump(userId).subscribe({
         next: (response) => {
           const data = response?.data || {};
@@ -129,11 +136,25 @@ export class SidebarComponent implements OnInit {
 
   buildMenu(xpPetrolEnabled: boolean, powerDieselEnabled: boolean) {
     const currentRole = this.role || 'Owner';
-    const isDeveloper = currentRole === 'SUPER_ADMIN' || currentRole === 'DEVELOPER';
-    const isManagerAdmin = currentRole === 'admin' || currentRole === 'Administrator';
+    const currentUsername = (this.username || localStorage.getItem('username') || '').trim().toLowerCase();
+    const isHeadOfficeManager = currentUsername === 'manager' ||
+      currentUsername === 'admin' ||
+      currentRole === 'SUPER_ADMIN' ||
+      currentRole === 'admin' ||
+      currentRole === 'Administrator';
+    const isDeveloper = currentRole === 'DEVELOPER';
     const isEmployee = currentRole === 'EMPLOYEE' || currentRole === 'Employee';
 
-    if (isDeveloper) {
+    if (isHeadOfficeManager) {
+      this.menuSections = [
+        {
+          section: 'USER MANAGEMENT',
+          items: [
+            { path: '/User', title: 'User Master', icon: 'supervised_user_circle' }
+          ]
+        }
+      ];
+    } else if (isDeveloper) {
       this.menuSections = [
         {
           section: 'SUPER ADMIN PANEL',
@@ -145,15 +166,6 @@ export class SidebarComponent implements OnInit {
             { path: '/financial-reports', title: 'Financial Suite', icon: 'account_balance_wallet' },
             { path: '/Report', title: 'Reports', icon: 'picture_as_pdf' },
             { path: '/settings', title: 'Settings', icon: 'settings' }
-          ]
-        }
-      ];
-    } else if (isManagerAdmin) {
-      this.menuSections = [
-        {
-          section: 'ADMIN PANEL',
-          items: [
-            { path: '/User', title: 'User Master', icon: 'supervised_user_circle' }
           ]
         }
       ];

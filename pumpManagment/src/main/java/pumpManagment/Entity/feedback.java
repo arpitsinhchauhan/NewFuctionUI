@@ -13,6 +13,7 @@ public class feedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_feedbackdata")
     private Integer idFeedbackdata;
     @Column(name = "username")
     private String username;

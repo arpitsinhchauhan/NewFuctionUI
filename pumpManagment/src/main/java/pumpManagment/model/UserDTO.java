@@ -24,6 +24,8 @@ public class UserDTO {
     private String powe_diesel_nozzle;
     private Long pumpId;
     private Long managerId;
+    private String databaseName;
+    private String pumpName;
 
     public UserDTO() {
     }
@@ -136,5 +138,24 @@ public class UserDTO {
 
     public void setManagerId(Long managerId) {
         this.managerId = managerId;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
+    public String getPumpName() {
+        if (pumpName != null && !pumpName.trim().isEmpty()) {
+            return pumpName.trim();
+        }
+        return firstName != null ? firstName.trim() : "";
+    }
+
+    public void setPumpName(String pumpName) {
+        this.pumpName = pumpName;
     }
 }

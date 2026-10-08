@@ -49,6 +49,10 @@ public class JwtUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
+        return generateToken(userDetails, null);
+    }
+
+    public String generateToken(UserDetails userDetails, String databaseName) {
         Map<String, Object> claims = new HashMap<>();
 
         Collection<? extends GrantedAuthority> roles = userDetails.getAuthorities();
@@ -62,8 +66,20 @@ public class JwtUtil {
         if (!roles.isEmpty()) {
             claims.put("role", roles.iterator().next().getAuthority());
         }
+        if (databaseName != null && !databaseName.trim().isEmpty()) {
+            claims.put("databaseName", databaseName.trim().toLowerCase());
+        }
 
         return doGenerateToken(claims, userDetails.getUsername());
+    }
+
+    public String getDatabaseNameFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token).getBody();
+            return claims.get("databaseName", String.class);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {

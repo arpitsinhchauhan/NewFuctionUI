@@ -27,11 +27,11 @@ public class Employee {
     private Integer id;
     @Column(name = "name")
     private String name;
-    @Column(name = "phoneNumber")
+    @Column(name = "phone_number")
     private String phoneNumber;
-    @Column(name = "accountNumber")
+    @Column(name = "account_number")
     private String accountNumber;
-    @Column(name = "employeeId")
+    @Column(name = "employee_id")
     private String employeeId;
     @Lob
     @Column(name = "photo")

@@ -236,6 +236,9 @@ public class PurchaseController {
     @Autowired
     private TankConfigurationRepository tankConfigurationRepository;
 
+    @Autowired
+    private pumpManagment.service.UserTenantCacheService userTenantCacheService;
+
     // Login Page
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(
@@ -287,7 +290,14 @@ public class PurchaseController {
                     .orElse("ROLE_USER");
 
             Long userId = daoUser.getId();
-            String token = jwtUtil.generateToken(userdetails);
+            String userDb = daoUser.getDatabaseName();
+            if ((userDb == null || userDb.trim().isEmpty()) && daoUser.getManagerId() != null) {
+                userDb = userTenantCacheService.resolveDatabaseForUserId(daoUser.getManagerId());
+            }
+            if (userDb != null && !userDb.trim().isEmpty()) {
+                userTenantCacheService.registerUserDatabase(username, userId, userDb);
+            }
+            String token = jwtUtil.generateToken(userdetails, userDb);
             String petrolNozzle = daoUser.getPetrol_nozzle();
             String dieselNozzle = daoUser.getDiesel_nozzle();
             String xpPetrolNozzle = daoUser.getXp_petrol_nozzle();

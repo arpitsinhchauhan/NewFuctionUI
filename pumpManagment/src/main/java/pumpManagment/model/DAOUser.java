@@ -71,6 +71,9 @@ public class DAOUser {
     @Column(name = "company_id")
     private Long companyId;
 
+    @Column(name = "database_name")
+    private String databaseName;
+
     public Long getId() {
         return id;
     }
@@ -237,5 +240,13 @@ public class DAOUser {
 
     public void setCompanyId(Long companyId) {
         this.companyId = companyId;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 }

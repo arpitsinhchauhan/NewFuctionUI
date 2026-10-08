@@ -20,32 +20,67 @@ public class DayClosing {
     @Column(name = "status", nullable = false)
     private String status = "OPEN"; // OPEN or CLOSED
 
+    @Column(name = "opening_cash")
     private Double openingCash = 0.0;
+
+    @Column(name = "cash_collection")
     private Double cashCollection = 0.0;
+
+    @Column(name = "upi_collection")
     private Double upiCollection = 0.0;
+
+    @Column(name = "card_collection")
     private Double cardCollection = 0.0;
+
+    @Column(name = "credit_sales")
     private Double creditSales = 0.0;
+
+    @Column(name = "expenses")
     private Double expenses = 0.0;
+
+    @Column(name = "fuel_sales")
     private Double fuelSales = 0.0;
+
+    @Column(name = "oil_sales")
     private Double oilSales = 0.0;
+
+    @Column(name = "total_sales")
     private Double totalSales = 0.0;
+
+    @Column(name = "net_collection")
     private Double netCollection = 0.0;
 
+    @Column(name = "real_opening_meter")
     private Double realOpeningMeter = 0.0;
+
+    @Column(name = "real_closing_meter")
     private Double realClosingMeter = 0.0;
+
+    @Column(name = "total_testing")
     private Double totalTesting = 0.0;
+
+    @Column(name = "net_sales_ltr")
     private Double netSalesLtr = 0.0;
 
+    @Column(name = "closed_by")
     private String closedBy;
+
+    @Column(name = "closed_time")
     private LocalDateTime closedTime;
 
+    @Column(name = "reopened_by")
     private String reopenedBy;
+
+    @Column(name = "reopened_time")
     private LocalDateTime reopenedTime;
 
-    @Column(length = 1000)
+    @Column(name = "reopen_reason", length = 1000)
     private String reopenReason;
 
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
+
+    @Column(name = "updated_date")
     private LocalDateTime updatedDate;
 
     public DayClosing() {

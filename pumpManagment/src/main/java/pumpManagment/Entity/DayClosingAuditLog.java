@@ -20,17 +20,28 @@ public class DayClosingAuditLog {
     @Column(name = "action", nullable = false)
     private String action; // DAY_CLOSED or DAY_REOPENED
 
+    @Column(name = "performed_by")
     private String performedBy;
+
+    @Column(name = "performed_role")
     private String performedRole;
+
+    @Column(name = "timestamp")
     private LocalDateTime timestamp;
 
+    @Column(name = "total_sales")
     private Double totalSales = 0.0;
+
+    @Column(name = "total_expenses")
     private Double totalExpenses = 0.0;
+
+    @Column(name = "net_collection")
     private Double netCollection = 0.0;
 
-    @Column(length = 1000)
+    @Column(name = "reason", length = 1000)
     private String reason;
 
+    @Column(name = "ip_address")
     private String ipAddress;
 
     public DayClosingAuditLog() {
