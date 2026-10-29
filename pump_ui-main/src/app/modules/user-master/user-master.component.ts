@@ -74,6 +74,36 @@ export class UserMasterComponent implements OnInit, OnDestroy {
     return `ID: ${managerId}`;
   }
 
+  getRoleLabel(role: string): string {
+    if (!role) return 'User';
+    const r = role.toUpperCase();
+    if (r === 'SUPER_ADMIN' || r === 'ADMIN' || r === 'ADMINISTRATOR' || r === 'DEVELOPER') {
+      return 'Super Admin';
+    }
+    if (r === 'PUMP_MANAGER' || r === 'USER' || r === 'OWNER' || r === 'MANAGER') {
+      return 'Pump Manager';
+    }
+    if (r === 'EMPLOYEE' || r === 'STAFF') {
+      return 'Employee';
+    }
+    return role;
+  }
+
+  getRoleIcon(role: string): string {
+    if (!role) return 'person';
+    const r = role.toUpperCase();
+    if (r === 'SUPER_ADMIN' || r === 'ADMIN' || r === 'ADMINISTRATOR' || r === 'DEVELOPER') {
+      return 'security';
+    }
+    if (r === 'PUMP_MANAGER' || r === 'USER' || r === 'OWNER' || r === 'MANAGER') {
+      return 'local_gas_station';
+    }
+    if (r === 'EMPLOYEE' || r === 'STAFF') {
+      return 'badge';
+    }
+    return 'person';
+  }
+
   addUser() {
     const dialogRef = this.dialog.open(AddUserComponent, {
       panelClass: 'dialog-lg',

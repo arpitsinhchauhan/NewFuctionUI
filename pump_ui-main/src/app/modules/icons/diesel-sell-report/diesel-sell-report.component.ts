@@ -13,7 +13,7 @@ import { UserServiceService } from 'app/services/user-service.service';
 })
 export class DieselSellReportComponent implements OnInit {
   isReload: boolean;
-  numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  numbers: number[] = Array.from({ length: 20 }, (_, i) => i + 1);
   selectedNumber: number = 1;
   userId: string;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
@@ -45,18 +45,17 @@ export class DieselSellReportComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  row = [
-    { pump: 'Diesel nozzle 1', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 2', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 3', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 4', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 5', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 6', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 7', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 8', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 9', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'Diesel nozzle 10', close_meter: '', open_meter: '', total: '', testing: '', diesel_ltr: '', rate: '', total_sell: '', date: '' }
-  ];
+  row = Array.from({ length: 20 }, (_, i) => ({
+    pump: `Diesel nozzle ${i + 1}`,
+    close_meter: '',
+    open_meter: '',
+    total: '',
+    testing: '',
+    diesel_ltr: '',
+    rate: '',
+    total_sell: '',
+    date: ''
+  }));
 
   calculateTotals(item) {
     const closeMeter = parseFloat(item.close_meter) || 0;

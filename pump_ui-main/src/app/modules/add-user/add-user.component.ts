@@ -26,7 +26,7 @@ export class AddUserComponent implements OnInit {
   /** True when PUMP_MANAGER is editing their OWN account → all fields editable */
   isEditingSelf = false;
 
-  pumpOptions: number[] = Array.from({ length: 10 }, (_, i) => i);
+  pumpOptions: number[] = Array.from({ length: 21 }, (_, i) => i);
   loggedInRole = '';
   availableRoles: any[] = [];
 

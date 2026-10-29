@@ -13,7 +13,7 @@ import { EditPurchaseComponent } from '../../table-list/edit-purchase/edit-purch
 })
 export class EditPetrolsellComponent implements OnInit {
   isReload: boolean;
-  petrolpumpList: string[] = ['Petrol nozzle 1', 'Petrol nozzle 2', 'Petrol nozzle 3', 'Petrol nozzle 4', 'Petrol nozzle 5'];
+  petrolpumpList: string[] = Array.from({ length: 20 }, (_, i) => `Petrol nozzle ${i + 1}`);
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
     private http: HttpClient,

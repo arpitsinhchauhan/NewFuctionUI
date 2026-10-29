@@ -14,7 +14,7 @@ import { UserServiceService } from 'app/services/user-service.service';
 export class EditpowerDieselComponent implements OnInit {
 
   isReload: boolean;
-  powerpumpList: string[] = ['powerDiesel nozzle 1', 'powerDiesel nozzle 2', 'powerDiesel nozzle 3', 'powerDiesel nozzle 4', 'powerDiesel nozzle 5'];
+  powerpumpList: string[] = Array.from({ length: 20 }, (_, i) => `powerDiesel nozzle ${i + 1}`);
 
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,

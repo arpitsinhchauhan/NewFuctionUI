@@ -13,7 +13,7 @@ import { API_POWER_DIESEL_ADD } from 'app/serviceult';
 export class AddpowerDieselComponent implements OnInit {
 
   isReload: boolean;
-  numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  numbers: number[] = Array.from({ length: 20 }, (_, i) => i + 1);
   selectedNumber: number = 1;
   userId: string;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
@@ -43,13 +43,17 @@ export class AddpowerDieselComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  row = [
-    { pump: 'powerDiesel nozzle 1', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel nozzle 2', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel nozzle 3', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel nozzle 4', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'powerDiesel nozzle 5', close_meter: '', open_meter: '', total: '', testing: '', powerdiesel_ltr: '', rate: '', total_sell: '', date: '' },
-  ];
+  row = Array.from({ length: 20 }, (_, i) => ({
+    pump: `powerDiesel nozzle ${i + 1}`,
+    close_meter: '',
+    open_meter: '',
+    total: '',
+    testing: '',
+    powerdiesel_ltr: '',
+    rate: '',
+    total_sell: '',
+    date: ''
+  }));
 
   calculateTotals(item) {
     const closeMeter = parseFloat(item.close_meter) || 0;

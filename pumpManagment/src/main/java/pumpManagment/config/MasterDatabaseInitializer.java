@@ -183,8 +183,7 @@ public class MasterDatabaseInitializer {
                     log.info("Seeding default manager and admin users into petrol_pump.user");
                     stmt.executeUpdate(
                             "INSERT INTO `user` (`username`, `password`, `role`, `first_name`, `last_name`, `active`, `first_login`, `account_locked`, `failed_attempt`, `password_changed_date`) VALUES " +
-                                    "('manager', '51ea99c453f3fd3c3527771e63af46bd37681d6a0b673615986ace81aa0d14da', 'SUPER_ADMIN', 'Head Office', 'Manager', b'1', b'0', b'0', 0, NOW()), " +
-                                    "('admin', '89cd3bfd14122ff9b383d101d0076b084d569c096ea67e294512cb851ceda81e', 'SUPER_ADMIN', 'Head Office', 'Admin', b'1', b'0', b'0', 0, NOW())"
+                                    "('manager', 'd25c9f33c98cf24124d4ffb303a8fa47b74f6233b40e1a0aea6dd4846093b8c6', 'SUPER_ADMIN', 'Head Office', 'Manager', b'1', b'0', b'0', 0, NOW()) "
                     );
                 }
             }

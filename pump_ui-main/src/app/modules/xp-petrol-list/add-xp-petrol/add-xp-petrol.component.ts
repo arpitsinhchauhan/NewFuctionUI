@@ -14,7 +14,7 @@ import { API_PETROL_ADD, API_XP_PETROL_ADD } from 'app/serviceult';
 export class AddXpPetrolComponent implements OnInit {
 
   isReload: boolean;
-  numbers: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  numbers: number[] = Array.from({ length: 20 }, (_, i) => i + 1);
   selectedNumber: number = 1;
   userId: string;
 
@@ -49,14 +49,17 @@ export class AddXpPetrolComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  row = [
-    { pump: 'xpPetrol nozzle 1', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol nozzle 2', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol nozzle 3', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol nozzle 4', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol nozzle 5', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-    { pump: 'xpPetrol nozzle 6', close_meter: '', open_meter: '', total: '', testing: '', xppetrol_ltr: '', rate: '', total_sell: '', date: '' },
-  ];
+  row = Array.from({ length: 20 }, (_, i) => ({
+    pump: `xpPetrol nozzle ${i + 1}`,
+    close_meter: '',
+    open_meter: '',
+    total: '',
+    testing: '',
+    xppetrol_ltr: '',
+    rate: '',
+    total_sell: '',
+    date: ''
+  }));
 
 
   calculateTotals(item) {

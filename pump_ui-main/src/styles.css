@@ -962,9 +962,14 @@ small,
   border-top-right-radius: var(--radius-md);
 }
 
+.card-header-modern .header-main,
+.card-header-modern .header-text,
 .header-text {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 4px !important;
 }
 
 .header-actions {
@@ -988,6 +993,31 @@ mat-icon {
   letter-spacing: 0.5px;
   font-size: 12px;
   margin: 0 !important;
+}
+
+.header-actions button.btn-primary-modern,
+.header-actions button.btn-premium,
+.header-actions button.premium-btn-primary {
+  text-transform: none !important;
+}
+
+.header-actions .mat-button-wrapper {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
 }
 
 .header-actions .mat-icon-button {

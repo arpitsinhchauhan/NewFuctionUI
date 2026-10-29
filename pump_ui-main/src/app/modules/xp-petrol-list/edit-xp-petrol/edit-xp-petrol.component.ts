@@ -13,7 +13,7 @@ import { UserServiceService } from 'app/services/user-service.service';
 })
 export class EditXpPetrolComponent implements OnInit {
   isReload: boolean;
-  xppumpList: string[] = ['xpPetrol nozzle 1', 'xpPetrol nozzle 2', 'xpPetrol nozzle 3', 'xpPetrol nozzle 4', 'xpPetrol nozzle 5'];
+  xppumpList: string[] = Array.from({ length: 20 }, (_, i) => `xpPetrol nozzle ${i + 1}`);
 
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,

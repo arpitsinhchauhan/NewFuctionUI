@@ -1,29 +1,38 @@
 <div class="user-master-wrapper">
-  <div class="card-modern">
+  <div class="card-modern user-master-card">
+    <!-- Header Section -->
     <div class="card-header-modern">
       <div class="header-main">
         <h4 class="card-title-modern">
-          {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'User Management Master' : 'Employee Management Master' }}
+          <span class="title-badge-icon">
+            <mat-icon>manage_accounts</mat-icon>
+          </span>
+          <span>{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'User Management Master' : 'Employee Management Master' }}</span>
         </h4>
-        <p class="header-subtitle text-muted small mb-0">
-          {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Manage station managers, employees, and pump assignments' : 'Manage staff, fuel stations, and nozzle configurations' }}
+        <p class="header-subtitle">
+          {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Manage station managers, employee credentials, and pump assignments' : 'Manage staff, fuel stations, and nozzle configurations' }}
         </p>
       </div>
+
       <div class="header-actions">
+        <!-- Search Input -->
         <div class="search-container-modern">
           <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter(searchTerm)" class="search-box-premium"
             placeholder="Search by user, pump, or role...">
-          <button class="search-btn-premium" (click)="applyFilter(searchTerm)">
+          <button class="search-btn-premium" (click)="applyFilter(searchTerm)" title="Search">
             <mat-icon>search</mat-icon>
           </button>
         </div>
-        <button mat-flat-button color="primary" class="premium-btn-primary" (click)="addUser()">
-          <mat-icon>person_add</mat-icon>
-          <span>{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Add New User' : 'Add New Employee' }}</span>
+
+        <!-- Add Button -->
+        <button mat-flat-button class="btn-primary-modern" (click)="addUser()">
+          <mat-icon class="btn-icon">person_add</mat-icon>
+          <span class="btn-text">{{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'Add New User' : 'Add New Employee' }}</span>
         </button>
       </div>
     </div>
 
+    <!-- Table Section -->
     <div class="table-responsive-modern">
       <table class="modern-table">
         <thead>
@@ -37,45 +46,54 @@
           </tr>
         </thead>
         <tbody>
+          <!-- Users Rows -->
           <tr *ngFor="let item of userList | paginate: { itemsPerPage: itemsPerPage, currentPage: currentPage }; trackBy: trackById">
             <!-- Employee / User Name -->
             <td>
               <div class="user-cell">
                 <div class="user-avatar" 
-                  [class.avatar-manager]="item.role === 'PUMP_MANAGER' || item.role === 'user'" 
-                  [class.avatar-admin]="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN'">
+                  [class.avatar-manager]="item.role === 'PUMP_MANAGER' || item.role === 'user' || item.role === 'Owner'" 
+                  [class.avatar-admin]="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN' || item.role === 'admin'">
                   {{ (item.lastName || item.username || 'U').charAt(0) | uppercase }}
                 </div>
                 <div class="user-info-stacked">
                   <span class="user-name-title">{{ item.lastName || item.username }}</span>
-                  <span class="user-handle"><mat-icon class="inline-icon">alternate_email</mat-icon>{{ item.username }}</span>
+                  <span class="user-handle">
+                    <mat-icon class="inline-icon">alternate_email</mat-icon>{{ item.username }}
+                  </span>
                 </div>
               </div>
             </td>
 
             <!-- Assigned Petrol Pump Station -->
             <td>
-              <div *ngIf="item.firstName" class="pump-badge">
+              <div *ngIf="item.firstName && item.firstName.toLowerCase() !== 'head office' && item.role !== 'SUPER_ADMIN' && item.role !== 'ADMIN' && item.role !== 'admin'" class="pump-badge">
                 <mat-icon class="pump-icon">local_gas_station</mat-icon>
                 <div class="pump-text-group">
                   <span class="pump-name">{{ item.firstName }}</span>
                   <span *ngIf="item.role === 'EMPLOYEE'" class="pump-station-sub">Assigned Station</span>
-                  <span *ngIf="item.role === 'PUMP_MANAGER' || item.role === 'user'" class="pump-station-sub pump-owner-sub">Station Owner</span>
+                  <span *ngIf="item.role === 'PUMP_MANAGER' || item.role === 'user' || item.role === 'Owner'" class="pump-station-sub pump-owner-sub">Station Owner</span>
                 </div>
               </div>
-              <span *ngIf="!item.firstName" class="no-pump-text">
-                <mat-icon class="inline-icon">domain_disabled</mat-icon> Head Office
-              </span>
+
+              <div *ngIf="!item.firstName || item.firstName.toLowerCase() === 'head office' || item.role === 'SUPER_ADMIN' || item.role === 'ADMIN' || item.role === 'admin'" class="head-office-badge">
+                <mat-icon class="office-icon">corporate_fare</mat-icon>
+                <div class="pump-text-group">
+                  <span class="office-name">Head Office</span>
+                  <span class="office-sub">Central Headquarters</span>
+                </div>
+              </div>
             </td>
 
             <!-- System Role & Manager -->
             <td>
               <div class="role-cell-stacked">
                 <span class="status-pill" 
-                  [class.role-admin]="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN'"
-                  [class.role-manager]="item.role === 'PUMP_MANAGER' || item.role === 'user'"
+                  [class.role-admin]="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN' || item.role === 'admin'"
+                  [class.role-manager]="item.role === 'PUMP_MANAGER' || item.role === 'user' || item.role === 'Owner'"
                   [class.role-employee]="item.role === 'EMPLOYEE'">
-                  {{ item.role === 'PUMP_MANAGER' || item.role === 'user' ? 'Pump Manager' : (item.role === 'EMPLOYEE' ? 'Employee' : item.role) }}
+                  <mat-icon class="pill-icon">{{ getRoleIcon(item.role) }}</mat-icon>
+                  <span>{{ getRoleLabel(item.role) }}</span>
                 </span>
                 <span *ngIf="item.role === 'EMPLOYEE' && item.managerId" class="manager-link">
                   <mat-icon class="inline-icon">supervisor_account</mat-icon>
@@ -86,27 +104,33 @@
 
             <!-- Contact Details -->
             <td>
-              <div class="contact-stacked">
+              <div class="contact-stacked" *ngIf="item.email || item.phoneNumber">
                 <div *ngIf="item.email" class="contact-row" [title]="item.email">
                   <mat-icon class="contact-icon">mail_outline</mat-icon>
                   <span class="contact-text">{{ item.email }}</span>
                 </div>
-                <div *ngIf="item.phoneNumber" class="contact-row">
+                <div *ngIf="item.phoneNumber" class="contact-row" [title]="item.phoneNumber">
                   <mat-icon class="contact-icon">phone_android</mat-icon>
                   <span class="contact-text">{{ item.phoneNumber }}</span>
                 </div>
+              </div>
+              <div *ngIf="!item.email && !item.phoneNumber" class="contact-empty">
+                <span class="empty-dash">—</span>
               </div>
             </td>
 
             <!-- Nozzle Count -->
             <td>
-              <div class="nozzle-badges" *ngIf="item.role !== 'SUPER_ADMIN' && item.role !== 'ADMIN'">
+              <div class="nozzle-badges" *ngIf="item.role !== 'SUPER_ADMIN' && item.role !== 'ADMIN' && item.role !== 'admin'">
                 <span class="nozzle-chip chip-petrol" title="Petrol Nozzles"><strong>P:</strong> {{ item.petrol_nozzle || 0 }}</span>
                 <span class="nozzle-chip chip-diesel" title="Diesel Nozzles"><strong>D:</strong> {{ item.diesel_nozzle || 0 }}</span>
                 <span class="nozzle-chip chip-xp" title="XP Petrol Nozzles" *ngIf="item.xp_petrol_nozzle > 0"><strong>XP:</strong> {{ item.xp_petrol_nozzle }}</span>
                 <span class="nozzle-chip chip-power" title="Power Diesel Nozzles" *ngIf="item.powe_diesel_nozzle > 0"><strong>PWR:</strong> {{ item.powe_diesel_nozzle }}</span>
               </div>
-              <span *ngIf="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN'" class="text-muted small">HQ (All)</span>
+              <div *ngIf="item.role === 'SUPER_ADMIN' || item.role === 'ADMIN' || item.role === 'admin'" class="hq-all-chip">
+                <mat-icon class="hq-icon">all_inclusive</mat-icon>
+                <span>HQ (All Stations)</span>
+              </div>
             </td>
 
             <!-- Actions -->
@@ -116,8 +140,21 @@
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button class="btn-action-delete" (click)="deleteUser(item.id)" title="Delete User">
-                  <mat-icon>delete</mat-icon>
+                  <mat-icon>delete_outline</mat-icon>
                 </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty State -->
+          <tr *ngIf="userList && userList.length === 0">
+            <td colspan="6" class="empty-state-cell">
+              <div class="empty-state-container">
+                <div class="empty-state-icon-circle">
+                  <mat-icon>person_search</mat-icon>
+                </div>
+                <h5 class="empty-state-title">No Users Found</h5>
+                <p class="empty-state-subtitle">No matching user records available. Try adjusting your search keyword or add a new user.</p>
               </div>
             </td>
           </tr>
@@ -125,11 +162,12 @@
       </table>
     </div>
 
+    <!-- Footer Section -->
     <div class="card-footer-modern">
       <div class="pagination-info">
-        Displaying {{ userList.length }} total {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'users' : 'employees' }}
+        Displaying <strong>{{ userList.length }}</strong> total {{ loggedInRole === 'SUPER_ADMIN' || loggedInRole === 'admin' ? 'users' : 'employees' }}
       </div>
-      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination"></pagination-controls>
+      <pagination-controls (pageChange)="currentPage = $event" class="modern-pagination" previousLabel="« Prev" nextLabel="Next »"></pagination-controls>
     </div>
   </div>
 </div>
