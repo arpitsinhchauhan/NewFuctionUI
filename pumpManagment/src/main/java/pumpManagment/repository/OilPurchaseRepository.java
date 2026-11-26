@@ -52,7 +52,7 @@ public interface OilPurchaseRepository extends JpaRepository<Oilpurchase, Intege
     );
 
     @Query(value = "SELECT SUM(net_total) FROM oilpurchase " +
-            "WHERE YEAR(date) = YEAR(CURDATE()) AND user_id = ?", nativeQuery = true)
+            "WHERE date BETWEEN CONCAT(YEAR(CURDATE()), '-01-01') AND CONCAT(YEAR(CURDATE()), '-12-31') AND user_id = ?", nativeQuery = true)
     Double findTotalOilPurchaseForCurrentYear(String userId);
 
     List<Oilpurchase> findByPumpId(Long pumpId);

@@ -31,10 +31,10 @@ public interface dailytotalRepository extends JpaRepository<dailytotal, Integer>
 
     List<dailytotal> findByDateAndUserId(String date, String userId);
 
-    @Query(value = "SELECT SUM(daily_total) FROM dailytotal WHERE MONTH(STR_TO_DATE(date, '%Y-%m-%d')) = MONTH(CURDATE()) AND user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT SUM(daily_total) FROM dailytotal WHERE date BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01') AND LAST_DAY(CURDATE()) AND user_id = :userId", nativeQuery = true)
     Long findTotalSumForCurrentMonth(@Param("userId") String userId);
 
-    @Query(value = "SELECT SUM(daily_total) FROM dailytotal WHERE YEAR(STR_TO_DATE(date, '%Y-%m-%d')) = YEAR(CURDATE()) AND user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT SUM(daily_total) FROM dailytotal WHERE date BETWEEN CONCAT(YEAR(CURDATE()), '-01-01') AND CONCAT(YEAR(CURDATE()), '-12-31') AND user_id = :userId", nativeQuery = true)
     Long findTotalSumForCurrentYear(@Param("userId") String userId);
 
 }

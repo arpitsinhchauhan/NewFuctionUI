@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, Renderer2, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, Renderer2, ViewChild, Output, EventEmitter } from '@angular/core';
 import { ROUTES } from '../sidebar/sidebar.component';
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { NavigationEnd, Router } from '@angular/router';
@@ -25,7 +25,7 @@ import { ThemeService } from 'app/services/theme.service';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   @Output() toggleSidenav = new EventEmitter<void>();
   showGMTTime: boolean = false;
   private listTitles: any[];
@@ -268,6 +268,16 @@ export class NavbarComponent implements OnInit {
         this.router.navigate(['/']);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+    }
+    if (this._router) {
+      this._router.unsubscribe();
+    }
   }
 
 

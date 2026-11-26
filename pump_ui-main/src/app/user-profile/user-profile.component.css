@@ -248,112 +248,94 @@ code {
   vertical-align: middle;
 }
 
-/* ===== Modern Pill Action Button (Matches User Image) ===== */
+/* ===== Modern Primary Action Button ===== */
 .pill-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 8px 22px 8px 10px;
-  border-radius: 50px;
-  border: none;
+  gap: 10px;
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: 1px solid #4f46e5;
   font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease-in-out;
   outline: none;
   text-decoration: none;
+  background: #4f46e5;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
 }
 
-.pill-btn:hover {
-  transform: translateY(-2px);
+.pill-btn:hover:not(:disabled) {
+  background: #3730a3;
+  border-color: #3730a3;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(55, 48, 163, 0.28);
 }
 
-.pill-btn:active {
+.pill-btn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-/* Circular Dark Icon Badge on Left */
+.pill-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-icon-badge {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #0f172a;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.pill-btn:hover .btn-icon-badge {
-  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
 }
 
 .btn-icon-badge mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+  line-height: 17px;
 }
 
-/* Electric Blue Pill (Primary / Default) */
-.pill-btn-blue, .pill-btn-primary {
-  background: #2196f3;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(33, 150, 243, 0.4);
-}
-.pill-btn-blue:hover, .pill-btn-primary:hover {
-  background: #1e88e5;
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.55);
-}
-.pill-btn-blue .btn-icon-badge, .pill-btn-primary .btn-icon-badge {
-  background: #0f172a;
-  color: #2196f3;
-}
-
-/* Red / Coral Danger Pill */
-.pill-btn-danger, .pill-btn-warn {
-  background: #ef4444;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
-}
-.pill-btn-danger:hover, .pill-btn-warn:hover {
-  background: #dc2626;
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.55);
-}
-.pill-btn-danger .btn-icon-badge, .pill-btn-warn .btn-icon-badge {
-  background: #0f172a;
-  color: #ef4444;
-}
-
-/* Orange Warning Pill */
-.pill-btn-warning {
-  background: #f59e0b;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
-}
-.pill-btn-warning:hover {
-  background: #d97706;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.55);
-}
-.pill-btn-warning .btn-icon-badge {
-  background: #0f172a;
-  color: #f59e0b;
-}
-
-/* Teal / Cyan Info Pill */
+.pill-btn-blue,
+.pill-btn-primary,
+.pill-btn-danger,
+.pill-btn-warn,
+.pill-btn-warning,
 .pill-btn-info {
-  background: #0ea5e9;
+  background: #4f46e5;
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+  border-color: #4f46e5;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
 }
-.pill-btn-info:hover {
-  background: #0284c7;
-  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.55);
+
+.pill-btn-blue:hover:not(:disabled),
+.pill-btn-primary:hover:not(:disabled),
+.pill-btn-danger:hover:not(:disabled),
+.pill-btn-warn:hover:not(:disabled),
+.pill-btn-warning:hover:not(:disabled),
+.pill-btn-info:hover:not(:disabled) {
+  background: #3730a3;
+  border-color: #3730a3;
+  box-shadow: 0 6px 14px rgba(55, 48, 163, 0.28);
 }
+
+.pill-btn-blue .btn-icon-badge,
+.pill-btn-primary .btn-icon-badge,
+.pill-btn-danger .btn-icon-badge,
+.pill-btn-warn .btn-icon-badge,
+.pill-btn-warning .btn-icon-badge,
 .pill-btn-info .btn-icon-badge {
-  background: #0f172a;
-  color: #0ea5e9;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
 }

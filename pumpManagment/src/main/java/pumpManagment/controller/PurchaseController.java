@@ -239,6 +239,32 @@ public class PurchaseController {
     @Autowired
     private pumpManagment.service.UserTenantCacheService userTenantCacheService;
 
+    private static final ObjectMapper SHARED_OBJECT_MAPPER = new ObjectMapper();
+    private static final java.util.concurrent.ConcurrentHashMap<String, CachedJasperReport> JASPER_REPORT_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static final class CachedJasperReport {
+        final long lastModified;
+        final JasperReport report;
+
+        CachedJasperReport(long lastModified, JasperReport report) {
+            this.lastModified = lastModified;
+            this.report = report;
+        }
+    }
+
+    private JasperReport loadCachedJasperReport(String path) throws JRException {
+        java.io.File file = new java.io.File(path);
+        long lastMod = file.exists() ? file.lastModified() : -1L;
+        CachedJasperReport cached = JASPER_REPORT_CACHE.get(path);
+        if (cached != null && cached.lastModified == lastMod) {
+            return cached.report;
+        }
+        JasperReport loaded = (JasperReport) JRLoader.loadObjectFromFile(path);
+        JASPER_REPORT_CACHE.put(path, new CachedJasperReport(lastMod, loaded));
+        return loaded;
+    }
+
     // Login Page
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(
@@ -1645,7 +1671,7 @@ public class PurchaseController {
             throws IOException, JRException, java.text.ParseException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        JasperReport jasperReport = (JasperReport) JRLoader.loadObjectFromFile("D:/report3.jasper");
+        JasperReport jasperReport = loadCachedJasperReport("D:/report3.jasper");
         HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("PUMP_NAME", name);
         parameters.put("REPORTDATE", date);
@@ -2147,57 +2173,79 @@ public class PurchaseController {
 
     private List<Map<String, Object>> addEmployeeNamesToEntities(List<?> entities) {
         List<Map<String, Object>> result = new ArrayList<>();
-        if (entities == null)
+        if (entities == null || entities.isEmpty())
             return result;
-        ObjectMapper mapper = new ObjectMapper();
-        Map<Long, String> cache = new HashMap<>();
+
+        List<Map<String, Object>> mappedEntities = new ArrayList<>(entities.size());
+        Set<Long> uniqueUserIds = new HashSet<>();
         for (Object entity : entities) {
             try {
-                Map<String, Object> map = mapper.convertValue(entity, new TypeReference<Map<String, Object>>() {
+                Map<String, Object> map = SHARED_OBJECT_MAPPER.convertValue(entity, new TypeReference<Map<String, Object>>() {
                 });
                 Object userIdObj = map.get("userId");
                 if (userIdObj != null) {
-                    String userIdStr = String.valueOf(userIdObj);
                     try {
-                        Long uid = Long.valueOf(userIdStr);
-                        String empName = cache.get(uid);
-                        if (empName == null) {
-                            Optional<DAOUser> uOpt = userRepository.findById(uid);
-                            if (uOpt.isPresent()) {
-                                DAOUser u = uOpt.get();
-                                if (u.getUsername() != null && !u.getUsername().trim().isEmpty()) {
-                                    empName = u.getUsername();
-                                } else {
-                                    empName = u.getFirstName() + (u.getLastName() != null ? " " + u.getLastName() : "");
-                                }
-                                if (empName.contains(" ")) {
-                                    String[] parts = empName.trim().split("\\s+");
-                                    empName = parts[parts.length - 1];
-                                }
-                            } else {
-                                empName = "User " + uid;
-                            }
-                            cache.put(uid, empName);
-                        }
-                        map.put("employeeName", empName);
-                    } catch (NumberFormatException e) {
-                        map.put("employeeName", "User " + userIdStr);
-                    }
-                } else {
-                    map.put("employeeName", "");
+                        uniqueUserIds.add(Long.valueOf(String.valueOf(userIdObj)));
+                    } catch (NumberFormatException ignored) {}
                 }
-                result.add(map);
+                mappedEntities.add(map);
             } catch (Exception e) {
-                try {
-                    Map<String, Object> map = mapper.convertValue(entity, new TypeReference<Map<String, Object>>() {
-                    });
-                    result.add(map);
-                } catch (Exception ex) {
-                    // Fallback
+                mappedEntities.add(null);
+            }
+        }
+
+        // Batch-fetch users once instead of N per-row findById calls (with findById fallback for mocked tests)
+        Map<Long, String> cache = new HashMap<>();
+        if (!uniqueUserIds.isEmpty()) {
+            Iterable<DAOUser> users = userRepository.findAllById(uniqueUserIds);
+            if (users != null) {
+                for (DAOUser u : users) {
+                    if (u != null && u.getId() != null) {
+                        cache.put(u.getId(), formatEmployeeDisplayName(u));
+                    }
+                }
+            }
+            if (cache.size() < uniqueUserIds.size()) {
+                for (Long uid : uniqueUserIds) {
+                    if (!cache.containsKey(uid)) {
+                        Optional<DAOUser> uOpt = userRepository.findById(uid);
+                        cache.put(uid, uOpt.isPresent() ? formatEmployeeDisplayName(uOpt.get()) : ("User " + uid));
+                    }
                 }
             }
         }
+
+        for (Map<String, Object> map : mappedEntities) {
+            if (map == null) continue;
+            Object userIdObj = map.get("userId");
+            if (userIdObj != null) {
+                String userIdStr = String.valueOf(userIdObj);
+                try {
+                    Long uid = Long.valueOf(userIdStr);
+                    map.put("employeeName", cache.getOrDefault(uid, "User " + uid));
+                } catch (NumberFormatException e) {
+                    map.put("employeeName", "User " + userIdStr);
+                }
+            } else {
+                map.put("employeeName", "");
+            }
+            result.add(map);
+        }
         return result;
+    }
+
+    private String formatEmployeeDisplayName(DAOUser u) {
+        String empName;
+        if (u.getUsername() != null && !u.getUsername().trim().isEmpty()) {
+            empName = u.getUsername();
+        } else {
+            empName = u.getFirstName() + (u.getLastName() != null ? " " + u.getLastName() : "");
+        }
+        if (empName != null && empName.contains(" ")) {
+            String[] parts = empName.trim().split("\\s+");
+            empName = parts[parts.length - 1];
+        }
+        return empName;
     }
 
     @GetMapping(value = "/customerName")
@@ -2360,14 +2408,13 @@ public class PurchaseController {
                 break;
 
             case "month":
-                dateCondition = "MONTH(date) = MONTH(CURDATE()) " +
-                        "AND YEAR(date) = YEAR(CURDATE())";
+                dateCondition = "date BETWEEN DATE_FORMAT(CURDATE(), '%Y-%m-01') AND LAST_DAY(CURDATE())";
                 break;
 
             case "year":
                 // calendar year (Jan–Dec)
                 int calYear = (year != null) ? year : Year.now().getValue();
-                dateCondition = "YEAR(date) = " + calYear;
+                dateCondition = "date BETWEEN '" + calYear + "-01-01' AND '" + calYear + "-12-31'";
                 break;
 
             case "fy":
@@ -2682,96 +2729,111 @@ public class PurchaseController {
 
         List<String> userIds = getEmployeeUserIds(effectiveUserId);
 
-        // 1. Digital Payments (ATM/UPI Transactions)
         double digitalPayments = 0.0;
-        for (String id : userIds) {
-            List<transaction> txs = transactionRepository.findByUserId(id);
-            if (txs != null) {
-                for (transaction t : txs) {
-                    if (t.getAmount() != null) {
-                        try {
-                            digitalPayments += Double.parseDouble(t.getAmount().trim().replace(",", ""));
-                        } catch (Exception e) {}
-                    }
-                }
-            }
-        }
-
-        // 2. Oil Stock (Oil Purchase)
         double oilStock = 0.0;
-        for (String id : userIds) {
-            Double val = oilPurchaseRepository.findTotalOilPurchaseForCurrentYear(id);
-            if (val != null) {
-                oilStock += val;
-            }
-        }
-
-        // 3. Indirect Expenses (Kharch)
         double indirectExpenses = 0.0;
-        for (String id : userIds) {
-            List<kharch> kList = kharchrepository.findByUserId(id);
-            if (kList != null) {
-                for (kharch k : kList) {
-                    if (k.getPrice() != null) {
-                        try {
-                            indirectExpenses += Double.parseDouble(k.getPrice().trim().replace(",", ""));
-                        } catch (Exception e) {}
+        double dieselStock = 0.0;
+        double petrolStock = 0.0;
+        double cousterBillBaki = 0.0;
+        double customerDepositsJama = 0.0;
+        double lubeOilSales = 0.0;
+
+        String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+        if (!userIds.isEmpty() && jdbcTemplate != null) {
+            String placeholders = userIds.stream().map(u -> "?").collect(Collectors.joining(","));
+            Object[] uidParams = userIds.toArray();
+
+            Double txSum = jdbcTemplate.queryForObject(
+                    "SELECT COALESCE(SUM(CAST(REPLACE(TRIM(amount), ',', '') AS DECIMAL(18,4))), 0) FROM `transaction` WHERE user_id IN (" + placeholders + ") AND amount IS NOT NULL",
+                    uidParams, Double.class);
+            if (txSum != null) digitalPayments = txSum;
+
+            Double oilPurSum = jdbcTemplate.queryForObject(
+                    "SELECT COALESCE(SUM(net_total), 0) FROM oilpurchase WHERE date BETWEEN CONCAT(YEAR(CURDATE()), '-01-01') AND CONCAT(YEAR(CURDATE()), '-12-31') AND user_id IN (" + placeholders + ")",
+                    uidParams, Double.class);
+            if (oilPurSum != null) oilStock = oilPurSum;
+
+            Double kharchSum = jdbcTemplate.queryForObject(
+                    "SELECT COALESCE(SUM(CAST(REPLACE(TRIM(price), ',', '') AS DECIMAL(18,4))), 0) FROM kharch WHERE user_id IN (" + placeholders + ") AND price IS NOT NULL",
+                    uidParams, Double.class);
+            if (kharchSum != null) indirectExpenses = kharchSum;
+
+            Object[] stockParams = new Object[uidParams.length + 1];
+            stockParams[0] = today;
+            System.arraycopy(uidParams, 0, stockParams, 1, uidParams.length);
+
+            List<Double> dStocks = jdbcTemplate.query(
+                    "SELECT dieselopenstock FROM dailydieselstock WHERE date = ? AND user_id IN (" + placeholders + ") GROUP BY user_id",
+                    stockParams, (rs, rowNum) -> rs.getDouble(1));
+            for (Double v : dStocks) {
+                if (v != null) dieselStock += v;
+            }
+
+            List<Double> pStocks = jdbcTemplate.query(
+                    "SELECT openstock FROM dailystock WHERE date = ? AND user_id IN (" + placeholders + ") GROUP BY user_id",
+                    stockParams, (rs, rowNum) -> rs.getDouble(1));
+            for (Double v : pStocks) {
+                if (v != null) petrolStock += v;
+            }
+
+            Map<String, Object> jbTotals = jdbcTemplate.queryForMap(
+                    "SELECT COALESCE(SUM(baki), 0) AS total_baki, COALESCE(SUM(jama), 0) AS total_jama FROM jamabakireport WHERE user_id IN (" + placeholders + ")",
+                    uidParams);
+            if (jbTotals != null) {
+                if (jbTotals.get("total_baki") instanceof Number) {
+                    cousterBillBaki = ((Number) jbTotals.get("total_baki")).doubleValue();
+                }
+                if (jbTotals.get("total_jama") instanceof Number) {
+                    customerDepositsJama = ((Number) jbTotals.get("total_jama")).doubleValue();
+                }
+            }
+
+            Double oilSellSum = jdbcTemplate.queryForObject(
+                    "SELECT COALESCE(SUM(CAST(REPLACE(TRIM(price), ',', '') AS DECIMAL(18,4))), 0) FROM oilsell WHERE user_id IN (" + placeholders + ") AND price IS NOT NULL",
+                    uidParams, Double.class);
+            if (oilSellSum != null) lubeOilSales = oilSellSum;
+        } else {
+            // Fallback for mocked tests where JdbcTemplate may be null
+            for (String id : userIds) {
+                List<transaction> txs = transactionRepository.findByUserId(id);
+                if (txs != null) {
+                    for (transaction t : txs) {
+                        if (t.getAmount() != null) {
+                            try { digitalPayments += Double.parseDouble(t.getAmount().trim().replace(",", "")); } catch (Exception e) {}
+                        }
                     }
                 }
-            }
-        }
+                Double val = oilPurchaseRepository.findTotalOilPurchaseForCurrentYear(id);
+                if (val != null) oilStock += val;
 
-        // 4. Diesel Stock
-        double dieselStock = 0.0;
-        String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        for (String id : userIds) {
-            List<Double> dStock = dailydieselstockRepository.findOpenstockByDateAndUserId(today, id);
-            if (dStock != null && !dStock.isEmpty() && dStock.get(0) != null) {
-                dieselStock += dStock.get(0);
-            }
-        }
-
-        // 5. Petrol Stock
-        double petrolStock = 0.0;
-        for (String id : userIds) {
-            List<Double> pStock = dailyskockRepository.findOpenstockByDateAndUserId(today, id);
-            if (pStock != null && !pStock.isEmpty() && pStock.get(0) != null) {
-                petrolStock += pStock.get(0);
-            }
-        }
-
-        // 6. Couster Bill ( Baki )
-        double cousterBillBaki = 0.0;
-        for (String id : userIds) {
-            List<jamabaki> jbList = JamabakiRepository.findByUserId(id);
-            if (jbList != null) {
-                for (jamabaki jb : jbList) {
-                    cousterBillBaki += jb.getBaki();
+                List<kharch> kList = kharchrepository.findByUserId(id);
+                if (kList != null) {
+                    for (kharch k : kList) {
+                        if (k.getPrice() != null) {
+                            try { indirectExpenses += Double.parseDouble(k.getPrice().trim().replace(",", "")); } catch (Exception e) {}
+                        }
+                    }
                 }
-            }
-        }
+                List<Double> dStock = dailydieselstockRepository.findOpenstockByDateAndUserId(today, id);
+                if (dStock != null && !dStock.isEmpty() && dStock.get(0) != null) dieselStock += dStock.get(0);
 
-        // 7. Customer Deposits ( Jama )
-        double customerDepositsJama = 0.0;
-        for (String id : userIds) {
-            List<jamabaki> jbList = JamabakiRepository.findByUserId(id);
-            if (jbList != null) {
-                for (jamabaki jb : jbList) {
-                    customerDepositsJama += jb.getJama();
+                List<Double> pStock = dailyskockRepository.findOpenstockByDateAndUserId(today, id);
+                if (pStock != null && !pStock.isEmpty() && pStock.get(0) != null) petrolStock += pStock.get(0);
+
+                List<jamabaki> jbList = JamabakiRepository.findByUserId(id);
+                if (jbList != null) {
+                    for (jamabaki jb : jbList) {
+                        cousterBillBaki += jb.getBaki();
+                        customerDepositsJama += jb.getJama();
+                    }
                 }
-            }
-        }
-
-        // 8. Lube Oil Sales
-        double lubeOilSales = 0.0;
-        for (String id : userIds) {
-            List<OilSell> oList = oilSellRepository.findByUserId(id);
-            if (oList != null) {
-                for (OilSell os : oList) {
-                    if (os.getPrice() != null) {
-                        try {
-                            lubeOilSales += Double.parseDouble(os.getPrice().trim().replace(",", ""));
-                        } catch (Exception e) {}
+                List<OilSell> oList = oilSellRepository.findByUserId(id);
+                if (oList != null) {
+                    for (OilSell os : oList) {
+                        if (os.getPrice() != null) {
+                            try { lubeOilSales += Double.parseDouble(os.getPrice().trim().replace(",", "")); } catch (Exception e) {}
+                        }
                     }
                 }
             }

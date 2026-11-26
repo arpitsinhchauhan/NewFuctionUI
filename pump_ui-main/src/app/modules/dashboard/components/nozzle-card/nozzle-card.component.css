@@ -1,11 +1,84 @@
 .nozzle-card-modern {
-  padding: 24px !important;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-.fuel-type-indicator {
+.nozzle-header {
+  padding: 16px 20px !important;
+  flex-wrap: wrap !important;
+  gap: 12px;
+}
+
+.nozzle-filter-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nozzle-card-body {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+/* Compact KPI Strip */
+.nozzle-kpi-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-main, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+}
+
+.nozzle-kpi-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-pill-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #64748b);
+}
+
+.kpi-pill-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main, #0f172a);
+}
+
+.nozzle-kpi-pill.kpi-accent .kpi-pill-value {
+  color: #4f46e5;
+}
+
+.nozzle-fuel-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.fuel-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted, #475569);
 }
 
 .dot {
@@ -13,50 +86,187 @@
   height: 8px;
   border-radius: 50%;
   display: inline-block;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  flex-shrink: 0;
 }
 
-.modern-table {
+/* Horizontal Bar Chart */
+.nozzle-chart-section {
+  background: var(--bg-main, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.nozzle-chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Readable Nozzle Table */
+.nozzle-table-wrap {
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.nozzle-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
 }
 
-.modern-table th {
-  padding: 12px 16px;
+.nozzle-table thead th {
+  padding: 10px 12px;
   font-size: 11px;
   text-transform: uppercase;
   color: var(--text-muted);
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-main);
+  white-space: nowrap;
 }
 
-.modern-table td {
-  padding: 16px;
-  font-size: 14px;
+.nozzle-table tbody td {
+  padding: 10px 12px;
+  font-size: 13px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
 }
 
-.modern-table tr:hover td {
-  background-color: rgba(0, 98, 255, 0.02);
+.nozzle-table tbody tr:hover td {
+  background-color: rgba(79, 70, 229, 0.03);
 }
 
-.modern-table tr:last-child td {
+.nozzle-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.nozzle-name-cell {
+  font-weight: 700;
+  color: var(--text-main, #0f172a);
+  white-space: nowrap;
+}
+
+.fuel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.volume-cell {
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.revenue-cell {
+  min-width: 120px;
+}
+
+.revenue-cell-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.revenue-amount {
+  font-weight: 700;
+  color: #4f46e5;
+  white-space: nowrap;
+}
+
+.inline-bar-track {
+  width: 100%;
+  max-width: 110px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.inline-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.nozzle-total-row td {
+  padding: 11px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--bg-main, #f8fafc);
+  border-top: 2px solid var(--border-color, #e2e8f0);
+  color: var(--text-main, #0f172a);
+}
+
+.nozzle-empty-cell {
+  padding: 32px 16px !important;
+  text-align: center;
+}
+
+.nozzle-empty-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.nozzle-empty-box mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.45;
+  margin-bottom: 8px;
+}
+
+.nozzle-empty-box h6 {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.nozzle-empty-box p {
+  margin: 0;
+  font-size: 12.5px;
 }
 
 .text-right {
   text-align: right;
 }
 
-@media (max-width: 768px) {
-  .header-actions {
-    margin-top: 16px;
+/* Dark Theme Support */
+::ng-deep .dark-theme .nozzle-kpi-strip,
+::ng-deep .dark-theme .nozzle-chart-section,
+::ng-deep .dark-theme .nozzle-total-row td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+::ng-deep .dark-theme .nozzle-kpi-pill.kpi-accent .kpi-pill-value,
+::ng-deep .dark-theme .revenue-amount {
+  color: #a5b4fc;
+}
+
+@media (max-width: 767px) {
+  .nozzle-card-body {
+    padding: 14px;
+  }
+
+  .nozzle-fuel-legend {
+    margin-left: 0;
     width: 100%;
-    display: flex;
-    justify-content: space-between;
+  }
+
+  .nozzle-table thead th,
+  .nozzle-table tbody td,
+  .nozzle-total-row td {
+    padding: 8px 10px;
+    font-size: 12px;
   }
 }

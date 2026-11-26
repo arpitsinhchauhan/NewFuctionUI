@@ -1,19 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import * as Chartist from 'chartist';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { forkJoin, of, Subject, Subscription } from 'rxjs';
+import { catchError, takeUntil } from 'rxjs/operators';
 import { DailyTotal } from '../../models/DailyTotal';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import * as d3 from 'd3';
 import { API_CURRENTMOUNTH_TOTAL, API_CURRENTYEAR_TOTAL, API_DAILY_CHART, API_DAILY_TOTAL, API_DIESEL, API_DIESEL_CURRENTYEAR_DATE, API_JAMABAKI_CURRENTYEAR_DATE, API_OIL_PURCHASE_CURRENTYEAR_DATE, API_PETROL_CURRENTYEAR_DATE, API_POWER_DIESEL, API_POWER_DIESEL_CURRENTYEAR_DATE, API_Petrol, API_XP_PETROL_CURRENTYEAR_DATE, API_XP_Petrol } from 'app/serviceult';
 import { ChartType, ChartConfiguration } from 'chart.js';
 import { LoaderService } from 'app/services/loader.service';
 import { NotificationService } from 'app/services/notification.service';
 import { UserServiceService } from 'app/services/user-service.service';
 import { ThemeService } from 'app/services/theme.service';
-import { Subscription } from 'rxjs';
 import { TankDetailsDialogComponent } from './components/tank-details-dialog/tank-details-dialog.component';
 import { TankConfigDialogComponent } from './components/tank-config-dialog/tank-config-dialog.component';
 
@@ -22,7 +19,8 @@ import { TankConfigDialogComponent } from './components/tank-config-dialog/tank-
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
 
   dailyTotals: DailyTotal[] = [];
   startDate: string = '';
@@ -111,38 +109,63 @@ export class DashboardComponent implements OnInit {
     {
       id: 'doughnutSliceLabels',
       afterDraw: (chart: any) => {
-        const { ctx } = chart;
-        chart.data.datasets.forEach((dataset: any, i: number) => {
-          const meta = chart.getDatasetMeta(i);
-          if (!meta || !meta.data) return;
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+
+        const dataset = chart.data?.datasets?.[0];
+        if (!dataset || !Array.isArray(dataset.data)) return;
+
+        const total = dataset.data.reduce((sum: number, v: any) => sum + (Number(v) || 0), 0);
+        if (total <= 0) return;
+
+        const meta = chart.getDatasetMeta(0);
+        if (meta && Array.isArray(meta.data)) {
           meta.data.forEach((element: any, index: number) => {
-            const val = dataset.data[index];
-            if (val && val > 0) {
+            const val = Number(dataset.data[index]) || 0;
+            const pct = (val / total) * 100;
+            // Only draw inside-slice percentage when slice is wide enough to avoid overlap
+            if (pct >= 6) {
               const pos = element.tooltipPosition();
               if (!pos) return;
-              const label = chart.data.labels[index];
-              let text = label;
-              if (label === 'Digital Payments') text = 'Digital';
-              else if (label === 'Oil Stock') text = 'Oil Stock';
-              else if (label === 'Indirect Expenses') text = 'Expenses';
-              else if (label === 'Diesel Stock') text = 'Diesel Stock';
-              else if (label === 'Petrol Stock') text = 'Petrol Stock';
-              else if (label === 'Couster Bill ( Baki )') text = 'Baki';
-              else if (label === 'Customer Deposits ( Jama )') text = 'Custom.';
-              else if (label === 'Lube Oil Sales') text = 'Lube';
 
               ctx.save();
               ctx.fillStyle = '#ffffff';
-              ctx.font = 'bold 11px Outfit, Inter, sans-serif';
+              ctx.font = '700 11px Inter, Outfit, sans-serif';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
-              ctx.shadowColor = 'rgba(0,0,0,0.6)';
-              ctx.shadowBlur = 3;
-              ctx.fillText(text, pos.x, pos.y);
+              ctx.shadowColor = 'rgba(15, 23, 42, 0.55)';
+              ctx.shadowBlur = 4;
+              ctx.fillText(`${pct.toFixed(0)}%`, pos.x, pos.y);
               ctx.restore();
             }
           });
-        });
+        }
+
+        // Draw crisp center total inside doughnut ring
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2;
+        const isDark = document.body.classList.contains('dark-theme');
+        const labelColor = isDark ? '#94a3b8' : '#64748b';
+        const valueColor = isDark ? '#f8fafc' : '#0f172a';
+
+        const formattedTotal = total >= 100000
+          ? `₹${(total / 100000).toFixed(2)}L`
+          : total >= 1000
+            ? `₹${(total / 1000).toFixed(1)}K`
+            : `₹${total.toFixed(0)}`;
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        ctx.fillStyle = labelColor;
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.fillText('TOTAL VALUE', centerX, centerY - 12);
+
+        ctx.fillStyle = valueColor;
+        ctx.font = '800 18px Outfit, Inter, sans-serif';
+        ctx.fillText(formattedTotal, centerX, centerY + 9);
+        ctx.restore();
       }
     }
   ];
@@ -155,25 +178,33 @@ export class DashboardComponent implements OnInit {
       hoverBackgroundColor: [],
       borderColor: '#ffffff',
       borderWidth: 2,
-      hoverOffset: 15
+      hoverOffset: 10
     }]
   };
   public pieChartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '58%',
+    cutout: '66%',
+    layout: {
+      padding: 8
+    },
     plugins: {
       legend: {
-        display: false // Hide default legend in favor of infographic-style custom cards legend
+        display: false
       },
       tooltip: {
         backgroundColor: 'rgba(15, 23, 42, 0.95)',
         titleColor: '#ffffff',
         bodyColor: '#ffffff',
+        titleFont: {
+          family: "'Inter', 'Outfit', sans-serif",
+          size: 12,
+          weight: '600'
+        },
         bodyFont: {
-          family: "'Outfit', 'Inter', sans-serif",
+          family: "'Inter', 'Outfit', sans-serif",
           size: 13,
-          weight: 'normal'
+          weight: '500'
         },
         padding: 12,
         cornerRadius: 8,
@@ -200,52 +231,63 @@ export class DashboardComponent implements OnInit {
         data: [],
         backgroundColor: [],
         hoverBackgroundColor: [],
-        borderRadius: 8,
-        barThickness: 22
+        borderRadius: 6,
+        barThickness: 18
       }
     ]
   };
 
   public chartOptions: ChartConfiguration['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
     indexAxis: 'y',
     plugins: {
       legend: { display: false },
       tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        padding: 10,
+        cornerRadius: 8,
         callbacks: {
-          label: (context) => context.raw.toLocaleString()
+          label: (context) => {
+            const val = Number(context.raw) || 0;
+            return ` ₹${val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          }
         }
       }
     },
     scales: {
       x: {
         beginAtZero: true,
-
-        // ✔ Correct place for border in Chart.js v4
         border: {
           display: false,
           color: 'transparent',
           width: 0
         },
-
         grid: {
-          color: '#e0e0e0'   // ✔ allowed
+          color: '#e2e8f0'
         },
-
         ticks: {
+          color: '#64748b',
+          font: { size: 11, weight: 'normal' },
           callback: function (val) {
             const num = Number(val);
-            return num / 1000 + 'K';
+            if (num === 0) return '₹0';
+            if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+            if (num >= 1000) return `₹${(num / 1000).toFixed(0)}K`;
+            return `₹${num}`;
           }
         }
       },
-
       y: {
         border: {
           display: false
         },
         grid: {
           display: false
+        },
+        ticks: {
+          color: '#334155',
+          font: { size: 12, weight: 'bold' }
         }
       }
     }
@@ -305,7 +347,7 @@ export class DashboardComponent implements OnInit {
       xpPetrolSales: this.use.getXPPetrolList(this.use.getFormattedDate(new Date()), this.userId).pipe(errorHandler('xpPetrolSales')),
       powerDieselSales: this.use.getpowerDiesel(this.use.getFormattedDate(new Date()), this.userId).pipe(errorHandler('powerDieselSales')),
       distribution: this.use.getDashboardDistribution(this.userId).pipe(errorHandler('distribution'))
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (results: any) => {
         // console.log('Dashboard data fetched successfully:', results);
 
@@ -571,65 +613,12 @@ export class DashboardComponent implements OnInit {
     return this.dailyTotals.reduce((sum, dailyTotal) => sum + dailyTotal.dailyTotal, 0);
   }
 
-  startAnimationForLineChart(chart) {
-    let seq: any, delays: any, durations: any;
-    seq = 0;
-    delays = 80;
-    durations = 500;
-    chart.on('draw', function (data) {
-      if (data.type === 'line' || data.type === 'area') {
-        data.element.animate({
-          d: {
-            begin: 600,
-            dur: 700,
-            from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
-            to: data.path.clone().stringify(),
-            easing: Chartist.Svg.Easing.easeOutQuint
-          }
-        });
-      } else if (data.type === 'point') {
-        seq++;
-        data.element.animate({
-          opacity: {
-            begin: seq * delays,
-            dur: durations,
-            from: 0,
-            to: 1,
-            easing: 'ease'
-          }
-        });
-      }
-    });
-    seq = 0;
-  };
-  startAnimationForBarChart(chart) {
-    let seq2: any, delays2: any, durations2: any;
-
-    seq2 = 0;
-    delays2 = 80;
-    durations2 = 500;
-    chart.on('draw', function (data) {
-      if (data.type === 'bar') {
-        seq2++;
-        data.element.animate({
-          opacity: {
-            begin: seq2 * delays2,
-            dur: durations2,
-            from: 0,
-            to: 1,
-            easing: 'ease'
-          }
-        });
-      }
-    });
-    seq2 = 0;
-  };
-
 
   getDailytotal() {
     const userId = localStorage.getItem('userId');
     const url = `${API_DAILY_TOTAL}?userId=${userId}`;
     this.http.get<{ id: number, date: string, dailyTotal: number }[]>(url)
+      .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         if (data && data.length > 0) {
           this.dailyTotal = data[0].dailyTotal;
@@ -638,63 +627,19 @@ export class DashboardComponent implements OnInit {
   }
 
   getCurrentmonthtotal() {
-    this.http.get<number>(`${API_CURRENTMOUNTH_TOTAL}?userId=${this.userId}`).subscribe((data) => {
-      this.CurrentmonthTotal = data;
-    });
+    this.http.get<number>(`${API_CURRENTMOUNTH_TOTAL}?userId=${this.userId}`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.CurrentmonthTotal = data;
+      });
   }
 
   getCurrentyear() {
-    this.http.get<number>(`${API_CURRENTYEAR_TOTAL}?userId=${this.userId}`).subscribe((data) => {
-      (data);
-      this.CurrentyearTotal = data;
-    });
-  }
-  createPieChart(data: any): void {
-    const summaryData = [
-      parseFloat(data.dieselSellSummary[0][0]),
-      parseFloat(data.kharchSellSummary[0][0]),
-      parseFloat(data.oilSellSummary[0][0]),
-      parseFloat(data.petrolSellSummary[0][0]),
-      parseFloat(data.purchaseSellSummary[0][0]),
-      parseFloat(data.transactionSellSummary[0][0])
-    ];
-    const labels = [
-      'Diesel Sell Summary',
-      'Kharch Sell Summary',
-      'Oil Sell Summary',
-      'Petrol Sell Summary',
-      'Purchase Sell Summary',
-      'Transaction Sell Summary'
-    ];
-    const width = 350;
-    const height = 350;
-    const radius = Math.min(width, height) / 2;
-    const svg = d3.select('#pieChart')
-      .append('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-    const pie = d3.pie();
-    const arc = d3.arc().outerRadius(radius - 10).innerRadius(0);
-    const pieData = pie(summaryData);
-    svg.selectAll('path')
-      .data(pieData)
-      .enter()
-      .append('path')
-      .attr('d', arc)
-      .attr('fill', d => color(d.index.toString()))
-      .attr('stroke', 'white')
-      .attr('stroke-width', '2px');
-    svg.selectAll('text')
-      .data(pieData)
-      .enter()
-      .append('text')
-      .attr('transform', d => `translate(${arc.centroid(d)})`)
-      .attr('dy', '.35em')
-      .attr('text-anchor', 'middle')
-      .text(d => labels[d.index]);
+    this.http.get<number>(`${API_CURRENTYEAR_TOTAL}?userId=${this.userId}`)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.CurrentyearTotal = data;
+      });
   }
 
   getPiechartValue() {
@@ -755,8 +700,8 @@ export class DashboardComponent implements OnInit {
           data: datasetData,
           backgroundColor: colors,
           hoverBackgroundColor: colors,
-          borderRadius: 8,
-          barThickness: 22
+          borderRadius: 6,
+          barThickness: 18
         }]
       };
 
@@ -766,9 +711,8 @@ export class DashboardComponent implements OnInit {
   updateChartThemes(theme: 'light' | 'dark') {
     const isDark = theme === 'dark';
     const textColor = isDark ? '#cbd5e1' : '#64748b';
+    const labelColor = isDark ? '#e2e8f0' : '#334155';
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : '#e2e8f0';
-
-
 
     // Update Sales Summary Options
     this.chartOptions = {
@@ -781,7 +725,7 @@ export class DashboardComponent implements OnInit {
         },
         y: {
           ...this.chartOptions.scales.y,
-          ticks: { color: textColor }
+          ticks: { ...this.chartOptions.scales.y.ticks, color: labelColor }
         }
       }
     };
@@ -858,14 +802,14 @@ export class DashboardComponent implements OnInit {
 
     // Items for this pump only
     const items = [
-      { name: 'Digital Payments', value: digitalVal, color: '#26466d', desc: 'UPI, ATM & digital payments' },
-      { name: 'Oil Stock', value: oilStockVal, color: '#8da843', desc: 'Lubricants inventory value' },
-      { name: 'Indirect Expenses', value: expensesVal, color: '#7c2727', desc: 'Operating expenses & kharch' },
-      { name: 'Diesel Stock', value: dieselStockVal, color: '#be473c', desc: 'Current diesel inventory' },
-      { name: 'Petrol Stock', value: petrolStockVal, color: '#3b78b5', desc: 'Current petrol inventory' },
-      { name: 'Couster Bill ( Baki )', value: bakiVal, color: '#75508a', desc: 'Customer outstanding credit' },
-      { name: 'Customer Deposits ( Jama )', value: jamaVal, color: '#38a5b2', desc: 'Customer payment deposits' },
-      { name: 'Lube Oil Sales', value: lubeSalesVal, color: '#e8802a', desc: 'Retail lube oil sales' }
+      { name: 'Digital Payments', value: digitalVal, color: '#4f46e5', desc: 'UPI, ATM & digital payments' },
+      { name: 'Oil Stock', value: oilStockVal, color: '#10b981', desc: 'Lubricants inventory value' },
+      { name: 'Indirect Expenses', value: expensesVal, color: '#ef4444', desc: 'Operating expenses & kharch' },
+      { name: 'Diesel Stock', value: dieselStockVal, color: '#f59e0b', desc: 'Current diesel inventory' },
+      { name: 'Petrol Stock', value: petrolStockVal, color: '#0ea5e9', desc: 'Current petrol inventory' },
+      { name: 'Customer Baki', value: bakiVal, color: '#8b5cf6', desc: 'Customer outstanding credit' },
+      { name: 'Customer Deposits (Jama)', value: jamaVal, color: '#06b6d4', desc: 'Customer payment deposits' },
+      { name: 'Lube Oil Sales', value: lubeSalesVal, color: '#ec4899', desc: 'Retail lube oil sales' }
     ];
 
     const totalSum = items.reduce((sum, it) => sum + it.value, 0);
@@ -900,14 +844,17 @@ export class DashboardComponent implements OnInit {
         hoverBackgroundColor: colors,
         borderColor: borderColor,
         borderWidth: 2,
-        hoverOffset: 12
+        hoverOffset: 10
       }]
     };
 
     // Update the layout labels for the chart options based on active theme
     this.pieChartOptions = {
       ...this.pieChartOptions,
-      cutout: '58%',
+      cutout: '66%',
+      layout: {
+        padding: 8
+      },
       plugins: {
         ...this.pieChartOptions?.plugins,
         legend: {
@@ -934,7 +881,7 @@ export class DashboardComponent implements OnInit {
     if (!userId) return;
 
     if (role === 'PUMP_MANAGER' || role === 'user') {
-      this.use.getManagerReports(+userId).subscribe({
+      this.use.getManagerReports(+userId).pipe(takeUntil(this.destroy$)).subscribe({
         next: (data) => {
           this.employeeReportsCount = data ? data.length : 0;
           this.dailyReports = this.aggregateReports(data || []);
@@ -943,10 +890,13 @@ export class DashboardComponent implements OnInit {
         error: (err) => console.error('Error fetching manager daily reports:', err)
       });
     } else if (role === 'EMPLOYEE' || role === 'employee') {
-      this.use.getEmployeeReports(+userId).subscribe({
+      this.use.getEmployeeReports(+userId).pipe(takeUntil(this.destroy$)).subscribe({
         next: (data) => {
           this.employeeReportsCount = data ? data.length : 0;
-          this.dailyReports = data || [];
+          this.dailyReports = (data || []).map((r: any) => ({
+            ...r,
+            parsedStockDetails: this.parseStockDetails(r.stockDetails)
+          }));
           this.calculateDailyReportsTotal();
         },
         error: (err) => console.error('Error fetching employee daily reports:', err)
@@ -1040,18 +990,20 @@ export class DashboardComponent implements OnInit {
         powerDieselRemaining: g.powerDieselRemaining
       };
 
-      return {
-        reportId: g.reportId,
-        reportDate: g.reportDate,
-        reportTime: g.reportTime,
-        createdDatetime: g.createdDatetime,
-        shift: g.shift,
-        createdBy: g.createdByList.join(' + '),
-        salesAmount: g.salesAmount,
-        stockDetails: JSON.stringify(stockObj)
-      };
-    });
-  }
+        const stockJson = JSON.stringify(stockObj);
+        return {
+          reportId: g.reportId,
+          reportDate: g.reportDate,
+          reportTime: g.reportTime,
+          createdDatetime: g.createdDatetime,
+          shift: g.shift,
+          createdBy: g.createdByList.join(' + '),
+          salesAmount: g.salesAmount,
+          stockDetails: stockJson,
+          parsedStockDetails: this.parseStockDetails(stockJson)
+        };
+      });
+    }
 
   calculateDailyReportsTotal(): void {
     this.totalDailyReportsSales = this.dailyReports.reduce((sum, r) => sum + (r.salesAmount || 0), 0);
@@ -1081,7 +1033,17 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  trackByReportId(index: number, item: any): any {
+    return item?.reportId || index;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
   ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.themeSubscription) {
       this.themeSubscription.unsubscribe();
     }

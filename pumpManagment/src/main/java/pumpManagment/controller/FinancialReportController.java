@@ -61,6 +61,24 @@ public class FinancialReportController {
     @Autowired
     private OilPurchaseRepository oilPurchaseRepository;
 
+    @Autowired(required = false)
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
+    private static final TemplateEngine SHARED_TEMPLATE_ENGINE = createTemplateEngine();
+
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("templates/");
+        resolver.setSuffix(".html");
+        resolver.setTemplateMode(TemplateMode.HTML);
+        resolver.setCharacterEncoding("UTF-8");
+        resolver.setCacheable(true);
+
+        TemplateEngine engine = new TemplateEngine();
+        engine.setTemplateResolver(resolver);
+        return engine;
+    }
+
     private DAOUser validateUserAndGet(String userIdStr) {
         if (userIdStr == null) return null;
         try {
@@ -142,6 +160,21 @@ public class FinancialReportController {
             }
         }
 
+        // Preload jamabaki records once per userId instead of inside the per-customer loop
+        Map<String, List<jamabaki>> jamabakiByCustomer = new HashMap<>();
+        for (String uid : uids) {
+            List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
+            if (jbList != null) {
+                for (jamabaki jb : jbList) {
+                    if (jb.getName() != null && !"INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
+                        jamabakiByCustomer
+                                .computeIfAbsent(jb.getName().toLowerCase(), k -> new ArrayList<>())
+                                .add(jb);
+                    }
+                }
+            }
+        }
+
         List<Map<String, Object>> resultList = new ArrayList<>();
         for (customer c : customerMap.values()) {
             if (customerName != null && !customerName.trim().isEmpty() &&
@@ -149,30 +182,24 @@ public class FinancialReportController {
                 continue;
             }
 
-            // Fetch all jamabaki records for this customer under these userIds
             double totalBaki = 0;
             double totalJama = 0;
             String lastPaymentDate = "";
             String lastVehicleNumber = c.getVehicleNumber();
 
-            // We iterate over all userIds of the pump to aggregate the customer's transactions
-            for (String uid : uids) {
-                List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
-                for (jamabaki jb : jbList) {
-                    if (jb.getName() != null && jb.getName().equalsIgnoreCase(c.getName())) {
-                        if (!"INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
-                            totalBaki += jb.getBaki();
-                            totalJama += jb.getJama();
-                            if (jb.getJama() > 0) {
-                                if (lastPaymentDate.isEmpty() || (jb.getDate() != null && jb.getDate().compareTo(lastPaymentDate) > 0)) {
-                                    lastPaymentDate = jb.getDate();
-                                }
-                            }
-                            if (jb.getBakiNote() != null && !jb.getBakiNote().isEmpty()) {
-                                lastVehicleNumber = jb.getBakiNote();
-                            }
-                        }
+            List<jamabaki> customerEntries = c.getName() != null
+                    ? jamabakiByCustomer.getOrDefault(c.getName().toLowerCase(), Collections.emptyList())
+                    : Collections.emptyList();
+            for (jamabaki jb : customerEntries) {
+                totalBaki += jb.getBaki();
+                totalJama += jb.getJama();
+                if (jb.getJama() > 0) {
+                    if (lastPaymentDate.isEmpty() || (jb.getDate() != null && jb.getDate().compareTo(lastPaymentDate) > 0)) {
+                        lastPaymentDate = jb.getDate();
                     }
+                }
+                if (jb.getBakiNote() != null && !jb.getBakiNote().isEmpty()) {
+                    lastVehicleNumber = jb.getBakiNote();
                 }
             }
 
@@ -480,28 +507,37 @@ public class FinancialReportController {
         double totalOutstanding = 0;
         double totalCredit = 0;
 
+        // Accumulate customer baki/jama totals during the single pass over jamabaki rows per user
+        Map<String, double[]> customerTotalsMap = new HashMap<>();
+
         for (String uid : uids) {
             totalSales += getSalesForUser(uid, startDate, endDate);
             totalExpenses += getExpensesForUser(uid, startDate, endDate);
             totalPurchases += getPurchasesForUser(uid, startDate, endDate);
 
-            // Sum Indirect Income from jamabaki
+            // Sum Indirect Income & customer ledger from jamabaki in a single pass
             List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
             for (jamabaki jb : jbList) {
                 if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
                     if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
                         totalIndirectIncome += jb.getJama();
                     }
-                } else if (jb.getBaki() > 0 && !"INITIAL".equalsIgnoreCase(jb.getType())) {
-                    // Credit Entry Sum
-                    if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
-                        totalCredit += jb.getBaki();
+                } else {
+                    if (jb.getBaki() > 0 && !"INITIAL".equalsIgnoreCase(jb.getType())) {
+                        if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
+                            totalCredit += jb.getBaki();
+                        }
+                    }
+                    if (jb.getName() != null) {
+                        double[] totals = customerTotalsMap.computeIfAbsent(jb.getName().toLowerCase(), k -> new double[2]);
+                        totals[0] += jb.getBaki();
+                        totals[1] += jb.getJama();
                     }
                 }
             }
         }
 
-        // Sum Customer Outstanding dynamically
+        // Sum Customer Outstanding dynamically using pre-aggregated customerTotalsMap
         List<customer> customers = new ArrayList<>();
         for (String uid : uids) {
             customers.addAll(CustomerRepository.findByUserId(uid));
@@ -513,22 +549,12 @@ public class FinancialReportController {
             }
         }
         for (customer c : customerMap.values()) {
-            double totalB = 0;
-            double totalJ = 0;
-            for (String uid : uids) {
-                List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
-                for (jamabaki jb : jbList) {
-                    if (jb.getName() != null && jb.getName().equalsIgnoreCase(c.getName())) {
-                        if (!"INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
-                            totalB += jb.getBaki();
-                            totalJ += jb.getJama();
-                        }
-                    }
+            double[] totals = c.getName() != null ? customerTotalsMap.get(c.getName().toLowerCase()) : null;
+            if (totals != null) {
+                double outstanding = totals[0] - totals[1];
+                if (outstanding > 0) {
+                    totalOutstanding += outstanding;
                 }
-            }
-            double outstanding = totalB - totalJ;
-            if (outstanding > 0) {
-                totalOutstanding += outstanding;
             }
         }
 
@@ -591,21 +617,44 @@ public class FinancialReportController {
         Map<String, Double> dailyProfitMap = new TreeMap<>();
         Map<String, Double> expenseBreakdownMap = new HashMap<>();
 
-        for (String uid : uids) {
-            // Expenses breakdown
-            List<Object[]> expensesList = kharchrepository.findExpensesAndNotes("", uid);
-            for (Object[] expObj : expensesList) {
-                if (expObj.length >= 2) {
-                    String category = String.valueOf(expObj[0]);
-                    double val = 0;
-                    try {
-                        val = Double.parseDouble(String.valueOf(expObj[1]));
-                    } catch (Exception e) {}
-                    expenseBreakdownMap.put(category, expenseBreakdownMap.getOrDefault(category, 0.0) + val);
+        if (jdbcTemplate != null && !uids.isEmpty()) {
+            // Load expenses breakdown & daily sums in batch queries instead of per-day N+1 queries
+            double perDayExpensesTotal = 0.0;
+            for (String uid : uids) {
+                List<Object[]> expensesList = kharchrepository.findExpensesAndNotes("", uid);
+                for (Object[] expObj : expensesList) {
+                    if (expObj.length >= 2) {
+                        String category = String.valueOf(expObj[0]);
+                        double val = 0;
+                        try {
+                            val = Double.parseDouble(String.valueOf(expObj[1]));
+                        } catch (Exception e) {}
+                        expenseBreakdownMap.put(category, expenseBreakdownMap.getOrDefault(category, 0.0) + val);
+                        perDayExpensesTotal += val;
+                    }
                 }
             }
 
-            // Daily sales/purchases/expenses to construct daily profit
+            Map<String, Double> salesByDate = new HashMap<>();
+            Map<String, Double> purchasesByDate = new HashMap<>();
+            String placeholders = uids.stream().map(u -> "?").collect(Collectors.joining(","));
+            Object[] rangeParams = new Object[uids.size() + 2];
+            rangeParams[0] = startDate;
+            rangeParams[1] = endDate;
+            for (int i = 0; i < uids.size(); i++) {
+                rangeParams[i + 2] = uids.get(i);
+            }
+
+            accumulateDailySums(salesByDate, "SELECT `date`, COALESCE(SUM(total_sell), 0) FROM petrolsell WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") GROUP BY `date`", rangeParams);
+            accumulateDailySums(salesByDate, "SELECT `date`, COALESCE(SUM(total_sell), 0) FROM dieselsell WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") GROUP BY `date`", rangeParams);
+            accumulateDailySums(salesByDate, "SELECT `date`, COALESCE(SUM(price), 0) FROM oilsell WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") GROUP BY `date`", rangeParams);
+            accumulateDailySums(salesByDate, "SELECT `date`, COALESCE(SUM(total_sell), 0) FROM xppetrol WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") GROUP BY `date`", rangeParams);
+            accumulateDailySums(salesByDate, "SELECT `date`, COALESCE(SUM(total_sell), 0) FROM powerdiesel WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") GROUP BY `date`", rangeParams);
+
+            accumulateDailySums(purchasesByDate, "SELECT `date`, COALESCE(SUM(total_purchase), 0) FROM purchase WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") AND `type` IN ('petrol', 'Diesel', 'diesel', 'Petrol') GROUP BY `date`", rangeParams);
+            accumulateDailySums(purchasesByDate, "SELECT `date`, COALESCE(SUM(net_amount), 0) FROM oilpurchase WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") AND `type` = 'oil' GROUP BY `date`", rangeParams);
+            accumulateDailySums(purchasesByDate, "SELECT `date`, COALESCE(SUM(extra_total_purchase), 0) FROM extrapurchases WHERE `date` BETWEEN ? AND ? AND user_id IN (" + placeholders + ") AND `extra_type` IN ('XP Petrol', 'Power Diesel') GROUP BY `date`", rangeParams);
+
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date start = sdf.parse(startDate);
@@ -614,21 +663,64 @@ public class FinancialReportController {
                 c.setTime(start);
                 while (!c.getTime().after(end)) {
                     String currDate = sdf.format(c.getTime());
-                    double sales = getSalesForUser(uid, currDate, currDate);
-                    double purchases = getPurchasesForUser(uid, currDate, currDate);
-                    double expenses = getExpensesForUser(uid, currDate, currDate);
-                    double profit = sales - purchases - expenses;
+                    double profit = salesByDate.getOrDefault(currDate, 0.0)
+                            - purchasesByDate.getOrDefault(currDate, 0.0)
+                            - perDayExpensesTotal;
                     dailyProfitMap.put(currDate, dailyProfitMap.getOrDefault(currDate, 0.0) + profit);
                     c.add(Calendar.DATE, 1);
                 }
             } catch (Exception e) {}
 
-            // Add Indirect Income to daily profit
-            List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
-            for (jamabaki jb : jbList) {
-                if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
-                    if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
-                        dailyProfitMap.put(jb.getDate(), dailyProfitMap.getOrDefault(jb.getDate(), 0.0) + jb.getJama());
+            for (String uid : uids) {
+                List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
+                for (jamabaki jb : jbList) {
+                    if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
+                        if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
+                            dailyProfitMap.put(jb.getDate(), dailyProfitMap.getOrDefault(jb.getDate(), 0.0) + jb.getJama());
+                        }
+                    }
+                }
+            }
+        } else {
+            for (String uid : uids) {
+                // Expenses breakdown
+                List<Object[]> expensesList = kharchrepository.findExpensesAndNotes("", uid);
+                for (Object[] expObj : expensesList) {
+                    if (expObj.length >= 2) {
+                        String category = String.valueOf(expObj[0]);
+                        double val = 0;
+                        try {
+                            val = Double.parseDouble(String.valueOf(expObj[1]));
+                        } catch (Exception e) {}
+                        expenseBreakdownMap.put(category, expenseBreakdownMap.getOrDefault(category, 0.0) + val);
+                    }
+                }
+
+                // Daily sales/purchases/expenses to construct daily profit
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date start = sdf.parse(startDate);
+                    Date end = sdf.parse(endDate);
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(start);
+                    double expenses = getExpensesForUser(uid, startDate, endDate);
+                    while (!c.getTime().after(end)) {
+                        String currDate = sdf.format(c.getTime());
+                        double sales = getSalesForUser(uid, currDate, currDate);
+                        double purchases = getPurchasesForUser(uid, currDate, currDate);
+                        double profit = sales - purchases - expenses;
+                        dailyProfitMap.put(currDate, dailyProfitMap.getOrDefault(currDate, 0.0) + profit);
+                        c.add(Calendar.DATE, 1);
+                    }
+                } catch (Exception e) {}
+
+                // Add Indirect Income to daily profit
+                List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
+                for (jamabaki jb : jbList) {
+                    if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
+                        if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
+                            dailyProfitMap.put(jb.getDate(), dailyProfitMap.getOrDefault(jb.getDate(), 0.0) + jb.getJama());
+                        }
                     }
                 }
             }
@@ -673,6 +765,18 @@ public class FinancialReportController {
     }
 
     // ================= HELPERS FOR SUMMARY CALCULATIONS =================
+
+    private void accumulateDailySums(Map<String, Double> target, String sql, Object[] params) {
+        try {
+            jdbcTemplate.query(sql, params, rs -> {
+                String d = rs.getString(1);
+                double val = rs.getDouble(2);
+                if (d != null) {
+                    target.put(d, target.getOrDefault(d, 0.0) + val);
+                }
+            });
+        } catch (Exception ignored) {}
+    }
 
     private double getSalesForUser(String userId, String startDate, String endDate) {
         double val = 0;
@@ -1027,16 +1131,26 @@ public class FinancialReportController {
             header.getCell(1).setCellStyle(headerStyle);
 
             double sales = 0, expenses = 0, purchasesSum = 0, indirectIncome = 0;
+            // Preload jamabaki rows once per userId for P&L, Customer Outstanding, and Indirect Income sheets
+            List<jamabaki> indirectIncomeRows = new ArrayList<>();
+            Map<String, List<jamabaki>> jamabakiByCustomer = new HashMap<>();
             for (String uid : uids) {
                 sales += getSalesForUser(uid, startDate, endDate);
                 expenses += getExpensesForUser(uid, startDate, endDate);
                 purchasesSum += getPurchasesForUser(uid, startDate, endDate);
 
                 List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
-                for (jamabaki jb : jbList) {
-                    if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
-                        if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
-                            indirectIncome += jb.getJama();
+                if (jbList != null) {
+                    for (jamabaki jb : jbList) {
+                        if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
+                            if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
+                                indirectIncome += jb.getJama();
+                                indirectIncomeRows.add(jb);
+                            }
+                        } else if (jb.getName() != null) {
+                            jamabakiByCustomer
+                                    .computeIfAbsent(jb.getName().toLowerCase(), k -> new ArrayList<>())
+                                    .add(jb);
                         }
                     }
                 }
@@ -1094,23 +1208,19 @@ public class FinancialReportController {
                 String lastPayDate = "";
                 String vNum = co.getVehicleNumber();
 
-                for (String uid : uids) {
-                    List<jamabaki> jbList = JamabakiRepository.findByUserId(uid);
-                    for (jamabaki jb : jbList) {
-                        if (jb.getName() != null && jb.getName().equalsIgnoreCase(co.getName())) {
-                            if (!"INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
-                                totalB += jb.getBaki();
-                                totalJ += jb.getJama();
-                                if (jb.getJama() > 0) {
-                                    if (lastPayDate.isEmpty() || (jb.getDate() != null && jb.getDate().compareTo(lastPayDate) > 0)) {
-                                        lastPayDate = jb.getDate();
-                                    }
-                                }
-                                if (jb.getBakiNote() != null && !jb.getBakiNote().isEmpty()) {
-                                    vNum = jb.getBakiNote();
-                                }
-                            }
+                List<jamabaki> customerEntries = co.getName() != null
+                        ? jamabakiByCustomer.getOrDefault(co.getName().toLowerCase(), Collections.emptyList())
+                        : Collections.emptyList();
+                for (jamabaki jb : customerEntries) {
+                    totalB += jb.getBaki();
+                    totalJ += jb.getJama();
+                    if (jb.getJama() > 0) {
+                        if (lastPayDate.isEmpty() || (jb.getDate() != null && jb.getDate().compareTo(lastPayDate) > 0)) {
+                            lastPayDate = jb.getDate();
                         }
+                    }
+                    if (jb.getBakiNote() != null && !jb.getBakiNote().isEmpty()) {
+                        vNum = jb.getBakiNote();
                     }
                 }
 
@@ -1134,19 +1244,12 @@ public class FinancialReportController {
             incHeader.createCell(3).setCellValue("Description");
 
             int incIdx = 1;
-            for (String uid : uids) {
-                List<jamabaki> list = JamabakiRepository.findByUserId(uid);
-                for (jamabaki jb : list) {
-                    if ("INDIRECT_INCOME".equalsIgnoreCase(jb.getType())) {
-                        if (jb.getDate() != null && jb.getDate().compareTo(startDate) >= 0 && jb.getDate().compareTo(endDate) <= 0) {
-                            Row r = incSheet.createRow(incIdx++);
-                            r.createCell(0).setCellValue(jb.getBakiNote() != null ? jb.getBakiNote() : "");
-                            r.createCell(1).setCellValue(jb.getJama());
-                            r.createCell(2).setCellValue(jb.getDate() != null ? jb.getDate() : "");
-                            r.createCell(3).setCellValue(jb.getJamaNote() != null ? jb.getJamaNote() : "");
-                        }
-                    }
-                }
+            for (jamabaki jb : indirectIncomeRows) {
+                Row r = incSheet.createRow(incIdx++);
+                r.createCell(0).setCellValue(jb.getBakiNote() != null ? jb.getBakiNote() : "");
+                r.createCell(1).setCellValue(jb.getJama());
+                r.createCell(2).setCellValue(jb.getDate() != null ? jb.getDate() : "");
+                r.createCell(3).setCellValue(jb.getJamaNote() != null ? jb.getJamaNote() : "");
             }
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1258,15 +1361,7 @@ public class FinancialReportController {
             Long displayPumpId = (pumpId != null) ? pumpId : (caller.getPumpId() != null ? caller.getPumpId() : 0L);
             ctx.setVariable("pumpId", displayPumpId);
 
-            ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-            resolver.setPrefix("templates/");
-            resolver.setSuffix(".html");
-            resolver.setTemplateMode(TemplateMode.HTML);
-            resolver.setCharacterEncoding("UTF-8");
-
-            TemplateEngine templateEngine = new TemplateEngine();
-            templateEngine.setTemplateResolver(resolver);
-            String html = templateEngine.process("ItReturn", ctx);
+            String html = SHARED_TEMPLATE_ENGINE.process("ItReturn", ctx);
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ITextRenderer renderer = new ITextRenderer();

@@ -36,13 +36,17 @@
   }
 
   .close-btn {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
+    width: 34px;
+    height: 34px;
+    line-height: 34px;
+    border-radius: 8px;
+    background: #f1f5f9;
     color: #64748b;
+    transition: all 0.2s ease-in-out;
     &:hover {
-      background: rgba(239, 68, 68, 0.1);
-      color: #ef4444;
+      background: #fee2e2;
+      color: #dc2626;
+      transform: translateY(-1px);
     }
   }
 }

@@ -29,8 +29,8 @@ public class DailyTotalCleanup {
     @Autowired
     private UserRepository userRepository;
 
-    // Scheduled to run every 1 minute
-    @Scheduled(cron = "0 * * * * *", zone = "Asia/Kolkata")
+    // Scheduled to run every 15 minutes to minimize recurring lock/scan overhead
+    @Scheduled(cron = "0 */15 * * * *", zone = "Asia/Kolkata")
     public void DailyTotalCleanup() {
         Set<String> targetDatabases = new HashSet<>();
 
@@ -52,16 +52,11 @@ public class DailyTotalCleanup {
             log.debug("Notice collecting pump databases for cleanup: {}", e.getMessage());
         }
 
-        String sql = "DELETE FROM dailytotal " +
-                "WHERE (date, user_id) NOT IN ( " +
-                "SELECT DISTINCT date, user_id FROM petrolsell " +
-                "UNION " +
-                "SELECT DISTINCT date, user_id FROM xppetrol " +
-                "UNION " +
-                "SELECT DISTINCT date, user_id FROM dieselsell " +
-                "UNION " +
-                "SELECT DISTINCT date, user_id FROM powerdiesel " +
-                ")";
+        String sql = "DELETE dt FROM dailytotal dt " +
+                "WHERE NOT EXISTS (SELECT 1 FROM petrolsell p WHERE p.date = dt.date AND p.user_id = dt.user_id) " +
+                "AND NOT EXISTS (SELECT 1 FROM xppetrol xp WHERE xp.date = dt.date AND xp.user_id = dt.user_id) " +
+                "AND NOT EXISTS (SELECT 1 FROM dieselsell d WHERE d.date = dt.date AND d.user_id = dt.user_id) " +
+                "AND NOT EXISTS (SELECT 1 FROM powerdiesel pd WHERE pd.date = dt.date AND pd.user_id = dt.user_id)";
 
         for (String db : targetDatabases) {
             try {

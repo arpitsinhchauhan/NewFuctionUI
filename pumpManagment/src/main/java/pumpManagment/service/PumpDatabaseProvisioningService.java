@@ -607,7 +607,30 @@ public class PumpDatabaseProvisioningService {
             "CREATE INDEX idx_oilpurchase_pump_date ON oilpurchase (pump_id, `date`(50))",
             "CREATE INDEX idx_oilpurchase_user_date ON oilpurchase (user_id(50), `date`(50))",
             "CREATE INDEX idx_extrapurchases_pump_date ON extrapurchases (pump_id, `date`(50))",
-            "CREATE INDEX idx_extrapurchases_user_date ON extrapurchases (user_id(50), `date`(50))"
+            "CREATE INDEX idx_extrapurchases_user_date ON extrapurchases (user_id(50), `date`(50))",
+            "CREATE INDEX idx_petrolsell_user_date ON petrolsell (user_id(50), `date`(50))",
+            "CREATE INDEX idx_petrolsell_date_pump ON petrolsell (`date`(50), pump(50))",
+            "CREATE INDEX idx_dieselsell_user_date ON dieselsell (user_id(50), `date`(50))",
+            "CREATE INDEX idx_dieselsell_date_pump ON dieselsell (`date`(50), pump(50))",
+            "CREATE INDEX idx_xppetrol_user_date ON xppetrol (user_id(50), `date`(50))",
+            "CREATE INDEX idx_xppetrol_date_pump ON xppetrol (`date`(50), pump(50))",
+            "CREATE INDEX idx_powerdiesel_user_date ON powerdiesel (user_id(50), `date`(50))",
+            "CREATE INDEX idx_powerdiesel_date_pump ON powerdiesel (`date`(50), pump(50))",
+            "CREATE INDEX idx_oilsell_user_date ON oilsell (user_id(50), `date`(50))",
+            "CREATE INDEX idx_kharch_user_date ON kharch (user_id(50), `date`(50))",
+            "CREATE INDEX idx_transaction_user_date ON `transaction` (user_id(50), `date`(50))",
+            "CREATE INDEX idx_jamabaki_user_date ON jamabakireport (user_id(50), `date`(50))",
+            "CREATE INDEX idx_jamabaki_name ON jamabakireport (`name`(100))",
+            "CREATE INDEX idx_loclcredit_user_date ON loclcredit (user_id(50), `date`(50))",
+            "CREATE INDEX idx_dailytotal_user_date ON dailytotal (user_id(50), `date`(50))",
+            "CREATE INDEX idx_dailystock_user_date ON dailystock (user_id(50), `date`(50))",
+            "CREATE INDEX idx_dailydieselstock_user_date ON dailydieselstock (user_id(50), `date`(50))",
+            "CREATE INDEX idx_xpdailystock_user_date ON xpdailystock (user_id(50), `date`(50))",
+            "CREATE INDEX idx_powerdieseldailystock_user_date ON powerdieseldailystock (user_id(50), `date`(50))",
+            "CREATE INDEX idx_dip_user_date ON dip (user_id(50), `date`(50))",
+            "CREATE INDEX idx_extradip_user_date ON extradip (user_id(50), `date`(50))",
+            "CREATE INDEX idx_customer_user_id ON customer (user_id(50))",
+            "CREATE INDEX idx_day_closing_business_date ON day_closing (business_date(50))"
     );
 
     /**

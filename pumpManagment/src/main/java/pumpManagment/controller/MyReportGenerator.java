@@ -92,6 +92,21 @@ public class MyReportGenerator implements ProfitLossService {
         @Autowired
         private UserRepository userRepository;
 
+        private static final TemplateEngine SHARED_TEMPLATE_ENGINE = createTemplateEngine();
+
+        private static TemplateEngine createTemplateEngine() {
+                ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+                resolver.setPrefix("templates/");
+                resolver.setSuffix(".html");
+                resolver.setTemplateMode(TemplateMode.HTML);
+                resolver.setCharacterEncoding("UTF-8");
+                resolver.setCacheable(true);
+
+                TemplateEngine engine = new TemplateEngine();
+                engine.setTemplateResolver(resolver);
+                return engine;
+        }
+
         private List<String> getTargetUserIds(String userIdStr) {
                 List<String> userIds = new ArrayList<>();
                 userIds.add(userIdStr);
@@ -256,15 +271,7 @@ public class MyReportGenerator implements ProfitLossService {
                         ctx.setVariable("closeOilSell", df.format(closeOilSell));
 
                         // ---------- PDF ----------
-                        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-                        resolver.setPrefix("templates/");
-                        resolver.setSuffix(".html");
-                        resolver.setTemplateMode(TemplateMode.HTML);
-                        resolver.setCharacterEncoding("UTF-8");
-
-                        TemplateEngine templateEngine = new TemplateEngine();
-                        templateEngine.setTemplateResolver(resolver);
-                        String html = templateEngine.process("ItReturn", ctx);
+                        String html = SHARED_TEMPLATE_ENGINE.process("ItReturn", ctx);
 
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         ITextRenderer renderer = new ITextRenderer();
@@ -507,16 +514,8 @@ public class MyReportGenerator implements ProfitLossService {
 
                         ctx.setVariable("totalRs", df.format(totalRs));
 
-                        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
-                        resolver.setPrefix("templates/");
-                        resolver.setSuffix(".html");
-                        resolver.setTemplateMode(TemplateMode.HTML);
-                        resolver.setCharacterEncoding("UTF-8");
-
                         // 3. Process template
-                        TemplateEngine templateEngine = new TemplateEngine();
-                        templateEngine.setTemplateResolver(resolver);
-                        String html = templateEngine.process("extraItReturn", ctx);
+                        String html = SHARED_TEMPLATE_ENGINE.process("extraItReturn", ctx);
 
                         // 4. Generate PDF
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -540,7 +539,6 @@ public class MyReportGenerator implements ProfitLossService {
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_PDF);
                         headers.add("Content-Disposition", "attachment; filename=Extra_Profit&Loss.pdf");
-                        System.out.println("PDF saved to: " + outputPath.toAbsolutePath());
                         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
                 } catch (IOException ex) {
                         Logger.getLogger(MyReportGenerator.class.getName()).log(Level.SEVERE, null, ex);

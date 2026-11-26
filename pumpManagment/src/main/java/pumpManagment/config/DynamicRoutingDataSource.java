@@ -126,6 +126,51 @@ public class DynamicRoutingDataSource extends AbstractRoutingDataSource {
                     stmt.executeUpdate(mig);
                 } catch (Exception ignored) {}
             }
+
+            // Ensure core performance indexes exist on existing tenant databases
+            java.util.Set<String> existingIndexes = new java.util.HashSet<>();
+            try (java.sql.ResultSet rs = stmt.executeQuery(
+                    "SELECT LOWER(CONCAT(TABLE_NAME, '.', INDEX_NAME)) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE()")) {
+                while (rs.next()) {
+                    existingIndexes.add(rs.getString(1));
+                }
+            } catch (Exception ignored) {}
+
+            String[][] tenantIndexes = {
+                    {"petrolsell", "idx_petrolsell_user_date", "CREATE INDEX idx_petrolsell_user_date ON petrolsell (user_id(50), `date`(50))"},
+                    {"petrolsell", "idx_petrolsell_date_pump", "CREATE INDEX idx_petrolsell_date_pump ON petrolsell (`date`(50), pump(50))"},
+                    {"dieselsell", "idx_dieselsell_user_date", "CREATE INDEX idx_dieselsell_user_date ON dieselsell (user_id(50), `date`(50))"},
+                    {"dieselsell", "idx_dieselsell_date_pump", "CREATE INDEX idx_dieselsell_date_pump ON dieselsell (`date`(50), pump(50))"},
+                    {"xppetrol", "idx_xppetrol_user_date", "CREATE INDEX idx_xppetrol_user_date ON xppetrol (user_id(50), `date`(50))"},
+                    {"xppetrol", "idx_xppetrol_date_pump", "CREATE INDEX idx_xppetrol_date_pump ON xppetrol (`date`(50), pump(50))"},
+                    {"powerdiesel", "idx_powerdiesel_user_date", "CREATE INDEX idx_powerdiesel_user_date ON powerdiesel (user_id(50), `date`(50))"},
+                    {"powerdiesel", "idx_powerdiesel_date_pump", "CREATE INDEX idx_powerdiesel_date_pump ON powerdiesel (`date`(50), pump(50))"},
+                    {"oilsell", "idx_oilsell_user_date", "CREATE INDEX idx_oilsell_user_date ON oilsell (user_id(50), `date`(50))"},
+                    {"kharch", "idx_kharch_user_date", "CREATE INDEX idx_kharch_user_date ON kharch (user_id(50), `date`(50))"},
+                    {"transaction", "idx_transaction_user_date", "CREATE INDEX idx_transaction_user_date ON `transaction` (user_id(50), `date`(50))"},
+                    {"jamabakireport", "idx_jamabaki_user_date", "CREATE INDEX idx_jamabaki_user_date ON jamabakireport (user_id(50), `date`(50))"},
+                    {"jamabakireport", "idx_jamabaki_name", "CREATE INDEX idx_jamabaki_name ON jamabakireport (`name`(100))"},
+                    {"loclcredit", "idx_loclcredit_user_date", "CREATE INDEX idx_loclcredit_user_date ON loclcredit (user_id(50), `date`(50))"},
+                    {"dailytotal", "idx_dailytotal_user_date", "CREATE INDEX idx_dailytotal_user_date ON dailytotal (user_id(50), `date`(50))"},
+                    {"dailystock", "idx_dailystock_user_date", "CREATE INDEX idx_dailystock_user_date ON dailystock (user_id(50), `date`(50))"},
+                    {"dailydieselstock", "idx_dailydieselstock_user_date", "CREATE INDEX idx_dailydieselstock_user_date ON dailydieselstock (user_id(50), `date`(50))"},
+                    {"xpdailystock", "idx_xpdailystock_user_date", "CREATE INDEX idx_xpdailystock_user_date ON xpdailystock (user_id(50), `date`(50))"},
+                    {"powerdieseldailystock", "idx_powerdieseldailystock_user_date", "CREATE INDEX idx_powerdieseldailystock_user_date ON powerdieseldailystock (user_id(50), `date`(50))"},
+                    {"dip", "idx_dip_user_date", "CREATE INDEX idx_dip_user_date ON dip (user_id(50), `date`(50))"},
+                    {"extradip", "idx_extradip_user_date", "CREATE INDEX idx_extradip_user_date ON extradip (user_id(50), `date`(50))"},
+                    {"purchase", "idx_purchase_user_date", "CREATE INDEX idx_purchase_user_date ON purchase (user_id(50), `date`(50))"},
+                    {"oilpurchase", "idx_oilpurchase_user_date", "CREATE INDEX idx_oilpurchase_user_date ON oilpurchase (user_id(50), `date`(50))"},
+                    {"extrapurchases", "idx_extrapurchases_user_date", "CREATE INDEX idx_extrapurchases_user_date ON extrapurchases (user_id(50), `date`(50))"},
+                    {"customer", "idx_customer_user_id", "CREATE INDEX idx_customer_user_id ON customer (user_id(50))"},
+                    {"day_closing", "idx_day_closing_business_date", "CREATE INDEX idx_day_closing_business_date ON day_closing (business_date(50))"}
+            };
+            for (String[] idx : tenantIndexes) {
+                if (!existingIndexes.contains((idx[0] + "." + idx[1]).toLowerCase())) {
+                    try {
+                        stmt.executeUpdate(idx[2]);
+                    } catch (Exception ignored) {}
+                }
+            }
         } catch (Exception e) {
             log.debug("Notice checking compatibility migrations in '{}': {}", dbName, e.getMessage());
         }

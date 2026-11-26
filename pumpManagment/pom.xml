@@ -136,11 +136,6 @@
             <version>24.1.0</version>
         </dependency>
         <dependency>
-            <groupId>com.twilio.sdk</groupId>
-            <artifactId>twilio</artifactId>
-            <version>10.5.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.mailjet</groupId>
             <artifactId>mailjet-client</artifactId>
             <version>5.2.5</version>

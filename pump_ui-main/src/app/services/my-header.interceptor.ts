@@ -7,7 +7,7 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { finalize, catchError, retry, timeout } from 'rxjs/operators';
+import { finalize, catchError, retry, timeout, tap } from 'rxjs/operators';
 import { LoaderService } from './loader.service';
 import { NotificationService } from './notification.service';
 import { Router } from '@angular/router';
@@ -45,12 +45,12 @@ export class MyHeaderInterceptor implements HttpInterceptor {
       setHeaders: headersConfig
     });
 
-    // Process request with timeout, retry, global error handling, and loader cleanup
+    // Process request with timeout, idempotent GET retry, global error handling, and loader cleanup
     return next.handle(clonedRequest).pipe(
       // Timeout after 20 seconds
       timeout(20000),
-      // Retry once on failure
-      retry(1),
+      // Retry once only for idempotent GET requests to avoid duplicate mutations on POST/PUT/DELETE
+      req.method === 'GET' ? retry(1) : tap(),
       catchError((error: HttpErrorResponse) => {
         let errorMessage = 'An error occurred while connecting to the server.';
 

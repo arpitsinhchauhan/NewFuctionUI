@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
@@ -69,7 +69,8 @@ interface BackPageResponse {
     { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
   ]
 })
-export class MainPanelComponent implements OnInit {
+export class MainPanelComponent implements OnInit, OnDestroy {
+  private clockIntervalId: any = null;
 
   showPetrolPumpsCount: number = 0;
   showDieselPumpsCount: number = 0;
@@ -354,7 +355,7 @@ export class MainPanelComponent implements OnInit {
     ];
 
     this.updateTime();
-    setInterval(() => this.updateTime(), 1000);
+    this.clockIntervalId = setInterval(() => this.updateTime(), 1000);
   }
 
   getUserPump() {
@@ -2633,6 +2634,13 @@ export class MainPanelComponent implements OnInit {
 
   cancel() {
     location.reload();
+  }
+
+  ngOnDestroy() {
+    if (this.clockIntervalId) {
+      clearInterval(this.clockIntervalId);
+      this.clockIntervalId = null;
+    }
   }
 
 }

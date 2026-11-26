@@ -209,60 +209,67 @@ button {
 
 /* ---- User Management Dialog Buttons ---- */
 .btn-submit-user {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  background: #4f46e5 !important;
   color: #ffffff !important;
-  border-radius: 50px !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.02em !important;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35) !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  border: none !important;
+  letter-spacing: 0.01em !important;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
+  transition: all 0.2s ease-in-out !important;
+  border: 1px solid #4f46e5 !important;
 }
 
-.btn-submit-user:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5) !important;
+.btn-submit-user:hover:not(:disabled) {
+  background: #3730a3 !important;
+  border-color: #3730a3 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 14px rgba(55, 48, 163, 0.28) !important;
 }
 
 .btn-change-pwd {
-  background: rgba(79, 70, 229, 0.08) !important;
-  color: #4f46e5 !important;
-  border: 1px solid rgba(79, 70, 229, 0.25) !important;
-  border-radius: 50px !important;
+  background: #eef2ff !important;
+  color: #4338ca !important;
+  border: 1px solid #c7d2fe !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
-.btn-change-pwd:hover {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-  color: #ffffff !important;
-  border-color: transparent !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35) !important;
+.btn-change-pwd:hover:not(:disabled) {
+  background: #e0e7ff !important;
+  color: #3730a3 !important;
+  border-color: #a5b4fc !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(67, 56, 202, 0.14) !important;
 }
 
 .btn-cancel-user {
-  border-radius: 50px !important;
-  border: 1px solid var(--border-color, #e2e8f0) !important;
-  background: var(--bg-card, #ffffff) !important;
-  color: var(--text-muted, #64748b) !important;
+  border-radius: 8px !important;
+  border: 1px solid #c7d2fe !important;
+  background: #eef2ff !important;
+  color: #4338ca !important;
   font-weight: 600 !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
-.btn-cancel-user:hover {
-  background: var(--bg-main, #f1f5f9) !important;
-  color: var(--text-main, #0f172a) !important;
-  border-color: #cbd5e1 !important;
+.btn-cancel-user:hover:not(:disabled) {
+  background: #e0e7ff !important;
+  color: #3730a3 !important;
+  border-color: #a5b4fc !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(67, 56, 202, 0.14) !important;
 }
 
 .close-btn {
-  border-radius: 50% !important;
-  transition: all 0.2s ease !important;
+  border-radius: 8px !important;
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
-.close-btn:hover {
-  background: rgba(225, 29, 72, 0.12) !important;
-  color: #e11d48 !important;
+.close-btn:hover:not(:disabled) {
+  background: #fecaca !important;
+  color: #b91c1c !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.16) !important;
 }

@@ -66,8 +66,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ExpensesListComponent } from './modules/kharch/expenses-list/expenses-list.component';
 import { ExpensesExcelComponent } from './user-profile/expenses-excel/expenses-excel.component';
-import { NgxGaugeModule } from 'ngx-gauge';
-import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { XpPetrolListComponent } from './modules/xp-petrol-list/xp-petrol-list.component';
@@ -140,22 +138,10 @@ import { TankConfigDialogComponent } from './modules/dashboard/components/tank-c
     MatTableModule,
     MatStepperModule,
     NgChartsModule,
-    MatStepperModule,
-    BrowserAnimationsModule,
-    MatTableModule,
-    MatCardModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    NgxGaugeModule,
-    CanvasJSAngularChartsModule,
     MatAutocompleteModule,
-    MatTableModule,
     MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatDatepickerModule,
     MatMomentDateModule,
     MatButtonToggleModule,
     MatSidenavModule,

@@ -91,7 +91,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let report of dailyReports" class="hover-row">
+                <tr *ngFor="let report of dailyReports; trackBy: trackByReportId" class="hover-row">
                   <td>
                     <div class="user-cell">
                       <div class="user-avatar bg-info text-white">{{ report.createdBy.charAt(0) | uppercase }}</div>
@@ -107,7 +107,7 @@
                   <td class="font-weight-bold text-success">₹{{ report.salesAmount | number:'1.2-2' }}</td>
                   <td>
                     <div class="stock-tags">
-                      <span *ngFor="let item of parseStockDetails(report.stockDetails)" 
+                      <span *ngFor="let item of (report.parsedStockDetails || parseStockDetails(report.stockDetails)); trackBy: trackByIndex" 
                             class="badge"
                             [class.badge-outline-petrol]="item.fuel === 'petrol'"
                             [class.badge-outline-diesel]="item.fuel === 'diesel'"
@@ -133,7 +133,7 @@
   <div class="row mb-4" *ngIf="realMeterSummary">
     <div class="col-12">
       <mat-card class="card-premium">
-        <div class="card-header-modern d-flex justify-content-between align-items-center">
+        <div class="card-header-modern d-flex justify-content-between align-items-center flex-wrap gap-2">
           <div class="header-text">
             <h4 class="card-title m-0 d-flex align-items-center">
               <mat-icon class="mr-2 text-primary">speed</mat-icon> Today's Real Shift Meter ERP Summary
@@ -141,7 +141,7 @@
             <p class="card-subtitle m-0 text-muted small">Real Opening = First Shift Open | Real Closing = Last Shift
               Close (No Duplicate Summing)</p>
           </div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="badge p-2 font-weight-bold d-flex align-items-center gap-1"
               [ngClass]="eodStatusData?.isClosed ? 'badge-success' : 'badge-warning'" *ngIf="eodStatusData">
               <mat-icon style="font-size:14px; height:14px; width:14px;">{{ eodStatusData.isClosed ? 'lock' :
@@ -151,21 +151,21 @@
             <span class="badge badge-info p-2 font-weight-bold">Live Shift Sync</span>
           </div>
         </div>
-        <div class="row mt-3 p-2">
-          <div class="col-md-3 col-6 mb-3 text-center border-right">
-            <span class="text-muted small d-block uppercase font-weight-bold">Today's Total Meter Sale</span>
+        <div class="erp-meter-grid p-3">
+          <div class="erp-meter-tile">
+            <span class="erp-meter-label">Today's Total Meter Sale</span>
             <h3 class="text-primary font-weight-bold m-0">{{ realMeterSummary.grandMeterSale | number:'1.2-2' }} L</h3>
           </div>
-          <div class="col-md-3 col-6 mb-3 text-center border-right">
-            <span class="text-muted small d-block uppercase font-weight-bold">Today's Total Testing</span>
+          <div class="erp-meter-tile">
+            <span class="erp-meter-label">Today's Total Testing</span>
             <h3 class="text-warning font-weight-bold m-0">{{ realMeterSummary.grandTesting | number:'1.2-2' }} L</h3>
           </div>
-          <div class="col-md-3 col-6 mb-3 text-center border-right">
-            <span class="text-muted small d-block uppercase font-weight-bold">Today's Net Sales</span>
+          <div class="erp-meter-tile">
+            <span class="erp-meter-label">Today's Net Sales</span>
             <h3 class="text-info font-weight-bold m-0">{{ realMeterSummary.grandNetSale | number:'1.2-2' }} L</h3>
           </div>
-          <div class="col-md-3 col-6 mb-3 text-center">
-            <span class="text-muted small d-block uppercase font-weight-bold">Today's Total Amount</span>
+          <div class="erp-meter-tile">
+            <span class="erp-meter-label">Today's Total Amount</span>
             <h3 class="text-success font-weight-bold m-0">₹{{ realMeterSummary.grandTotalAmount | number:'1.2-2' }}</h3>
           </div>
         </div>
@@ -175,7 +175,7 @@
 
   <!-- Summary Cards -->
   <div class="row mb-4">
-    <div class="col-lg-4 col-md-6 mb-4">
+    <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
       <mat-card class="card-premium summary-card success">
         <div class="card-icon-wrapper">
           <mat-icon>payments</mat-icon>
@@ -191,7 +191,7 @@
       </mat-card>
     </div>
 
-    <div class="col-lg-4 col-md-6 mb-4">
+    <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
       <mat-card class="card-premium summary-card warning">
         <div class="card-icon-wrapper">
           <mat-icon>calendar_month</mat-icon>
@@ -207,7 +207,7 @@
       </mat-card>
     </div>
 
-    <div class="col-lg-4 col-md-6 mb-4">
+    <div class="col-lg-4 col-md-4 col-sm-12 mb-3">
       <mat-card class="card-premium summary-card primary">
         <div class="card-icon-wrapper">
           <mat-icon>analytics</mat-icon>
@@ -323,45 +323,63 @@
   </div>
 
   <!-- Charts & Nozzle Sales Section Side-by-Side -->
-  <div class="row mb-4">
-    <div class="col-lg-6 mb-4">
-      <mat-card class="card-premium chart-card h-100">
-        <div class="card-header-modern">
+  <div class="row analytics-split-row mb-2">
+    <div class="col-xl-6 col-lg-12 mb-4 d-flex">
+      <mat-card class="card-premium chart-card distribution-card w-100">
+        <div class="card-header-modern distribution-header">
           <div class="header-text">
             <h4 class="card-title">Fuel & Baki Distribution</h4>
-            <p class="card-subtitle">Sales & outstanding breakdown</p>
+            <p class="card-subtitle">Capital, inventory & credit allocation</p>
           </div>
-        </div>
-        <div class="chart-container mt-4" style="position: relative; height: 320px;">
-          <canvas *ngIf="totalDistributionSum > 0" baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions" [plugins]="doughnutPlugins">
-          </canvas>
-          <div *ngIf="totalDistributionSum === 0" class="d-flex flex-column align-items-center justify-content-center h-100 text-muted" style="min-height: 250px;">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; opacity: 0.4;">donut_large</mat-icon>
-            <h5 class="text-muted mt-3 mb-1">No Distribution Data Recorded</h5>
-            <p class="text-muted small m-0 text-center">No sales, fuel stock, or credit records found for this pump yet.</p>
+          <div class="distribution-total-badge" *ngIf="totalDistributionSum > 0">
+            <span class="total-badge-label">Total Pool</span>
+            <span class="total-badge-value">₹{{ totalDistributionSum | number:'1.0-0' }}</span>
           </div>
         </div>
 
-        <!-- Premium Custom Legend (Infographic Style) -->
-        <div class="premium-legend-container mt-3">
-          <div *ngFor="let detail of pieChartDetails" class="premium-legend-item">
-            <div class="legend-pill-wrapper">
-              <span class="legend-pill" [style.background-color]="detail.color">
-                {{ detail.name }}
-              </span>
-              <span class="legend-percentage">{{ detail.pct | number:'1.1-1' }}%</span>
+        <div class="distribution-body">
+          <div class="distribution-chart-stage">
+            <div class="doughnut-canvas-wrap" *ngIf="totalDistributionSum > 0">
+              <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions" [plugins]="doughnutPlugins">
+              </canvas>
             </div>
-            <div class="legend-value-row">
-              <span class="legend-desc">{{ detail.desc }}</span>
-              <span class="legend-val">₹{{ detail.value | number:'1.2-2' }}</span>
+            <div *ngIf="totalDistributionSum === 0" class="distribution-empty-state">
+              <div class="empty-icon-ring">
+                <mat-icon>donut_large</mat-icon>
+              </div>
+              <h5 class="empty-title">No Distribution Data Recorded</h5>
+              <p class="empty-desc">No sales, fuel stock, or credit records found for this pump yet.</p>
+            </div>
+          </div>
+
+          <!-- Compact 2-Column Category Summary Grid -->
+          <div class="distribution-summary-grid">
+            <div *ngFor="let detail of pieChartDetails" class="dist-summary-card">
+              <span class="dist-accent-bar" [style.background-color]="detail.color"></span>
+              <div class="dist-card-top">
+                <div class="dist-name-wrap">
+                  <span class="dist-color-dot" [style.background-color]="detail.color"></span>
+                  <span class="dist-name" [title]="detail.name">{{ detail.name }}</span>
+                </div>
+                <span class="dist-pct-badge" [style.color]="detail.color" [style.background-color]="detail.color + '18'">
+                  {{ detail.pct | number:'1.1-1' }}%
+                </span>
+              </div>
+              <div class="dist-card-bottom">
+                <span class="dist-desc">{{ detail.desc }}</span>
+                <span class="dist-amount">₹{{ detail.value | number:'1.2-2' }}</span>
+              </div>
+              <div class="dist-progress-track">
+                <div class="dist-progress-fill" [style.width.%]="detail.pct" [style.background-color]="detail.color"></div>
+              </div>
             </div>
           </div>
         </div>
       </mat-card>
     </div>
 
-    <div class="col-lg-6 mb-4">
-      <app-nozzle-card class="h-100 d-block" [nozzleSales]="nozzleSalesData" [(filterType)]="nozzleFilterType"
+    <div class="col-xl-6 col-lg-12 mb-4 d-flex">
+      <app-nozzle-card class="w-100 d-flex flex-column" [nozzleSales]="nozzleSalesData" [(filterType)]="nozzleFilterType"
         [(selectedYear)]="nozzleSelectedYear" [yearList]="yearList" (filterChange)="onNozzleFilterChange()">
       </app-nozzle-card>
     </div>
@@ -370,13 +388,13 @@
   <!-- Sales Summary Section -->
   <div class="row mb-4">
     <div class="col-12">
-      <mat-card class="card-premium chart-card">
-        <div class="card-header-modern">
+      <mat-card class="card-premium chart-card sales-summary-card">
+        <div class="card-header-modern sales-summary-header">
           <div class="header-text">
             <h4 class="card-title">Sales Performance Summary</h4>
-            <p class="card-subtitle">Detailed breakdown of sales trends</p>
+            <p class="card-subtitle">Detailed breakdown of sales, purchases & expenses</p>
           </div>
-          <div class="header-actions">
+          <div class="header-actions flex-wrap">
             <mat-button-toggle-group [(ngModel)]="filterType" (change)="onFilterChange()" class="modern-toggle-group">
               <mat-button-toggle value="today">Day</mat-button-toggle>
               <mat-button-toggle value="month">Month</mat-button-toggle>
@@ -391,7 +409,7 @@
             </mat-form-field>
           </div>
         </div>
-        <div class="chart-container mt-4">
+        <div class="sales-summary-chart-wrap">
           <canvas baseChart [data]="chartData" [type]="chartType" [options]="chartOptions"></canvas>
         </div>
       </mat-card>

@@ -1,10 +1,10 @@
 <mat-card class="card-premium nozzle-card-modern h-100">
-  <div class="card-header-modern">
+  <div class="card-header-modern nozzle-header">
     <div class="header-text">
       <h4 class="card-title">Nozzle Sales Performance</h4>
-      <p class="card-subtitle">Detailed tracking of individual nozzle throughput</p>
+      <p class="card-subtitle">Nozzle-wise sales volume & revenue comparison</p>
     </div>
-    <div class="header-actions">
+    <div class="header-actions nozzle-filter-actions">
       <mat-button-toggle-group [(ngModel)]="filterType"
         (change)="filterTypeChange.emit(filterType); filterChange.emit()" 
         class="modern-toggle-group">
@@ -14,7 +14,7 @@
         <mat-button-toggle value="fy">FY</mat-button-toggle>
       </mat-button-toggle-group>
 
-      <mat-form-field *ngIf="filterType === 'fy'" appearance="outline" class="small-select ml-2">
+      <mat-form-field *ngIf="filterType === 'fy'" appearance="outline" class="small-select">
         <mat-select [(ngModel)]="selectedYear"
           (selectionChange)="selectedYearChange.emit(selectedYear); filterChange.emit()">
           <mat-option *ngFor="let year of yearList" [value]="year">{{year}}-{{year+1}}</mat-option>
@@ -23,37 +23,80 @@
     </div>
   </div>
 
-  <div class="table-responsive mt-3">
-    <table class="modern-table">
-      <thead>
-        <tr>
-          <th>Nozzle ID</th>
-          <th>Fuel Type</th>
-          <th class="text-right">Volume (L)</th>
-          <th class="text-right">Total Revenue (₹)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let nozzle of nozzleSales">
-          <td class="font-weight-bold">{{ nozzle.nozzleName }}</td>
-          <td>
-            <div class="fuel-type-indicator">
-              <span class="dot" [style.background-color]="getFuelColor(nozzle.fuelType)"></span>
-              <span>{{ nozzle.fuelType }}</span>
-            </div>
-          </td>
-          <td class="text-right text-muted">{{ nozzle.liters | number:'1.2-2' }}</td>
-          <td class="text-right font-weight-bold text-primary">
-            ₹{{ nozzle.amount | number:'1.2-2' }}
-          </td>
-        </tr>
-        <tr *ngIf="nozzleSales.length === 0">
-          <td colspan="4" class="text-center py-5 text-muted">
-            <mat-icon style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px;">receipt_long</mat-icon>
-            <p>No sales records found for this period</p>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="nozzle-card-body">
+    <!-- Summary KPI Strip + Fuel Color Legend -->
+    <div class="nozzle-kpi-strip" *ngIf="nozzleSales.length > 0">
+      <div class="nozzle-kpi-pill">
+        <span class="kpi-pill-label">Total Volume</span>
+        <span class="kpi-pill-value">{{ totalVolume | number:'1.2-2' }} L</span>
+      </div>
+      <div class="nozzle-kpi-pill kpi-accent">
+        <span class="kpi-pill-label">Total Revenue</span>
+        <span class="kpi-pill-value">₹{{ totalRevenue | number:'1.2-2' }}</span>
+      </div>
+      <div class="nozzle-fuel-legend" *ngIf="fuelLegend.length > 0">
+        <span *ngFor="let item of fuelLegend" class="fuel-legend-chip">
+          <span class="dot" [style.background-color]="item.color"></span>
+          <span>{{ item.label }}</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Horizontal Visual Comparison Bar Chart -->
+    <div class="nozzle-chart-section" *ngIf="hasChartData">
+      <div class="nozzle-chart-wrap" [style.height.px]="getChartHeight()">
+        <canvas baseChart [data]="nozzleChartData" [type]="nozzleChartType" [options]="nozzleChartOptions"></canvas>
+      </div>
+    </div>
+
+    <!-- Readable Nozzle Table -->
+    <div class="table-responsive nozzle-table-wrap">
+      <table class="modern-table nozzle-table">
+        <thead>
+          <tr>
+            <th>Nozzle</th>
+            <th>Fuel Type</th>
+            <th class="text-right">Volume (L)</th>
+            <th class="text-right">Total Revenue (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let nozzle of nozzleSales">
+            <td class="nozzle-name-cell">{{ nozzle.nozzleName }}</td>
+            <td>
+              <span class="fuel-badge" [style.color]="getFuelColor(nozzle.fuelType)" [style.background-color]="getFuelColor(nozzle.fuelType) + '16'" [style.border-color]="getFuelColor(nozzle.fuelType) + '40'">
+                <span class="dot" [style.background-color]="getFuelColor(nozzle.fuelType)"></span>
+                <span>{{ nozzle.fuelType }}</span>
+              </span>
+            </td>
+            <td class="text-right volume-cell">{{ nozzle.liters | number:'1.2-2' }} L</td>
+            <td class="text-right revenue-cell">
+              <div class="revenue-cell-inner">
+                <span class="revenue-amount">₹{{ nozzle.amount | number:'1.2-2' }}</span>
+                <div class="inline-bar-track" *ngIf="maxRevenue > 0">
+                  <div class="inline-bar-fill" [style.width.%]="nozzle.amount > 0 ? getRevenueBarWidth(nozzle.amount) : 0" [style.background-color]="getFuelColor(nozzle.fuelType)"></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="nozzleSales.length === 0">
+            <td colspan="4" class="nozzle-empty-cell">
+              <div class="nozzle-empty-box">
+                <mat-icon>local_gas_station</mat-icon>
+                <h6>No Nozzle Sales Recorded</h6>
+                <p>No sales transactions were found for the selected time range.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="nozzleSales.length > 0">
+          <tr class="nozzle-total-row">
+            <td colspan="2">Total ({{ nozzleSales.length }} Nozzles)</td>
+            <td class="text-right">{{ totalVolume | number:'1.2-2' }} L</td>
+            <td class="text-right text-primary">₹{{ totalRevenue | number:'1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
 </mat-card>

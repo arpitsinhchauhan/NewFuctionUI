@@ -60,10 +60,10 @@
                   </td>
                   <td class="text-center">
                     <div class="action-buttons">
-                      <button mat-icon-button color="primary" (click)="addRow()" *ngIf="i === billRows.length - 1">
+                      <button mat-icon-button color="primary" (click)="addRow()" *ngIf="i === billRows.length - 1" title="Add Row">
                         <mat-icon>add_circle</mat-icon>
                       </button>
-                      <button mat-icon-button color="warn" (click)="deleteRow(i)" *ngIf="billRows.length > 1">
+                      <button mat-icon-button color="warn" (click)="deleteRow(i)" *ngIf="billRows.length > 1" title="Remove Row">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </div>
@@ -145,10 +145,10 @@
                   </td>
                   <td class="text-center">
                     <div class="action-buttons">
-                      <button mat-icon-button color="primary" (click)="addRowOil()" *ngIf="i === oilRows.length - 1">
+                      <button mat-icon-button color="primary" (click)="addRowOil()" *ngIf="i === oilRows.length - 1" title="Add Row">
                         <mat-icon>add_circle</mat-icon>
                       </button>
-                      <button mat-icon-button color="warn" (click)="deleteRowOil(i)" *ngIf="oilRows.length > 1">
+                      <button mat-icon-button color="warn" (click)="deleteRowOil(i)" *ngIf="oilRows.length > 1" title="Remove Row">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </div>

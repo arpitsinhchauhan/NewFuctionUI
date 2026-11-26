@@ -7,9 +7,23 @@
   /* Core Brand Colors (Enterprise Accounting & SaaS style) */
   --primary: #4f46e5;
   /* Deep Indigo (Trust & Stability) */
-  --primary-hover: #4338ca;
+  --primary-hover: #3730a3;
   --primary-light: #eef2ff;
   --primary-rgb: 79, 70, 229;
+
+  /* Unified Button Theme Tokens */
+  --btn-primary-bg: #4f46e5;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover-bg: #3730a3;
+  --btn-secondary-bg: #eef2ff;
+  --btn-secondary-text: #4338ca;
+  --btn-secondary-hover-bg: #e0e7ff;
+  --btn-danger-bg: #fee2e2;
+  --btn-danger-text: #dc2626;
+  --btn-danger-hover-bg: #fecaca;
+  --btn-radius: 8px;
+  --btn-font-weight: 600;
+  --btn-transition: all 0.2s ease-in-out;
 
   --secondary: #1e293b;
   /* Slate Blue (Sophisticated) */
@@ -390,41 +404,67 @@ small,
   font-weight: 500;
 }
 
-.modern-pagination .ngx-pagination {
+body .modern-pagination .ngx-pagination,
+body .ngx-pagination {
   margin-bottom: 0 !important;
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 6px !important;
 }
 
-.modern-pagination .ngx-pagination li {
-  border-radius: 4px;
-  transition: all 0.2s;
+body .modern-pagination .ngx-pagination li,
+body .ngx-pagination li {
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
-.modern-pagination .ngx-pagination a,
-.modern-pagination .ngx-pagination span {
-  color: var(--text-main) !important;
-  border-radius: 4px !important;
+body .modern-pagination .ngx-pagination a,
+body .modern-pagination .ngx-pagination button,
+body .modern-pagination .ngx-pagination span,
+body .ngx-pagination a,
+body .ngx-pagination button,
+body .ngx-pagination span {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
   text-decoration: none !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
-.modern-pagination .ngx-pagination a:hover {
-  background: var(--sidebar-hover) !important;
-  border-radius: 4px !important;
-  color: var(--primary) !important;
+body .modern-pagination .ngx-pagination a,
+body .modern-pagination .ngx-pagination button,
+body .ngx-pagination a,
+body .ngx-pagination button {
+  background: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
 }
 
-.modern-pagination .ngx-pagination .current {
-  background: var(--primary) !important;
-  color: #ffffff !important;
-  border-radius: 4px !important;
+body .modern-pagination .ngx-pagination a:hover,
+body .modern-pagination .ngx-pagination button:hover,
+body .ngx-pagination a:hover,
+body .ngx-pagination button:hover {
+  background: var(--btn-secondary-hover-bg) !important;
+  color: #3730a3 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(67, 56, 202, 0.14);
 }
 
-.modern-pagination .ngx-pagination .disabled {
+body .modern-pagination .ngx-pagination .current,
+body .ngx-pagination .current {
+  background: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+}
+
+body .modern-pagination .ngx-pagination .disabled,
+body .ngx-pagination .disabled {
+  background: transparent !important;
   color: var(--text-muted) !important;
-  opacity: 0.5;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 
@@ -467,42 +507,44 @@ small,
 
 .search-btn-premium {
   position: absolute;
-  right: 3px;
-  top: 3px;
-  width: 34px;
-  height: 34px;
-  background: var(--primary);
-  color: white;
+  right: 5px;
+  top: 4px;
+  width: 32px;
+  height: 32px;
+  background: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
   border: none;
-  border-radius: 50%;
+  border-radius: 8px !important;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.3);
+  transition: var(--btn-transition) !important;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
 }
 
-.search-btn-premium:hover {
-  background: var(--primary-hover);
-  transform: scale(1.05);
+.search-btn-premium:hover:not(:disabled) {
+  background: var(--btn-primary-hover-bg) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(55, 48, 163, 0.28);
+}
+
+.search-btn-premium:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.search-btn-premium:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .search-btn-premium mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
-}
-
-.search-btn-premium:hover {
-  background: var(--primary-dark);
-  transform: scale(1.05);
-}
-
-.search-btn-premium mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
+  color: inherit !important;
 }
 
 /* --- Report & Export Dialog Utilities --- */
@@ -856,33 +898,23 @@ small,
 }
 
 /* Premium Export Buttons */
-.btn-export-excel {
-  background: #065f46 !important;
-  /* Deep Emerald Green for Excel */
-  color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(6, 95, 70, 0.2) !important;
-}
-
-.btn-export-excel:hover {
-  background: #047857 !important;
-  transform: translateY(-1px);
-}
-
+.btn-export-excel,
 .btn-export-pdf {
-  background: #be123c !important;
-  /* Rich Crimson for PDF */
-  color: #ffffff !important;
-  box-shadow: 0 4px 10px rgba(190, 18, 60, 0.2) !important;
+  background: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border: 1px solid var(--btn-primary-bg) !important;
+  border-radius: var(--btn-radius) !important;
+  font-weight: var(--btn-font-weight) !important;
+  transition: var(--btn-transition) !important;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
 }
 
-.btn-export-pdf:hover {
-  background: #e11d48 !important;
-  transform: translateY(-1px);
-}
-
-.header-actions .mat-flat-button:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.btn-export-excel:hover:not(:disabled),
+.btn-export-pdf:hover:not(:disabled) {
+  background: var(--btn-primary-hover-bg) !important;
+  border-color: var(--btn-primary-hover-bg) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 14px rgba(55, 48, 163, 0.28) !important;
 }
 
 .dialog-actions-modern {
@@ -988,17 +1020,11 @@ mat-icon {
 }
 
 .header-actions button {
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  font-size: 12px;
-  margin: 0 !important;
-}
-
-.header-actions button.btn-primary-modern,
-.header-actions button.btn-premium,
-.header-actions button.premium-btn-primary {
   text-transform: none !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  font-size: 13px;
+  margin: 0 !important;
 }
 
 .header-actions .mat-button-wrapper {
@@ -1021,10 +1047,10 @@ mat-icon {
 }
 
 .header-actions .mat-icon-button {
-  width: 32px !important;
-  height: 32px !important;
-  line-height: 32px !important;
-  display: flex !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
 }
@@ -1036,8 +1062,9 @@ mat-icon {
   line-height: 18px !important;
 }
 
-.close-btn:hover {
-  background-color: rgba(239, 68, 68, 0.1) !important;
+.close-btn:hover:not(:disabled) {
+  background-color: var(--btn-danger-hover-bg) !important;
+  color: var(--btn-danger-text) !important;
 }
 
 /* --- Tabless (Seamless) Form Cards --- */
@@ -1147,187 +1174,162 @@ mat-icon {
    ========================================================================== */
 
 /* Base Premium Button Utility */
-/* Base Premium Button Utility */
 .btn-premium,
 .btn-premium .mat-button-wrapper {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.02em !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
   text-transform: none !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.2s ease-in-out !important;
   cursor: pointer !important;
   border: 1px solid transparent !important;
   outline: none !important;
   font-family: 'Inter', sans-serif !important;
   white-space: nowrap !important;
   user-select: none !important;
-  border-radius: 50px !important;
-  /* Fully rounded pill style */
+  border-radius: 8px !important;
 }
 
 /* Button Sizes */
 .btn-sm {
   height: 36px !important;
-  padding: 0 18px !important;
+  padding: 0 16px !important;
   font-size: 13px !important;
 }
 
 .btn-md {
-  height: 42px !important;
-  padding: 0 24px !important;
-  font-size: 14px !important;
+  height: 40px !important;
+  padding: 0 22px !important;
+  font-size: 13.5px !important;
 }
 
 .btn-lg {
-  height: 48px !important;
-  padding: 0 32px !important;
+  height: 46px !important;
+  padding: 0 28px !important;
   font-size: 15px !important;
 }
 
 /* Interactive Effects */
-.btn-premium:hover:not(:disabled) {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.15) !important;
-  filter: brightness(1.08) !important;
+.btn-premium:hover:not(:disabled):not([disabled]) {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22) !important;
 }
 
-.btn-premium:active:not(:disabled) {
+.btn-premium:active:not(:disabled):not([disabled]) {
   transform: translateY(0) !important;
-  box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 2px 6px rgba(55, 48, 163, 0.16) !important;
 }
 
-.btn-premium:disabled {
-  opacity: 0.5 !important;
+.btn-premium:disabled,
+.btn-premium[disabled] {
+  opacity: 0.55 !important;
   cursor: not-allowed !important;
-  background: var(--bg-main) !important;
-  border-color: var(--border-color) !important;
-  color: var(--text-light) !important;
+  transform: none !important;
   box-shadow: none !important;
 }
 
 /* Professional Color Variants */
-.btn-premium-primary {
-  background: var(--primary) !important;
-  color: #ffffff !important;
-  border-color: var(--primary) !important;
-  box-shadow: 0 4px 14px rgba(var(--primary-rgb), 0.35) !important;
+.btn-premium-primary,
+.btn-premium-success,
+.btn-premium-warning {
+  background: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border-color: var(--btn-primary-bg) !important;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
 }
 
-.btn-premium-success {
-  background: var(--success) !important;
-  color: #ffffff !important;
-  border-color: var(--success) !important;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+.btn-premium-primary:hover:not(:disabled):not([disabled]),
+.btn-premium-success:hover:not(:disabled):not([disabled]),
+.btn-premium-warning:hover:not(:disabled):not([disabled]) {
+  background: var(--btn-primary-hover-bg) !important;
+  border-color: var(--btn-primary-hover-bg) !important;
+  color: var(--btn-primary-text) !important;
+  box-shadow: 0 6px 14px rgba(55, 48, 163, 0.28) !important;
 }
 
 .btn-premium-danger {
-  background: var(--danger) !important;
-  color: #ffffff !important;
-  border-color: var(--danger) !important;
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35) !important;
+  background: var(--btn-danger-bg) !important;
+  color: var(--btn-danger-text) !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: none !important;
 }
 
-.btn-premium-warning {
-  background: var(--warning) !important;
-  color: #ffffff !important;
-  border-color: var(--warning) !important;
-  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35) !important;
+.btn-premium-danger:hover:not(:disabled):not([disabled]) {
+  background: var(--btn-danger-hover-bg) !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.16) !important;
 }
 
 .btn-premium-secondary {
-  background: #ffffff !important;
-  color: var(--text-main) !important;
-  border: 1.5px solid var(--border-color) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  background: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
+  border: 1px solid #c7d2fe !important;
+  box-shadow: none !important;
 }
 
-.btn-premium-secondary:hover {
-  background: var(--primary-light) !important;
-  border-color: var(--primary) !important;
-  color: var(--primary) !important;
-  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.15) !important;
+.btn-premium-secondary:hover:not(:disabled):not([disabled]) {
+  background: var(--btn-secondary-hover-bg) !important;
+  border-color: #a5b4fc !important;
+  color: #3730a3 !important;
+  box-shadow: 0 4px 10px rgba(67, 56, 202, 0.14) !important;
 }
 
-/* Dark Theme Adjustments */
-body.dark-theme .btn-premium-secondary {
-  background: var(--bg-card) !important;
-  color: var(--text-main) !important;
-  border-color: var(--border-color) !important;
-}
-
-/* Table Action Buttons (ERP Style) */
-/* PDF Export Button */
-.btn-export-pdf {
-  background: #dc2626 !important;
-  color: #ffffff !important;
-  border-color: #dc2626 !important;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35) !important;
-}
-
-.btn-export-pdf:hover:not(:disabled) {
-  background: #b91c1c !important;
-  border-color: #b91c1c !important;
-}
-
+/* Table Action Buttons (Unified Icon Buttons) */
 .action-btn-circle {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
   padding: 0 !important;
-  border-radius: 50% !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .action-btn-circle mat-icon {
   font-size: 18px !important;
   width: 18px !important;
   height: 18px !important;
+  line-height: 18px !important;
 }
 
-.action-btn-edit {
-  color: var(--primary) !important;
-  background: rgba(var(--primary-rgb), 0.08) !important;
+.action-btn-edit,
+.action-btn-view,
+.action-btn-print {
+  color: var(--btn-secondary-text) !important;
+  background: var(--btn-secondary-bg) !important;
 }
 
-.action-btn-edit:hover {
-  background: var(--primary) !important;
-  color: #ffffff !important;
+.action-btn-edit:hover:not(:disabled),
+.action-btn-view:hover:not(:disabled),
+.action-btn-print:hover:not(:disabled) {
+  background: var(--btn-secondary-hover-bg) !important;
+  color: #3730a3 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(67, 56, 202, 0.16) !important;
 }
 
 .action-btn-delete {
-  color: var(--danger) !important;
-  background: rgba(225, 29, 72, 0.08) !important;
+  color: var(--btn-danger-text) !important;
+  background: var(--btn-danger-bg) !important;
 }
 
-.action-btn-delete:hover {
-  background: var(--danger) !important;
-  color: #ffffff !important;
+.action-btn-delete:hover:not(:disabled) {
+  background: var(--btn-danger-hover-bg) !important;
+  color: #b91c1c !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.16) !important;
 }
 
-.action-btn-view {
-  color: var(--success) !important;
-  background: rgba(5, 150, 105, 0.08) !important;
-}
-
-.action-btn-view:hover {
-  background: var(--success) !important;
-  color: #ffffff !important;
-}
-
-.action-btn-print {
-  color: #8b5cf6 !important;
-  background: rgba(139, 92, 246, 0.08) !important;
-}
-
-.action-btn-print:hover {
-  background: #8b5cf6 !important;
-  color: #ffffff !important;
+.action-btn-circle:active:not(:disabled) {
+  transform: translateY(0) !important;
 }
 
 /* Dashboard Quick Action Buttons */
@@ -1606,28 +1608,40 @@ body {
 }
 
 .modern-toggle-group .mat-button-toggle-checked {
-  background-color: var(--primary) !important;
+  background-color: var(--btn-primary-bg) !important;
   color: #ffffff !important;
+}
+
+.modern-toggle-group .mat-button-toggle:not(.mat-button-toggle-checked):hover {
+  background-color: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
 }
 
 .modern-toggle-group .mat-button-toggle-label-content {
   line-height: 30px !important;
   font-size: 12px !important;
+  font-weight: 600 !important;
 }
 
 .mat-flat-button,
 .mat-raised-button,
-.mat-stroked-button {
-  line-height: 32px !important;
+.mat-stroked-button,
+.mat-button:not(.mat-icon-button) {
+  line-height: 36px !important;
   padding: 0 16px !important;
   font-size: 13px !important;
-  border-radius: var(--radius-sm) !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .mat-icon-button {
-  width: 36px !important;
-  height: 36px !important;
-  line-height: 36px !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .mat-icon {
@@ -1641,7 +1655,7 @@ body.dark-theme .modern-toggle-group {
 }
 
 body.dark-theme .modern-toggle-group .mat-button-toggle-checked {
-  background-color: var(--primary) !important;
+  background-color: var(--btn-primary-bg) !important;
   color: #ffffff !important;
 }
 
@@ -2484,12 +2498,12 @@ textarea.form-control-modern {
   background: var(--bg-card);
 }
 
-.mat-dialog-container button:not(.mat-icon-button):not(.mat-button-base),
+.mat-dialog-container button:not(.mat-icon-button):not(.mat-button-base):not(.mat-mini-fab),
 .btn-premium,
 .premium-btn {
   min-height: 36px;
-  padding: 0 14px !important;
-  border-radius: 10px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
 }
@@ -2643,7 +2657,38 @@ body.dark-theme .mat-dialog-container .modal-footer {
   gap: 8px !important;
 }
 
-/* 3. GLOBAL STANDARDIZED BUTTONS (36px Height, 6px Border Radius) */
+/* 3. GLOBAL STANDARDIZED UNIFIED BUTTON SYSTEM (Indigo/Purple Theme) */
+button,
+.btn,
+.mat-button,
+.mat-flat-button,
+.mat-raised-button,
+.mat-stroked-button,
+.mat-icon-button,
+.mat-mini-fab {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Preserve inherited color for spans/icons inside buttons (prevents global span color leak) */
+button span,
+button .mat-button-wrapper,
+button .mat-button-wrapper span,
+a.mat-icon-button .mat-button-wrapper,
+.btn span,
+.btn-premium span {
+  color: inherit !important;
+}
+
+/* Remove Angular Material gray focus overlay over custom theme backgrounds */
+.mat-button .mat-button-focus-overlay,
+.mat-flat-button .mat-button-focus-overlay,
+.mat-raised-button .mat-button-focus-overlay,
+.mat-stroked-button .mat-button-focus-overlay,
+.mat-icon-button .mat-button-focus-overlay {
+  opacity: 0 !important;
+}
+
+/* Shared Base Geometry & Motion */
 .btn-erp,
 .btn-save,
 .btn-update,
@@ -2654,24 +2699,33 @@ body.dark-theme .mat-dialog-container .modal-footer {
 .btn-excel,
 .btn-search,
 .btn-reset,
-.btn-refresh {
-  height: 36px !important;
+.btn-refresh,
+.btn-primary-modern,
+.premium-btn-primary,
+.premium-btn-accent,
+.btn-modern-primary,
+.btn-modern-cancel,
+.btn-modern:not(.btn-close-modal),
+button.btn:not(.close),
+.mat-flat-button,
+.mat-raised-button,
+.mat-stroked-button,
+.mat-button:not(.mat-icon-button) {
   min-height: 36px !important;
   padding: 0 16px !important;
-  border-radius: var(--radius-sm) !important;
+  border-radius: 8px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.01em !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  border: 1px solid transparent !important;
   cursor: pointer !important;
   transition: all 0.2s ease-in-out !important;
   text-transform: none !important;
   white-space: nowrap !important;
-  box-shadow: var(--shadow-sm) !important;
+  line-height: 1.2 !important;
 }
 
 .btn-erp mat-icon,
@@ -2684,25 +2738,170 @@ body.dark-theme .mat-dialog-container .modal-footer {
 .btn-excel mat-icon,
 .btn-search mat-icon,
 .btn-reset mat-icon,
-.btn-refresh mat-icon {
+.btn-refresh mat-icon,
+.mat-flat-button mat-icon,
+.mat-raised-button mat-icon,
+.mat-stroked-button mat-icon,
+.mat-button:not(.mat-icon-button) mat-icon,
+button.btn mat-icon {
   font-size: 18px !important;
   width: 18px !important;
   height: 18px !important;
+  line-height: 18px !important;
 }
 
-.btn-erp:hover:not(:disabled),
-.btn-save:hover:not(:disabled),
-.btn-update:hover:not(:disabled),
-.btn-delete:hover:not(:disabled),
-.btn-cancel:hover:not(:disabled),
-.btn-print:hover:not(:disabled),
-.btn-pdf:hover:not(:disabled),
-.btn-excel:hover:not(:disabled),
-.btn-search:hover:not(:disabled),
-.btn-reset:hover:not(:disabled),
-.btn-refresh:hover:not(:disabled) {
+/* Primary Buttons (#4F46E5 -> #3730A3) */
+.btn-save,
+.btn-update,
+.btn-search,
+.btn-pdf,
+.btn-excel,
+.btn-print,
+.btn-refresh,
+.btn-primary-modern,
+.premium-btn-primary,
+.premium-btn-accent,
+.btn-modern-primary,
+button.btn.btn-primary,
+button.btn.btn-info,
+button.btn.btn-success,
+.mat-flat-button.mat-primary,
+.mat-raised-button.mat-primary,
+.mat-flat-button.mat-accent,
+.mat-raised-button.mat-accent,
+.mat-flat-button:not(.mat-warn):not(.btn-premium-secondary):not(.btn-secondary):not(.btn-cancel),
+.mat-raised-button:not(.mat-warn):not(.btn-premium-secondary):not(.btn-secondary):not(.btn-cancel) {
+  background: var(--btn-primary-bg) !important;
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-text) !important;
+  border: 1px solid var(--btn-primary-bg) !important;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
+}
+
+.btn-save:hover:not(:disabled):not([disabled]),
+.btn-update:hover:not(:disabled):not([disabled]),
+.btn-search:hover:not(:disabled):not([disabled]),
+.btn-pdf:hover:not(:disabled):not([disabled]),
+.btn-excel:hover:not(:disabled):not([disabled]),
+.btn-print:hover:not(:disabled):not([disabled]),
+.btn-refresh:hover:not(:disabled):not([disabled]),
+.btn-primary-modern:hover:not(:disabled):not([disabled]),
+.premium-btn-primary:hover:not(:disabled):not([disabled]),
+.premium-btn-accent:hover:not(:disabled):not([disabled]),
+.btn-modern-primary:hover:not(:disabled):not([disabled]),
+button.btn.btn-primary:hover:not(:disabled):not([disabled]),
+button.btn.btn-info:hover:not(:disabled):not([disabled]),
+button.btn.btn-success:hover:not(:disabled):not([disabled]),
+.mat-flat-button.mat-primary:hover:not(:disabled):not(.mat-button-disabled),
+.mat-raised-button.mat-primary:hover:not(:disabled):not(.mat-button-disabled),
+.mat-flat-button.mat-accent:hover:not(:disabled):not(.mat-button-disabled),
+.mat-raised-button.mat-accent:hover:not(:disabled):not(.mat-button-disabled),
+.mat-flat-button:not(.mat-warn):not(.btn-premium-secondary):not(.btn-secondary):not(.btn-cancel):hover:not(:disabled):not(.mat-button-disabled),
+.mat-raised-button:not(.mat-warn):not(.btn-premium-secondary):not(.btn-secondary):not(.btn-cancel):hover:not(:disabled):not(.mat-button-disabled) {
+  background: var(--btn-primary-hover-bg) !important;
+  background-color: var(--btn-primary-hover-bg) !important;
+  border-color: var(--btn-primary-hover-bg) !important;
+  color: var(--btn-primary-text) !important;
   transform: translateY(-1px) !important;
-  box-shadow: var(--shadow-md) !important;
+  box-shadow: 0 6px 14px rgba(55, 48, 163, 0.28) !important;
+}
+
+/* Secondary Buttons (#EEF2FF / #4338CA -> #E0E7FF) */
+.btn-cancel,
+.btn-reset,
+.btn-secondary,
+.btn-modern-cancel,
+button.btn.btn-secondary,
+button.btn.btn-outline-secondary,
+button.btn.btn-outline-primary,
+button.btn.btn-outline-warning,
+button.btn.btn-outline-success,
+.mat-stroked-button:not(.mat-warn):not(.btn-premium-primary),
+.mat-button:not(.mat-icon-button):not(.mat-warn):not(.btn-premium-primary),
+.mat-flat-button.btn-premium-secondary,
+.mat-raised-button.btn-premium-secondary {
+  background: var(--btn-secondary-bg) !important;
+  background-color: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
+  border: 1px solid #c7d2fe !important;
+  box-shadow: none !important;
+}
+
+.btn-cancel:hover:not(:disabled):not([disabled]),
+.btn-reset:hover:not(:disabled):not([disabled]),
+.btn-secondary:hover:not(:disabled):not([disabled]),
+.btn-modern-cancel:hover:not(:disabled):not([disabled]),
+button.btn.btn-secondary:hover:not(:disabled):not([disabled]),
+button.btn.btn-outline-secondary:hover:not(:disabled):not([disabled]),
+button.btn.btn-outline-primary:hover:not(:disabled):not([disabled]),
+button.btn.btn-outline-warning:hover:not(:disabled):not([disabled]),
+button.btn.btn-outline-success:hover:not(:disabled):not([disabled]),
+.mat-stroked-button:not(.mat-warn):not(.btn-premium-primary):hover:not(:disabled):not(.mat-button-disabled),
+.mat-button:not(.mat-icon-button):not(.mat-warn):not(.btn-premium-primary):hover:not(:disabled):not(.mat-button-disabled),
+.mat-flat-button.btn-premium-secondary:hover:not(:disabled):not(.mat-button-disabled),
+.mat-raised-button.btn-premium-secondary:hover:not(:disabled):not(.mat-button-disabled) {
+  background: var(--btn-secondary-hover-bg) !important;
+  background-color: var(--btn-secondary-hover-bg) !important;
+  border-color: #a5b4fc !important;
+  color: #3730a3 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(67, 56, 202, 0.14) !important;
+}
+
+/* Delete / Danger Buttons (#FEE2E2 / #DC2626 -> #FECACA) */
+.btn-delete,
+button.btn.btn-danger,
+button.btn.btn-outline-danger,
+.mat-flat-button.mat-warn,
+.mat-raised-button.mat-warn,
+.mat-stroked-button.mat-warn,
+.mat-button.mat-warn:not(.mat-icon-button) {
+  background: var(--btn-danger-bg) !important;
+  background-color: var(--btn-danger-bg) !important;
+  color: var(--btn-danger-text) !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: none !important;
+}
+
+.btn-delete:hover:not(:disabled):not([disabled]),
+button.btn.btn-danger:hover:not(:disabled):not([disabled]),
+button.btn.btn-outline-danger:hover:not(:disabled):not([disabled]),
+.mat-flat-button.mat-warn:hover:not(:disabled):not(.mat-button-disabled),
+.mat-raised-button.mat-warn:hover:not(:disabled):not(.mat-button-disabled),
+.mat-stroked-button.mat-warn:hover:not(:disabled):not(.mat-button-disabled),
+.mat-button.mat-warn:not(.mat-icon-button):hover:not(:disabled):not(.mat-button-disabled) {
+  background: var(--btn-danger-hover-bg) !important;
+  background-color: var(--btn-danger-hover-bg) !important;
+  border-color: #fca5a5 !important;
+  color: #b91c1c !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.16) !important;
+}
+
+/* Active & Disabled States (Global) */
+.btn-erp:active:not(:disabled),
+.btn-save:active:not(:disabled),
+.btn-update:active:not(:disabled),
+.btn-delete:active:not(:disabled),
+.btn-cancel:active:not(:disabled),
+.btn-print:active:not(:disabled),
+.btn-pdf:active:not(:disabled),
+.btn-excel:active:not(:disabled),
+.btn-search:active:not(:disabled),
+.btn-reset:active:not(:disabled),
+.btn-refresh:active:not(:disabled),
+.btn-primary-modern:active:not(:disabled),
+.premium-btn-primary:active:not(:disabled),
+.btn-modern-primary:active:not(:disabled),
+.btn-modern-cancel:active:not(:disabled),
+.btn-modern:not(.btn-close-modal):active:not(:disabled),
+button.btn:not(.close):active:not(:disabled),
+.mat-flat-button:active:not(:disabled):not(.mat-button-disabled),
+.mat-raised-button:active:not(:disabled):not(.mat-button-disabled),
+.mat-stroked-button:active:not(:disabled):not(.mat-button-disabled),
+.mat-button:not(.mat-icon-button):active:not(:disabled):not(.mat-button-disabled) {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12) !important;
 }
 
 .btn-erp:disabled,
@@ -2715,174 +2914,207 @@ body.dark-theme .mat-dialog-container .modal-footer {
 .btn-excel:disabled,
 .btn-search:disabled,
 .btn-reset:disabled,
-.btn-refresh:disabled {
+.btn-refresh:disabled,
+.btn-primary-modern:disabled,
+.premium-btn-primary:disabled,
+.btn-modern-primary:disabled,
+.btn-modern-cancel:disabled,
+.btn-modern:disabled,
+button.btn:disabled,
+.mat-flat-button:disabled,
+.mat-flat-button.mat-button-disabled,
+.mat-raised-button:disabled,
+.mat-raised-button.mat-button-disabled,
+.mat-stroked-button:disabled,
+.mat-stroked-button.mat-button-disabled,
+.mat-button:disabled,
+.mat-button.mat-button-disabled {
   opacity: 0.55 !important;
   cursor: not-allowed !important;
+  transform: none !important;
   box-shadow: none !important;
 }
 
-/* Button Color Palette */
-.btn-save,
-.btn-update,
-.btn-search {
-  background-color: #2563eb !important;
-  /* Blue */
-  color: #ffffff !important;
-}
-
-.btn-save:hover:not(:disabled),
-.btn-update:hover:not(:disabled),
-.btn-search:hover:not(:disabled) {
-  background-color: #1d4ed8 !important;
-}
-
-.btn-delete {
-  background-color: #dc2626 !important;
-  /* Red */
-  color: #ffffff !important;
-}
-
-.btn-delete:hover:not(:disabled) {
-  background-color: #b91c1c !important;
-}
-
-.btn-cancel {
-  background-color: #64748b !important;
-  /* Gray */
-  color: #ffffff !important;
-}
-
-.btn-cancel:hover:not(:disabled) {
-  background-color: #475569 !important;
-}
-
-.btn-print {
-  background-color: #7c3aed !important;
-  /* Purple */
-  color: #ffffff !important;
-}
-
-.btn-print:hover:not(:disabled) {
-  background-color: #6d28d9 !important;
-}
-
-.btn-pdf {
-  background-color: #059669 !important;
-  /* Green */
-  color: #ffffff !important;
-}
-
-.btn-pdf:hover:not(:disabled) {
-  background-color: #047857 !important;
-}
-
-.btn-excel {
-  background-color: #065f46 !important;
-  /* Dark Green */
-  color: #ffffff !important;
-}
-
-.btn-excel:hover:not(:disabled) {
-  background-color: #064e3b !important;
-}
-
-.btn-reset {
-  background-color: #ea580c !important;
-  /* Orange */
-  color: #ffffff !important;
-}
-
-.btn-reset:hover:not(:disabled) {
-  background-color: #c2410c !important;
-}
-
-.btn-refresh {
-  background-color: #0891b2 !important;
-  /* Cyan */
-  color: #ffffff !important;
-}
-
-.btn-refresh:hover:not(:disabled) {
-  background-color: #0e7490 !important;
-}
-
-/* 4. ACTION BUTTONS IN TABLES */
+/* 4. ICON-ONLY BUTTONS (Tables, Toolbars, Dialogs, Navbar) */
 .btn-action-view,
 .btn-action-edit,
 .btn-action-delete,
 .btn-action-print,
-.btn-action-download {
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
+.btn-action-download,
+.btn-icon-soft,
+.btn-close-soft,
+.btn-close-custom,
+.btn-close-dialog,
+.btn-close-modal,
+.mat-icon-button {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  line-height: 34px !important;
   padding: 0 !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  border: none !important;
+  border: 1px solid transparent !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .btn-action-view mat-icon,
 .btn-action-edit mat-icon,
 .btn-action-delete mat-icon,
 .btn-action-print mat-icon,
-.btn-action-download mat-icon {
-  font-size: 16px !important;
-  width: 16px !important;
-  height: 16px !important;
+.btn-action-download mat-icon,
+.btn-icon-soft mat-icon,
+.btn-close-soft mat-icon,
+.btn-close-custom mat-icon,
+.btn-close-dialog mat-icon,
+.btn-close-modal mat-icon,
+.mat-icon-button mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
 }
 
-.btn-action-view {
-  color: #0284c7 !important;
-  background: rgba(2, 132, 199, 0.1) !important;
+/* Primary / Secondary Icon Buttons (Edit, View, Print, Download, Refresh, Add Row) */
+.btn-action-view,
+.btn-action-edit,
+.btn-action-print,
+.btn-action-download,
+.btn-icon-soft,
+.mat-icon-button.mat-primary,
+.mat-icon-button.mat-accent {
+  color: var(--btn-secondary-text) !important;
+  background: var(--btn-secondary-bg) !important;
 }
 
-.btn-action-view:hover {
-  background: #0284c7 !important;
-  color: #ffffff !important;
+.btn-action-view:hover:not(:disabled),
+.btn-action-edit:hover:not(:disabled),
+.btn-action-print:hover:not(:disabled),
+.btn-action-download:hover:not(:disabled),
+.btn-icon-soft:hover:not(:disabled),
+.mat-icon-button.mat-primary:hover:not(:disabled):not(.mat-button-disabled),
+.mat-icon-button.mat-accent:hover:not(:disabled):not(.mat-button-disabled) {
+  background: var(--btn-secondary-hover-bg) !important;
+  color: #3730a3 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(67, 56, 202, 0.16) !important;
 }
 
-.btn-action-edit {
-  color: #2563eb !important;
-  background: rgba(37, 99, 235, 0.1) !important;
+/* Delete / Danger Icon Buttons */
+.btn-action-delete,
+.btn-delete-row,
+.mat-icon-button.mat-warn {
+  color: var(--btn-danger-text) !important;
+  background: var(--btn-danger-bg) !important;
 }
 
-.btn-action-edit:hover {
-  background: #2563eb !important;
-  color: #ffffff !important;
+.btn-action-delete:hover:not(:disabled),
+.btn-delete-row:hover:not(:disabled),
+.mat-icon-button.mat-warn:hover:not(:disabled):not(.mat-button-disabled) {
+  background: var(--btn-danger-hover-bg) !important;
+  color: #b91c1c !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.16) !important;
 }
 
-.btn-action-delete {
-  color: #dc2626 !important;
-  background: rgba(220, 38, 38, 0.1) !important;
+/* Neutral Close Icon Buttons */
+.btn-close-soft,
+.btn-close-custom,
+.btn-close-dialog,
+.mat-icon-button.close-btn:not(.mat-warn):not(.mat-primary),
+.mat-dialog-container .dialog-header-modern .mat-icon-button:not(.mat-warn):not(.mat-primary),
+.mat-dialog-container .card-header-modern .mat-icon-button:not(.mat-warn):not(.mat-primary) {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
 }
 
-.btn-action-delete:hover {
-  background: #dc2626 !important;
-  color: #ffffff !important;
+.btn-close-soft:hover:not(:disabled),
+.btn-close-custom:hover:not(:disabled),
+.btn-close-dialog:hover:not(:disabled),
+.mat-icon-button.close-btn:not(.mat-warn):not(.mat-primary):hover:not(:disabled),
+.mat-dialog-container .dialog-header-modern .mat-icon-button:not(.mat-warn):not(.mat-primary):hover:not(:disabled),
+.mat-dialog-container .card-header-modern .mat-icon-button:not(.mat-warn):not(.mat-primary):hover:not(:disabled) {
+  background: var(--btn-danger-bg) !important;
+  color: var(--btn-danger-text) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.14) !important;
 }
 
-.btn-action-print {
-  color: #7c3aed !important;
-  background: rgba(124, 58, 237, 0.1) !important;
+/* Input Suffix Password Visibility Toggle */
+.mat-icon-button[matSuffix] {
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  line-height: 30px !important;
 }
 
-.btn-action-print:hover {
-  background: #7c3aed !important;
-  color: #ffffff !important;
+.mat-icon-button[matSuffix]:hover:not(:disabled) {
+  background: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
-.btn-action-download {
-  color: #059669 !important;
-  background: rgba(5, 150, 105, 0.1) !important;
+.mat-icon-button:active:not(:disabled):not([matSuffix]),
+.btn-action-view:active:not(:disabled),
+.btn-action-edit:active:not(:disabled),
+.btn-action-delete:active:not(:disabled),
+.btn-action-print:active:not(:disabled),
+.btn-action-download:active:not(:disabled) {
+  transform: translateY(0) !important;
 }
 
-.btn-action-download:hover {
-  background: #059669 !important;
-  color: #ffffff !important;
+.mat-icon-button:disabled,
+.mat-icon-button.mat-button-disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Respect Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  .btn-premium,
+  .btn-erp,
+  .btn-save,
+  .btn-update,
+  .btn-delete,
+  .btn-cancel,
+  .btn-print,
+  .btn-pdf,
+  .btn-excel,
+  .btn-search,
+  .btn-reset,
+  .btn-refresh,
+  .mat-flat-button,
+  .mat-raised-button,
+  .mat-stroked-button,
+  .mat-button,
+  .mat-icon-button,
+  .action-btn-circle,
+  .search-btn-premium,
+  .modern-pagination .ngx-pagination a,
+  .modern-pagination .ngx-pagination button {
+    transition: background-color 0.01s ease, color 0.01s ease !important;
+  }
+
+  .btn-premium:hover,
+  .mat-flat-button:hover,
+  .mat-raised-button:hover,
+  .mat-stroked-button:hover,
+  .mat-button:hover,
+  .mat-icon-button:hover,
+  .action-btn-circle:hover,
+  .search-btn-premium:hover,
+  .modern-pagination .ngx-pagination a:hover,
+  .modern-pagination .ngx-pagination button:hover {
+    transform: none !important;
+  }
 }
 
 /* 5. STANDARDIZED FORMS & INPUTS */
